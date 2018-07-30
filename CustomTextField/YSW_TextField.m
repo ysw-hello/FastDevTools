@@ -99,7 +99,7 @@ static CGFloat const CornerRadius = 5;
     NSString *subStr0, *subStr1, *subStr2;
     subStr0 = [[originStr substringToIndex:3] stringByAppendingString:marginStr];
     subStr1 = [[originStr substringWithRange:NSMakeRange(3, 4)] stringByAppendingString:marginStr];
-    subStr2 = [originStr substringWithRangeSafely:NSMakeRange(originStr.length - 4, 4)];
+    subStr2 = [originStr substringWithRange:NSMakeRange(originStr.length - 4, 4)];
     
     return [NSString stringWithFormat:@"%@%@%@", subStr0, subStr1, subStr2];
 }
@@ -108,7 +108,7 @@ static CGFloat const CornerRadius = 5;
 - (void)customUI {
     self.layer.masksToBounds = YES;
     self.layer.cornerRadius = CornerRadius;
-    self.backgroundColor = kATf8Color;
+    self.backgroundColor = [UIColor lightGrayColor];
 }
 
 #pragma mark - reset super methods

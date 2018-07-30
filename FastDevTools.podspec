@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "FastDevTools"
-  s.version      = "0.2.1"
+  s.version      = "0.2.2"
   s.summary      = "一些帮助快速开发的工具类for iOS"
   s.homepage     = "https://github.com/ysw-hello/FastDevTools"
   s.license      = { :type => "MIT", :file => "LICENSE" }
@@ -37,6 +37,7 @@ Pod::Spec.new do |s|
   
   #TextField样式定制
   s.subspec 'CustomTextField' do |ss|
-    ss.source_files = 'CustomTextField/*.{h.m}'
+    ss.source_files = 'CustomTextField/*.{h,m}'
   end
+
 end
