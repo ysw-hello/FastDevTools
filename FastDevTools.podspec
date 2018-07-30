@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "FastDevTools"
-  s.version      = "0.1.1"
+  s.version      = "0.2.0"
   s.summary      = "一些帮助快速开发的工具类for iOS"
   s.homepage     = "https://github.com/ysw-hello/FastDevTools"
   s.license      = { :type => "MIT", :file => "LICENSE" }
@@ -34,5 +34,9 @@ Pod::Spec.new do |s|
     ss.ios.vendored_libraries = 'Mp3Encode/libLame/libmp3lame.a' #静态库
     ss.resources = 'Mp3Encode/TestResource/test.pcm' #测试的资源文件
   end
-
+  
+  #TextField样式定制
+  s.subspec 'CustomTextField' do |ss|
+    ss.source_files = 'CustomTextField/*.{h.m}'
+  end
 end
