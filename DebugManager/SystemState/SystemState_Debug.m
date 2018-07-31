@@ -50,7 +50,7 @@
         self.statusBarWindow = [[UIWindow alloc] initWithFrame:_fpsStatusBar.frame];
         _statusBarWindow.hidden = YES;
         _statusBarWindow.backgroundColor = [UIColor blackColor];
-        _statusBarWindow.windowLevel = UIWindowLevelStatusBar + 10000;
+        _statusBarWindow.windowLevel = UIWindowLevelStatusBar + 100000;
         [_statusBarWindow addSubview:self.fpsStatusBar];
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActiveNotif) name:UIApplicationDidBecomeActiveNotification object:nil];

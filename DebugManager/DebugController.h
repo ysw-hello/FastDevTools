@@ -25,7 +25,9 @@
  }
  
  - (void)pushDebuger {
- [self.navigationController pushViewController:[NSClassFromString(@"DebugController") new] animated:YES];
+ DebugController *debugVC = [DebugController new];
+ debugVC.rootViewController = [(AppDelegate *)[UIApplication sharedApplication].delegate rootViewController];//需传入承载的rootViewController
+ [self.navigationController pushViewController:debugVC animated:YES];
  }
  
  */
@@ -33,16 +35,17 @@
 #import <UIKit/UIKit.h>
 
 @interface DebugController : UIViewController
+@property (nonatomic, strong) UIViewController *rootViewController;
 
 @end
 
 @interface DebugCell : UITableViewCell
-
 @property (nonatomic, strong) NSString *title;
 
 @property (nonatomic, strong) UISwitch *debugSwitch;
 
 @property (nonatomic, assign) NSInteger index;//触发事件的cell_index
 
+@property (nonatomic, strong) UIViewController *rootViewController;
 
 @end

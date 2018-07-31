@@ -63,7 +63,7 @@
     }
     cell.title = [_titleArray objectAtIndex:indexPath.row];
     cell.index = indexPath.row;
-    
+    cell.rootViewController = self.rootViewController;
     return cell;
 }
 
@@ -154,7 +154,7 @@
 - (void)sandBox_actionWithState:(BOOL)state {
     [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_SandBoxKey_DebugSwitch];
     if (state) {
-        [[SandBox_Debug sharedInstance] showSandBoxListView];
+        [[SandBox_Debug sharedInstance] showSandBoxListViewWithRootViewController:self.rootViewController];
     } else {
         [[SandBox_Debug sharedInstance] removeSandBoxListView];
     }

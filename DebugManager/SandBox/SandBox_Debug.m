@@ -33,13 +33,14 @@
     return debug;
 }
 
-- (void)showSandBoxListView {
+- (void)showSandBoxListViewWithRootViewController:(UIViewController *)rootViewController {
     self.listView = [[SandBox_ListView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight, kScreenWidth, kScreenHeight - kStatusBarHeight)];
     _listView.tag = SandBox_ListView_Tag;
     _listView.backgroundColor = [UIColor clearColor];
     _listView.alpha = 0.8;
+    _listView.rootViewController = rootViewController;
     
-    [AppDelegateInstance.rootViewController.view addSubview:_listView];
+    [rootViewController.view addSubview:_listView];
 }
 
 - (void)removeSandBoxListView {
@@ -311,7 +312,7 @@
 
 #pragma mark - UIDocumentInteractionControllerDelegate
 - (UIViewController *)documentInteractionControllerViewControllerForPreview:(UIDocumentInteractionController *)controller {
-    return AppDelegateInstance.rootViewController;
+    return self.rootViewController;
 }
 
 - (CGRect)documentInteractionControllerRectForPreview:(UIDocumentInteractionController *)controller {

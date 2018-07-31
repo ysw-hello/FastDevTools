@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "FastDevTools"
-  s.version      = "0.3.0"
+  s.version      = "0.3.1"
   s.summary      = "一些帮助快速开发的工具类for iOS"
   s.homepage     = "https://github.com/ysw-hello/FastDevTools"
   s.license      = { :type => "MIT", :file => "LICENSE" }
@@ -42,7 +42,7 @@ Pod::Spec.new do |s|
 
   #DebugManager 本地沙盒可视化，FPS & CPU & 内存 性能可视化
   s.subspec 'DebugManager' do |ss|
-    ss.source_files = 'DebugManager/*.{h,m}' , 'DebugManager/**/*.{h,m}'
+    ss.source_files = 'DebugManager/DebugController.{h,m}' , 'DebugManager/**/*.{h,m}'
     ss.dependency 'FMDB', '~> 2.7.2'
   end
 
