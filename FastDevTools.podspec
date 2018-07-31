@@ -12,11 +12,6 @@ Pod::Spec.new do |s|
   s.source             = { :git => "https://github.com/ysw-hello/FastDevTools.git", :tag => "#{s.version}" }
   s.requires_arc       = true 
  
-  #s.source_files  = '**/*.{h,m}' #,'**/**/*.{h,mm,cpp,hpp}' 
-  #s.libraries = 'c++'
-  #s.resources = 'Mp3Encode/TestResource/test.pcm' #测试的资源文件
-  #s.ios.vendored_libraries = 'Mp3Encode/libLame/libmp3lame.a' #静态库
- 
   #相册资源管理
   s.subspec 'AssetsSave' do |ss|
     ss.source_files = 'AssetsSave/*.{h,m}'
