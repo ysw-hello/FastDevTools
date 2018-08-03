@@ -25,7 +25,7 @@
  
  - (void)pushDebuger {
  DebugController *debugVC = [DebugController new];
- debugVC.rootViewController = [(AppDelegate *)[UIApplication sharedApplication].delegate rootViewController];//需传入承载的rootViewController
+ debugVC.rootViewController = [(AppDelegate *)[UIApplication sharedApplication].delegate window].rootViewController;//需传入承载的rootViewController
  [self.navigationController pushViewController:debugVC animated:YES];
  }
  
