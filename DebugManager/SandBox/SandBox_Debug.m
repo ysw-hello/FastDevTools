@@ -181,16 +181,22 @@
 
 - (void)showContent:(NSString *)content {
     UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(0, 1, self.width, self.height-1)];
+    textView.editable = NO;
+    
     NSString *tips = @"温馨提示：双击移除ContentView\n";
     NSMutableAttributedString *arrStr = [[NSMutableAttributedString alloc] initWithString:[tips stringByAppendingString:content]];
     [arrStr addAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:25], NSForegroundColorAttributeName : [UIColor blueColor]} range:NSMakeRange(0, tips.length)];
     textView.attributedText = arrStr;
+    
     UITapGestureRecognizer *doubleTapGestureRecognizer_ = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap)];
     [doubleTapGestureRecognizer_ setNumberOfTapsRequired:2];
     [textView addGestureRecognizer:doubleTapGestureRecognizer_];
+    
     [self addSubview:textView];
+    
     self.textView = textView;
     self.alpha = 1.0;
+    
     return;
 }
 - (void)doubleTap {

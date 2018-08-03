@@ -9,13 +9,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
-#define SandBox_ListView_Tag 10001
-
-static NSString *const kNotif_Name_SandBoxListRemoved = @"kNotif_Name_SandBoxListRemoved";
-
-static NSString *const kUserDefaults_SandBoxKey_DebugSwitch = @"kUserDefaults_SandBoxKey_DebugSwitch";
-static NSString *const kUserDefaults_SystemStateKey_DebugSwitch = @"kUserDefaults_SystemStateKey_DebugSwitch";
-
 @interface SandBox_Debug : NSObject
 
 + (instancetype)sharedInstance;
