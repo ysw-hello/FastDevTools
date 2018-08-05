@@ -25,6 +25,7 @@ static NSString *const kNotif_Name_SandBoxListRemoved = @"kNotif_Name_SandBoxLis
 static NSString *const kNotif_Name_DataFetchContentRemoved = @"kNotif_Name_DataFetchContentRemoved";
 
 static NSString *const kUserDefaults_SandBoxKey_DebugSwitch = @"kUserDefaults_SandBoxKey_DebugSwitch";
+static NSString *const kUserDefaults_SandBoxForWebKey_DebugSwitch = @"kUserDefaults_SandBoxForWebKey_DebugSwitch";
 static NSString *const kUserDefaults_SystemStateKey_DebugSwitch = @"kUserDefaults_SystemStateKey_DebugSwitch";
 static NSString *const kUserDefaults_DataFetchKey_DebugSwitch = @"kUserDefaults_DataFetchKey_DebugSwitch";
 

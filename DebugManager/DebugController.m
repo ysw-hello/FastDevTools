@@ -9,6 +9,7 @@
 #import "DebugController.h"
 #import "DataFetch_Debug.h"
 #import "SandBox_Debug.h"
+#import "SandBox_Web_Debug.h"
 #import "SystemState_Debug.h"
 #import "UIView+Additions.h"
 
@@ -26,7 +27,7 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.title =  @"调试控制器";
-    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"请求抓包开关"];
+    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"本地沙盒Web调试", @"请求抓包开关"];
     [self initTableView];
 }
 
@@ -50,6 +51,7 @@
     if (!cell) {
         cell = [[DebugCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
     }
+    
     switch (indexPath.row) {
         case 0:
             cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SystemStateKey_DebugSwitch];
@@ -60,8 +62,13 @@
             cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxKey_DebugSwitch];
             cell.moduleType = kDebug_ModuleType_SandBox;
             break;
-            
+         
         case 2:
+            cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+            cell.moduleType = kDebug_ModuleType_SandBox_Web;
+            break;
+            
+        case 3:
             cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_DataFetchKey_DebugSwitch];
             cell.moduleType = kDebug_ModuleType_DataFetch;
             break;
@@ -70,12 +77,21 @@
             cell.debugSwitch.on = NO;
             break;
     }
+    cell.debugSwithAction = ^(BOOL isOn, Debug_ModuleType moduleType) {
+        if (moduleType == kDebug_ModuleType_SandBox_Web) {
+            [tableView reloadData];
+        }
+    };
+
     cell.title = [_titleArray objectAtIndex:indexPath.row];
     cell.rootViewController = self.rootViewController;
     return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 2 && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
+        return 50 + 40*3;
+    }
     return 50;
 }
 
@@ -87,6 +103,14 @@
 /*************************************  DebugCell  *******************************************/
 @interface DebugCell ()
 @property (nonatomic, strong) UILabel *titleLabel;
+
+@property (nonatomic, strong) UIView *webServerView;
+@property (nonatomic, strong) UILabel *webServerURL;
+@property (nonatomic, strong) UILabel *webUploaderServerURL;
+@property (nonatomic, strong) UILabel *webDavServerURL;
+
+@property (nonatomic, strong) UILabel *tipsLabel;
+
 
 @end
 
@@ -114,11 +138,13 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     _titleLabel.left = 10;
-    _titleLabel.centerY = self.height / 2;
+    _titleLabel.centerY = _moduleType == kDebug_ModuleType_SandBox_Web ? 50/2 : self.height/2;
     
     _debugSwitch.left = self.width - _debugSwitch.width - 10;
     _debugSwitch.centerY = _titleLabel.centerY;
     
+    _webServerView.frame = CGRectMake(0, self.debugSwitch.bottom + 5, self.width, self.height - self.debugSwitch.bottom - 10);
+    _tipsLabel.width = _webServerView.width;
 }
 
 - (void)dealloc {
@@ -126,6 +152,51 @@
 }
 
 #pragma mark - private SEL
+- (void)customWebServerViewWithUrls:(NSArray *)urlArr {
+    [self.webServerView removeFromSuperview];
+    self.webServerView = [[UIView alloc] initWithFrame:CGRectZero];
+    _webServerView.backgroundColor = [UIColor blackColor];
+    [self addSubview:_webServerView];
+    
+    self.webServerURL = [self createLabelWithFrame:CGRectMake(10, 5, 100, 20)];
+    NSString *str = @"浏览器访问地址为: ";
+    NSMutableAttributedString *att = [[NSMutableAttributedString alloc] initWithString:[str stringByAppendingString:urlArr[0]]];
+    [att addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(str.length, [urlArr[0] length])];
+    _webServerURL.attributedText = att;
+    [_webServerURL sizeToFit];
+    
+    self.webUploaderServerURL = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webServerURL.bottom + 5, 100, 20)];
+    NSString *str1 = @"WebUploader访问地址为: ";
+    NSMutableAttributedString *att1 = [[NSMutableAttributedString alloc] initWithString:[str1 stringByAppendingString:urlArr[1]]];
+    [att1 addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(str1.length, [urlArr[1] length])];
+    _webUploaderServerURL.attributedText = att1;
+    [_webUploaderServerURL sizeToFit];
+    
+    self.webDavServerURL = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webUploaderServerURL.bottom + 5, 100, 20)];
+    NSString *str2 = @"WebDav服务器地址为: ";
+    NSMutableAttributedString *att2 = [[NSMutableAttributedString alloc] initWithString:[str2 stringByAppendingString:urlArr[2]]];
+    [att2 addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(str2.length, [urlArr[2] length])];
+    _webDavServerURL.attributedText = att2;
+    [_webDavServerURL sizeToFit];
+    
+    UILabel *tipsLabel = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webDavServerURL.bottom + 5, 100, 20)];
+    tipsLabel.text = @"温馨提示：WebDav Mac客户端建议使用'Transmit' \n<xclient.info有破解版下载> ";
+    tipsLabel.textColor = [UIColor redColor];
+    tipsLabel.numberOfLines = 2;
+    [tipsLabel sizeToFit];
+    [_webServerView addSubview:tipsLabel];
+    self.tipsLabel = tipsLabel;
+}
+
+- (UILabel *)createLabelWithFrame:(CGRect)frame {
+    UILabel *label = [[UILabel alloc] initWithFrame:frame];
+    label.textColor = [UIColor whiteColor];
+    label.font = [UIFont systemFontOfSize:15];
+    label.textAlignment = NSTextAlignmentLeft;
+    [_webServerView addSubview:label];
+    return label;
+}
+
 - (void)dataFetchContentRemoved {
     if ((self.moduleType == kDebug_ModuleType_DataFetch)) {
         self.debugSwitch.on = NO;
@@ -145,10 +216,17 @@
     self.debugSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(100, 10, 50, 34)];
     [_debugSwitch addTarget:self action:@selector(changeState) forControlEvents:UIControlEventValueChanged];
     [self addSubview:_debugSwitch];
+    
+    
+    
+    
 }
 
 - (void)changeState {
     [self actionProcessWithSwitchState:_debugSwitch.isOn];
+    if (self.debugSwithAction) {
+        self.debugSwithAction(_debugSwitch.isOn, _moduleType);
+    }
 }
 
 #pragma mark - action 处理
@@ -160,6 +238,10 @@
             
         case kDebug_ModuleType_SandBox://本地沙盒目录
             [self sandBox_actionWithState:switchState];
+            break;
+          
+        case kDebug_ModuleType_SandBox_Web://本地沙盒Web调试
+            [self sandBoxForWeb_actionWithState:switchState];
             break;
             
         case kDebug_ModuleType_DataFetch://请求抓包展示
@@ -188,6 +270,18 @@
     }
     
 }
+- (void)sandBoxForWeb_actionWithState:(BOOL)state {
+    [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+    if (state) {
+        NSArray *urlArr = [[SandBox_Web_Debug sharedInstance] run];
+        [self customWebServerViewWithUrls:urlArr];
+    } else {
+        [[SandBox_Web_Debug sharedInstance] stop];
+        [self.webServerView removeFromSuperview];
+    }
+    
+}
+
 - (void)systemState_actionWithState:(BOOL)state {
     [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_SystemStateKey_DebugSwitch];
     if (state) {
@@ -196,6 +290,7 @@
         [[SystemState_Debug sharedInstance] stop];
     }
 }
+
 
 @end
 

@@ -37,6 +37,7 @@
 typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_SystemState, //系统状态开关
     kDebug_ModuleType_SandBox, //本地沙盒目录
+    kDebug_ModuleType_SandBox_Web,//本地沙盒文件Web调试
     kDebug_ModuleType_DataFetch, //请求抓包开关
 };
 
@@ -47,6 +48,9 @@ typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
 @end
 
 @interface DebugCell : UITableViewCell
+
+@property (nonatomic, copy) void(^debugSwithAction) (BOOL isOn, Debug_ModuleType moduleType);
+
 @property (nonatomic, strong) NSString *title;
 
 @property (nonatomic, assign) Debug_ModuleType moduleType;
