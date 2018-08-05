@@ -17,9 +17,6 @@
 @property (nonatomic, strong) GCDWebUploader *uploader;
 @property (nonatomic, strong) GCDWebDAVServer *webDavServer;
 
-@property (nonatomic, strong) NSMutableArray *arr;
-
-
 @end
 
 @implementation SandBox_Web_Debug
@@ -33,18 +30,18 @@
 }
 
 - (NSArray *)run {
-    self.arr = [NSMutableArray array];
+    self.webServerURL_Array = [NSMutableArray array];
     
     BOOL ret1 = [[SandBox_Web_Debug sharedInstance] fileContentHtml];
-    [self.arr addObject:ret1 ? _webServer.serverURL.description ? : @"--" : @"webServer 服务开启失败"];
+    [self.webServerURL_Array addObject:ret1 ? _webServer.serverURL.description ? : @"--" : @"webServer 服务开启失败"];
 
     BOOL ret2 = [[SandBox_Web_Debug sharedInstance] sandBox_Uploader];
-    [self.arr addObject:ret2 ? _uploader.serverURL.description ? : @"--" : @"webUploader 服务开启失败"];
+    [self.webServerURL_Array addObject:ret2 ? _uploader.serverURL.description ? : @"--" : @"webUploader 服务开启失败"];
 
     BOOL ret3 = [[SandBox_Web_Debug sharedInstance] sandBox_WebDav];
-    [self.arr addObject:ret3 ? _webDavServer.serverURL.description ? : @"--" : @"webDavServer 服务开启失败"];
+    [self.webServerURL_Array addObject:ret3 ? _webDavServer.serverURL.description ? : @"--" : @"webDavServer 服务开启失败"];
 
-    return _arr;
+    return _webServerURL_Array;
 }
 
 - (void)stop {
@@ -57,8 +54,8 @@
     [self.webDavServer stop];
     self.webDavServer = nil;
     
-    [self.arr removeAllObjects];
-    self.arr = nil;
+    [self.webServerURL_Array removeAllObjects];
+    self.webServerURL_Array = nil;
     
 }
 

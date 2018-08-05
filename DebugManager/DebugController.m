@@ -135,6 +135,20 @@
     [self layoutIfNeeded];
 }
 
+- (void)setModuleType:(Debug_ModuleType)moduleType {
+    _moduleType = moduleType;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch] && _moduleType == kDebug_ModuleType_SandBox_Web) {
+        if ([SandBox_Web_Debug sharedInstance].webServerURL_Array.count == 3) {
+            [self customWebServerViewWithUrls:[SandBox_Web_Debug sharedInstance].webServerURL_Array];
+        } else {
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+            self.debugSwitch.on = NO;
+        }
+        
+    }
+
+}
+
 - (void)layoutSubviews {
     [super layoutSubviews];
     _titleLabel.left = 10;
@@ -153,6 +167,9 @@
 
 #pragma mark - private SEL
 - (void)customWebServerViewWithUrls:(NSArray *)urlArr {
+    if (urlArr.count < 3) {
+        return;
+    }
     [self.webServerView removeFromSuperview];
     self.webServerView = [[UIView alloc] initWithFrame:CGRectZero];
     _webServerView.backgroundColor = [UIColor blackColor];
@@ -216,9 +233,6 @@
     self.debugSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(100, 10, 50, 34)];
     [_debugSwitch addTarget:self action:@selector(changeState) forControlEvents:UIControlEventValueChanged];
     [self addSubview:_debugSwitch];
-    
-    
-    
     
 }
 

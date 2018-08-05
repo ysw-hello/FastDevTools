@@ -35,7 +35,7 @@
 #import <UIKit/UIKit.h>
 
 typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
-    kDebug_ModuleType_SystemState, //系统状态开关
+    kDebug_ModuleType_SystemState = 1, //系统状态开关
     kDebug_ModuleType_SandBox, //本地沙盒目录
     kDebug_ModuleType_SandBox_Web,//本地沙盒文件Web调试
     kDebug_ModuleType_DataFetch, //请求抓包开关

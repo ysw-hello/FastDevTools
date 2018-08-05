@@ -10,6 +10,11 @@
 
 @interface SandBox_Web_Debug : NSObject
 
+/**
+ webServerURL 数组
+ */
+@property (nonatomic, strong) NSMutableArray *webServerURL_Array;
+
 + (instancetype)sharedInstance;
 
 - (NSArray *)run;
