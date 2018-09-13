@@ -22,22 +22,48 @@
 
 @implementation DebugController
 
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    [self.navigationController.navigationBar setShadowImage:nil];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    [super viewWillDisappear:animated];
+    [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.title =  @"调试控制器";
-    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"本地沙盒Web调试", @"请求抓包开关"];
+    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"本地沙盒Web调试", @"请求抓包开关", @"环境设置(点击输入)"];
     [self initTableView];
 }
 
+#pragma mark - setters or getters
+- (void)setHostName:(NSString *)hostName {
+    _hostName = hostName;
+    
+}
+
+#pragma mark - private SEL
+
 - (void)initTableView {
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, kNavBarBottom, kScreenWidth, kScreenHeight - kNavBarBottom) style:UITableViewStylePlain];
+    
+    CGFloat top = self.view.height == kScreenHeight ? kNavBarBottom : 0;
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, top, kScreenWidth, kScreenHeight - kNavBarBottom) style:UITableViewStylePlain];
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.tableFooterView = [UIView new];
     [self.view addSubview:_tableView];
     
+}
+
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    CGFloat top = self.view.height == kScreenHeight ? kNavBarBottom : 0;
+    _tableView.top = top;
 }
 
 #pragma mark - tableView Deleagate & DataSource
@@ -72,7 +98,13 @@
             cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_DataFetchKey_DebugSwitch];
             cell.moduleType = kDebug_ModuleType_DataFetch;
             break;
-
+            
+        case 4:
+            cell.debugSwitch.hidden = YES;
+            cell.moduleType = kDebug_ModuleType_HostChange;
+            cell.title = _hostName.length > 1 ? [NSString stringWithFormat:@"当前Host:%@", _hostName] : [_titleArray objectAtIndex:indexPath.row];
+            break;
+            
         default:
             cell.debugSwitch.on = NO;
             break;
@@ -83,7 +115,11 @@
         }
     };
 
-    cell.title = [_titleArray objectAtIndex:indexPath.row];
+    
+    if (cell.moduleType != kDebug_ModuleType_HostChange) {
+        cell.title = [_titleArray objectAtIndex:indexPath.row];
+    }
+    
     cell.rootViewController = self.rootViewController;
     return cell;
 }
@@ -93,6 +129,12 @@
         return 50 + 40*3;
     }
     return 50;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.row == 4 && self.hostChangeBlock) {
+        self.hostChangeBlock();
+    }
 }
 
 @end

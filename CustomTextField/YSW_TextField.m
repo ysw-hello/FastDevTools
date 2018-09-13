@@ -108,7 +108,7 @@ static CGFloat const CornerRadius = 5;
 - (void)customUI {
     self.layer.masksToBounds = YES;
     self.layer.cornerRadius = CornerRadius;
-    self.backgroundColor = [UIColor lightGrayColor];
+    self.backgroundColor = [UIColor colorWithRed:248/255.0 green:248/255.0 blue:248/255.0 alpha:1.0];
 }
 
 #pragma mark - reset super methods

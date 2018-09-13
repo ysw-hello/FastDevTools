@@ -39,13 +39,27 @@ typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_SandBox, //本地沙盒目录
     kDebug_ModuleType_SandBox_Web,//本地沙盒文件Web调试
     kDebug_ModuleType_DataFetch, //请求抓包开关
+    kDebug_ModuleType_HostChange, //环境配置
 };
 
+typedef void(^ActionHandler)(void);
 
 @interface DebugController : UIViewController
 @property (nonatomic, strong) UIViewController *rootViewController;
 
+/**
+ 环境切换 action
+ */
+@property (nonatomic, weak) ActionHandler hostChangeBlock;
+
+/**
+ 当前环境为：
+ */
+@property (nonatomic, strong) NSString *hostName;
+
+
 @end
+
 
 @interface DebugCell : UITableViewCell
 
@@ -58,6 +72,7 @@ typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
 @property (nonatomic, strong) UISwitch *debugSwitch;
 
 @property (nonatomic, strong) UIViewController *rootViewController;
+
 
 @end
 
