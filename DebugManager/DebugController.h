@@ -50,7 +50,7 @@ typedef void(^ActionHandler)(void);
 /**
  环境切换 action
  */
-@property (nonatomic, weak) ActionHandler hostChangeBlock;
+@property (nonatomic, copy) ActionHandler hostChangeBlock;
 
 /**
  当前环境为：
