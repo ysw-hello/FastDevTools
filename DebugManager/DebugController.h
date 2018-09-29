@@ -40,9 +40,11 @@ typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_SandBox_Web,//本地沙盒文件Web调试
     kDebug_ModuleType_DataFetch, //请求抓包开关
     kDebug_ModuleType_HostChange, //环境配置
+    kDebug_ModuleType_TipsOnline, //预上线tip服务器
 };
 
 typedef void(^ActionHandler)(void);
+typedef void(^ActionHandler_State)(BOOL state);
 
 @interface DebugController : UIViewController
 @property (nonatomic, strong) UIViewController *rootViewController;
@@ -56,6 +58,9 @@ typedef void(^ActionHandler)(void);
  当前环境为：
  */
 @property (nonatomic, strong) NSString *hostName;
+
+//预上线tip服务器 开关action
+@property (nonatomic, copy) ActionHandler_State tipsStateChangeBlock;
 
 
 @end

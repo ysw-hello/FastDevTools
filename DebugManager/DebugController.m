@@ -37,7 +37,7 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.title =  @"调试控制器";
-    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"本地沙盒Web调试", @"请求抓包开关", @"环境设置(点击输入)"];
+    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"本地沙盒Web调试", @"请求抓包开关", @"环境设置(点击输入)", @"线上tips开关"];
     [self initTableView];
 }
 
@@ -104,7 +104,12 @@
             cell.moduleType = kDebug_ModuleType_HostChange;
             cell.title = _hostName.length > 1 ? [NSString stringWithFormat:@"当前Host:%@", _hostName] : [_titleArray objectAtIndex:indexPath.row];
             break;
-            
+         
+        case 5:
+            cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
+            cell.moduleType = kDebug_ModuleType_TipsOnline;
+            break;
+
         default:
             cell.debugSwitch.on = NO;
             break;
@@ -112,7 +117,14 @@
     cell.debugSwithAction = ^(BOOL isOn, Debug_ModuleType moduleType) {
         if (moduleType == kDebug_ModuleType_SandBox_Web) {
             [tableView reloadData];
+        } else if (moduleType == kDebug_ModuleType_TipsOnline) {
+            [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
+            //tips预上线服务器 action
+            if (self.tipsStateChangeBlock) {
+                self.tipsStateChangeBlock(isOn);
+            }
         }
+        
     };
 
     
@@ -303,11 +315,12 @@
         case kDebug_ModuleType_DataFetch://请求抓包展示
             [self fetchData_actionWithState:switchState];
             break;
-            
+        
         default:
             break;
     }
 }
+
 - (void)fetchData_actionWithState:(BOOL)state {
     [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_DataFetchKey_DebugSwitch];
     if (state) {
