@@ -37,14 +37,22 @@
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.title =  @"调试控制器";
-    self.titleArray = @[@"系统状态开关", @"本地沙盒目录", @"本地沙盒Web调试", @"请求抓包开关", @"环境设置(点击输入)", @"线上tips开关"];
+    self.titleArray = @[
+                        @"系统状态开关",
+                        @"本地沙盒目录",
+                        @"本地沙盒Web调试",
+                        @"请求抓包开关",
+                        @"环境设置(点击输入)",
+                        @"线上tips开关",
+                        @"UID(点击复制)"
+                        ];
     [self initTableView];
 }
 
 #pragma mark - setters or getters
 - (void)setHostName:(NSString *)hostName {
     _hostName = hostName;
-    
+    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:4 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 #pragma mark - private SEL
@@ -78,6 +86,8 @@
         cell = [[DebugCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
     }
     
+    cell.title = [_titleArray objectAtIndex:indexPath.row];
+
     switch (indexPath.row) {
         case 0:
             cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SystemStateKey_DebugSwitch];
@@ -102,14 +112,20 @@
         case 4:
             cell.debugSwitch.hidden = YES;
             cell.moduleType = kDebug_ModuleType_HostChange;
-            cell.title = _hostName.length > 1 ? [NSString stringWithFormat:@"当前Host:%@", _hostName] : [_titleArray objectAtIndex:indexPath.row];
+            cell.title = _hostName.length > 1 ? [NSString stringWithFormat:@"当前Host：%@", _hostName] : [_titleArray objectAtIndex:indexPath.row];
             break;
          
         case 5:
             cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
             cell.moduleType = kDebug_ModuleType_TipsOnline;
             break;
-
+            
+        case 6:
+            cell.debugSwitch.hidden = YES;
+            cell.moduleType = kDebug_ModuleType_UIDPaste;
+            cell.title = [NSString stringWithFormat:@"UID(点击复制)：%@", self.UIDStr];
+            break;
+            
         default:
             cell.debugSwitch.on = NO;
             break;
@@ -126,11 +142,6 @@
         }
         
     };
-
-    
-    if (cell.moduleType != kDebug_ModuleType_HostChange) {
-        cell.title = [_titleArray objectAtIndex:indexPath.row];
-    }
     
     cell.rootViewController = self.rootViewController;
     return cell;
@@ -146,6 +157,10 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row == 4 && self.hostChangeBlock) {
         self.hostChangeBlock();
+    } else if (indexPath.row == 6 && self.UIDStr.length > 0) {
+        UIPasteboard *pasteBoard = [UIPasteboard generalPasteboard];
+        [pasteBoard setString:self.UIDStr];
+
     }
 }
 

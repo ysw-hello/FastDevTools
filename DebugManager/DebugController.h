@@ -36,11 +36,12 @@
 
 typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_SystemState = 1, //系统状态开关
-    kDebug_ModuleType_SandBox, //本地沙盒目录
-    kDebug_ModuleType_SandBox_Web,//本地沙盒文件Web调试
-    kDebug_ModuleType_DataFetch, //请求抓包开关
-    kDebug_ModuleType_HostChange, //环境配置
-    kDebug_ModuleType_TipsOnline, //预上线tip服务器
+    kDebug_ModuleType_SandBox = 2, //本地沙盒目录
+    kDebug_ModuleType_SandBox_Web = 3,//本地沙盒文件Web调试
+    kDebug_ModuleType_DataFetch = 4, //请求抓包开关
+    kDebug_ModuleType_HostChange = 5, //环境配置
+    kDebug_ModuleType_TipsOnline = 6, //预上线tip服务器
+    kDebug_ModuleType_UIDPaste = 7, //UID点击复制
 };
 
 typedef void(^ActionHandler)(void);
@@ -58,6 +59,12 @@ typedef void(^ActionHandler_State)(BOOL state);
  当前环境为：
  */
 @property (nonatomic, strong) NSString *hostName;
+
+/**
+ 当前用户UID为：
+ */
+@property (nonatomic, strong) NSString *UIDStr;
+
 
 //预上线tip服务器 开关action
 @property (nonatomic, copy) ActionHandler_State tipsStateChangeBlock;
