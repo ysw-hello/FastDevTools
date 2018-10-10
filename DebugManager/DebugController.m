@@ -160,7 +160,7 @@
     } else if (indexPath.row == 6 && self.UIDStr.length > 0) {
         UIPasteboard *pasteBoard = [UIPasteboard generalPasteboard];
         [pasteBoard setString:self.UIDStr];
-
+        [self.view showAlertWithMessage:@"UID复制成功!"];
     }
 }
 

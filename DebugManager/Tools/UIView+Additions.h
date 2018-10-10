@@ -155,4 +155,6 @@ static NSString *const kUserDefaults_OnlineTipsKey_DebugSwitch = @"kUserDefaults
  */
 - (CGPoint)offsetFromView:(UIView*)otherView;
 
+- (void)showAlertWithMessage:(NSString *)message;
+
 @end
