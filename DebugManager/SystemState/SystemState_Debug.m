@@ -88,6 +88,7 @@
     }
     _lastTimeStamp = displaylink.timestamp;
     CGFloat fps = _countPerFrame / interval;
+//    NSLog(@"fps:%f", fps);
     _countPerFrame = 0;
     self.fpsStatusBar.fpsLabel.text = [NSString stringWithFormat:@"FPS:%d", (int)round(fps)];
     self.fpsStatusBar.fpsLabel.labelState = [self labelStateWith:kSystemState_LabelType_FPS value:fps];

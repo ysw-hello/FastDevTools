@@ -10,6 +10,12 @@
 
 @interface YSW_TextField : UITextField
 
+/**
+ 是否添加“完成”ToolBar default:NO
+ */
+@property (nonatomic, assign) BOOL needToolBar;
+
+
 - (instancetype)initWithFrame:(CGRect)frame delegate:(id)delegate;
 
 //定制placeholder 颜色&字体

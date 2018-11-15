@@ -29,6 +29,19 @@ static CGFloat const CornerRadius = 5;
 
 
 #pragma mark - public Methods
+- (void)setNeedToolBar:(BOOL)needToolBar {
+    _needToolBar = needToolBar;
+    if (needToolBar) {
+        UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, [[UIScreen mainScreen] bounds].size.width, 35)];
+        toolBar.tintColor = [UIColor blueColor];
+        toolBar.backgroundColor = [UIColor lightGrayColor];
+        UIBarButtonItem *space = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithTitle:@"完成" style:UIBarButtonItemStylePlain target:self action:@selector(keyboardOut)];
+        toolBar.items = @[space ,done];
+        self.inputAccessoryView = toolBar;
+    }
+}
+
 - (void)customPlaceHolderWithFont:(UIFont *)font textColor:(UIColor *)textColor text:(NSString *)text {
     NSMutableAttributedString *attStr_ = [[NSMutableAttributedString alloc] initWithString:text attributes:@{NSFontAttributeName : font, NSForegroundColorAttributeName : textColor}];
     self.attributedPlaceholder = attStr_;
@@ -109,6 +122,10 @@ static CGFloat const CornerRadius = 5;
     self.layer.masksToBounds = YES;
     self.layer.cornerRadius = CornerRadius;
     self.backgroundColor = [UIColor colorWithRed:248/255.0 green:248/255.0 blue:248/255.0 alpha:1.0];
+}
+
+- (void)keyboardOut {
+    [self resignFirstResponder];
 }
 
 #pragma mark - reset super methods
