@@ -9,6 +9,7 @@
 #import "AFURLSessionManager+LogAddtions.h"
 #import <objc/runtime.h>
 #import "DataFetch_Debug.h"
+#import "NSString+EncodeFormat.h"
 
 @implementation AFURLSessionManager (LogAddtions)
 
@@ -28,7 +29,7 @@
     
     return [self debugLog_dataTaskWithRequest:request uploadProgress:uploadProgressBlock downloadProgress:downloadProgressBlock completionHandler:^(NSURLResponse *response, id  _Nullable responseObject, NSError * _Nullable error) {
         
-        NSString *requestBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
+        NSString *requestBody = [[[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding] encodeFormat];
 //        NSLog(@"Succeed:URL:%@,\n param:%@,\n  method:%@,\n response:%@,\n error:%@\n", request.URL, requestBody, request.HTTPMethod, responseObject, error);
         DataFetch_Model *model = [DataFetch_Model new];
         model.method = request.HTTPMethod;

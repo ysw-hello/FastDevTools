@@ -8,6 +8,7 @@
 
 #import "DataFetch_Debug.h"
 #import "AFURLSessionManager+LogAddtions.h"
+#import "AFHTTPRequestOperationManager+Log_HttpRequest.h"
 #import "DataFetch_ContentView.h"
 #import "UIView+Additions.h"
 
@@ -31,6 +32,7 @@
         dataFetcher = [DataFetch_Debug new];
         dataFetcher.dataArr = [NSMutableArray array];
         [AFURLSessionManager swizzleTaskRequest];
+        [AFHTTPRequestOperationManager swizzleTaskRequest];
     });
     return dataFetcher;
 }
@@ -47,7 +49,7 @@
     self.contentView = [[DataFetch_ContentView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight, kScreenWidth, kScreenHeight - kStatusBarHeight)];
     _contentView.tag = DataFetch_ContentView_TAG;
     _contentView.alpha = 0.8;
-    _contentView.backgroundColor = [UIColor yellowColor];
+    _contentView.backgroundColor = [UIColor blackColor];
     _contentView.dataArray = self.dataArr;
     [rootViewController.view addSubview:_contentView];
 }
