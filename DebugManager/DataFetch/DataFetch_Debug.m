@@ -7,10 +7,18 @@
 //
 
 #import "DataFetch_Debug.h"
-#import "AFURLSessionManager+LogAddtions.h"
-#import "AFHTTPRequestOperationManager+Log_HttpRequest.h"
 #import "DataFetch_ContentView.h"
 #import "UIView+Additions.h"
+
+#if __has_include(<AFNetworking/AFHTTPRequestOperationManager.h>)
+#import "AFHTTPRequestOperationManager+Log_HttpRequest.h"
+#endif
+
+#if __has_include(<AFNetworking/AFURLSessionManager.h>)
+#import "AFURLSessionManager+LogAddtions.h"
+#endif
+
+
 
 @implementation DataFetch_Model
 
@@ -31,8 +39,8 @@
     dispatch_once(&onceToken, ^{
         dataFetcher = [DataFetch_Debug new];
         dataFetcher.dataArr = [NSMutableArray array];
-        [AFURLSessionManager swizzleTaskRequest];
-        [AFHTTPRequestOperationManager swizzleTaskRequest];
+        if (NSClassFromString(@"AFURLSessionManager")) [NSClassFromString(@"AFURLSessionManager") swizzleTaskRequest];
+         if (NSClassFromString(@"AFHTTPRequestOperationManager")) [NSClassFromString(@"AFHTTPRequestOperationManager")  swizzleTaskRequest];
     });
     return dataFetcher;
 }

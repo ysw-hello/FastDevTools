@@ -5,6 +5,8 @@
 //  Created by TimmyYan on 2018/11/16.
 //
 
+#if __has_include(<AFNetworking/AFHTTPRequestOperationManager.h>)
+
 #import "AFHTTPRequestOperationManager+Log_HttpRequest.h"
 #import <objc/runtime.h>
 #import "DataFetch_Debug.h"
@@ -63,3 +65,5 @@
 }
 
 @end
+
+#endif
