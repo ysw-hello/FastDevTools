@@ -11,19 +11,17 @@
 
 //格式化字符串及处理编码格式
 - (NSString *)encodeFormat {
-    if (@available(iOS 8.0, *)) {
-        if ([self containsString:@"&"]) {
-            NSArray *arr = [self componentsSeparatedByString:@"&"];
-            NSMutableArray *mArr = [NSMutableArray array];
-            for (NSString *str_ in arr) {
-                if ([str_ containsString:@"="]) {
-                    NSArray *arr_ = [str_ componentsSeparatedByString:@"="];
-                    NSString *subStr = [@"  " stringByAppendingString:[arr_ componentsJoinedByString:@":"]];
-                    [mArr addObject:[subStr stringByRemovingPercentEncoding]];
-                }
+    if ([self rangeOfString:@"&"].location != NSNotFound) {
+        NSArray *arr = [self componentsSeparatedByString:@"&"];
+        NSMutableArray *mArr = [NSMutableArray array];
+        for (NSString *str_ in arr) {
+            if ([str_ rangeOfString:@"="].location != NSNotFound) {
+                NSArray *arr_ = [str_ componentsSeparatedByString:@"="];
+                NSString *subStr = [@"  " stringByAppendingString:[arr_ componentsJoinedByString:@":"]];
+                [mArr addObject:[subStr stringByRemovingPercentEncoding]];
             }
-            return [[@"{\n" stringByAppendingString:[mArr componentsJoinedByString:@"\n"]] stringByAppendingString:@"\n}"];
         }
+        return [[@"{\n" stringByAppendingString:[mArr componentsJoinedByString:@"\n"]] stringByAppendingString:@"\n}"];
     }
     return self;
 }
