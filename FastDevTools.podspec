@@ -2,7 +2,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "FastDevTools"
-  s.version      = "0.7.3"
+  s.version      = "0.8.1"
   s.summary      = "一些帮助快速开发的工具类for iOS"
   s.homepage     = "https://github.com/ysw-hello/FastDevTools"
   s.license      = { :type => "MIT", :file => "LICENSE" }
@@ -37,13 +37,14 @@ Pod::Spec.new do |s|
 
   #DebugManager 本地沙盒可视化，FPS & CPU & 内存 性能可视化
   s.subspec 'DebugManager' do |ss|
-    ss.source_files = 'DebugManager/DebugController.{h,m}' , 'DebugManager/**/*.{h,m}'
+    ss.source_files = 'DebugManager/DebugController.{h,m}' , 'DebugManager/**/*.{h,m}' , 'DebugManager/**/**/*.{h,m}'
     ss.dependency 'FMDB'
     ss.dependency 'AFNetworking'
     ss.dependency 'GCDWebServer'
     ss.dependency 'GCDWebServer/WebUploader'
     ss.dependency 'GCDWebServer/WebDAV'
     ss.dependency 'FastDevTools/CustomTextField'
+    ss.libraries = 'resolv'
   end
 
 end

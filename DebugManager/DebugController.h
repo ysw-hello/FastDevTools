@@ -42,6 +42,7 @@ typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_HostChange = 5, //环境配置
     kDebug_ModuleType_TipsOnline = 6, //预上线tip服务器
     kDebug_ModuleType_UIDPaste = 7, //UID点击复制
+    kDebug_ModuleType_NetStatus = 8, //网络监测
 };
 
 typedef void(^ActionHandler)(void);

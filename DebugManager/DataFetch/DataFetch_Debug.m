@@ -8,7 +8,7 @@
 
 #import "DataFetch_Debug.h"
 #import "DataFetch_ContentView.h"
-#import "UIView+Additions.h"
+#import "UIView+Debug_Additions.h"
 
 #if __has_include(<AFNetworking/AFHTTPRequestOperationManager.h>)
 #import "AFHTTPRequestOperationManager+Log_HttpRequest.h"
@@ -54,7 +54,7 @@
 
 - (void)showDataFetchViewWithRootViewController:(UIViewController *)rootViewController {
     
-    self.contentView = [[DataFetch_ContentView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight, kScreenWidth, kScreenHeight - kStatusBarHeight)];
+    self.contentView = [[DataFetch_ContentView alloc] initWithFrame:CGRectMake(0, kDebug_StatusBarHeight, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_StatusBarHeight)];
     _contentView.tag = DataFetch_ContentView_TAG;
     _contentView.alpha = 0.8;
     _contentView.backgroundColor = [UIColor blackColor];

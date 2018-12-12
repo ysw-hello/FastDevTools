@@ -11,7 +11,8 @@
 #import "SandBox_Debug.h"
 #import "SandBox_Web_Debug.h"
 #import "SystemState_Debug.h"
-#import "UIView+Additions.h"
+#import "NetStatus/NetStatus_Debug.h"
+#import "UIView+Debug_Additions.h"
 
 @interface DebugController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -44,7 +45,8 @@
                         @"请求抓包开关",
                         @"环境设置(点击输入)",
                         @"线上tips开关",
-                        @"UID(点击复制)"
+                        @"UID(点击复制)",
+                        @"网络状态监测"
                         ];
     [self initTableView];
 }
@@ -59,8 +61,8 @@
 
 - (void)initTableView {
     
-    CGFloat top = self.view.height == kScreenHeight ? kNavBarBottom : 0;
-    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, top, kScreenWidth, kScreenHeight - kNavBarBottom) style:UITableViewStylePlain];
+    CGFloat top = self.view.height == kDebug_ScreenHeight ? kDebug_NavBarBottom : 0;
+    self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, top, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_NavBarBottom) style:UITableViewStylePlain];
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.tableFooterView = [UIView new];
@@ -70,7 +72,7 @@
 
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
-    CGFloat top = self.view.height == kScreenHeight ? kNavBarBottom : 0;
+    CGFloat top = self.view.height == kDebug_ScreenHeight ? kDebug_NavBarBottom : 0;
     _tableView.top = top;
 }
 
@@ -124,6 +126,11 @@
             cell.debugSwitch.hidden = YES;
             cell.moduleType = kDebug_ModuleType_UIDPaste;
             cell.title = [NSString stringWithFormat:@"UID(点击复制)：%@", self.UIDStr];
+            break;
+            
+        case 7:
+            cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_NetMonitorKey_DebugSwitch];
+            cell.moduleType = kDebug_ModuleType_NetStatus;
             break;
             
         default:
@@ -193,6 +200,8 @@
         [self customSubviews];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sandBoxListRemoved) name:kNotif_Name_SandBoxListRemoved object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataFetchContentRemoved) name:kNotif_Name_DataFetchContentRemoved object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(netStatusContentRemoved) name:kNotif_Name_NetStatusContentRemoved object:nil];
+
     }
     return self;
 }
@@ -283,6 +292,12 @@
     return label;
 }
 
+- (void)netStatusContentRemoved {
+    if (self.moduleType == kDebug_ModuleType_NetStatus) {
+        self.debugSwitch.on = NO;
+    }
+}
+
 - (void)dataFetchContentRemoved {
     if ((self.moduleType == kDebug_ModuleType_DataFetch)) {
         self.debugSwitch.on = NO;
@@ -330,10 +345,24 @@
         case kDebug_ModuleType_DataFetch://请求抓包展示
             [self fetchData_actionWithState:switchState];
             break;
+            
+        case kDebug_ModuleType_NetStatus://网络监测分析
+            [self netMonitor_actionWithState:switchState];
+            break;
         
         default:
             break;
     }
+}
+
+- (void)netMonitor_actionWithState:(BOOL)state {
+    [[NSUserDefaults standardUserDefaults] setBool:state forKey:KUserDefaults_NetMonitorKey_DebugSwitch];
+    if (state) {
+        [[NetStatus_Debug sharedInstance] showNetMonitorViewWithRootViewController:self.rootViewController];
+    } else {
+        [[NetStatus_Debug sharedInstance] hideNetMonitorView];
+    }
+
 }
 
 - (void)fetchData_actionWithState:(BOOL)state {

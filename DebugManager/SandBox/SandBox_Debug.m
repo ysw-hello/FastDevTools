@@ -9,7 +9,7 @@
 #import "SandBox_Debug.h"
 #import <objc/runtime.h>
 #import <FMDB/FMDB.h>
-#import "UIView+Additions.h"
+#import "UIView+Debug_Additions.h"
 
 
 /*******************************  逻辑类管理  *******************************/
@@ -34,7 +34,7 @@
 }
 
 - (void)showSandBoxListViewWithRootViewController:(UIViewController *)rootViewController {
-    self.listView = [[SandBox_ListView alloc] initWithFrame:CGRectMake(0, kStatusBarHeight, kScreenWidth, kScreenHeight - kStatusBarHeight)];
+    self.listView = [[SandBox_ListView alloc] initWithFrame:CGRectMake(0, kDebug_StatusBarHeight, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_StatusBarHeight)];
     _listView.tag = SandBox_ListView_Tag;
     _listView.backgroundColor = [UIColor clearColor];
     _listView.alpha = 0.8;

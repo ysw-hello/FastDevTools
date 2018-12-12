@@ -1,14 +1,14 @@
 //
-//  UIView+Additions.m
+//  UIView+Debug_Additions.m
 //  DebugController
 //
 //  Created by 闫士伟 on 2018/7/30.
 //  Copyright © 2018年 com.ysw. All rights reserved.
 //
 
-#import "UIView+Additions.h"
+#import "UIView+Debug_Additions.h"
 
-@implementation UIView (Additions)
+@implementation UIView (Debug_Additions)
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 - (CGFloat)left {

@@ -10,7 +10,7 @@
 #import "SystemState_DataSource.h"
 #import "SystemState_StatusBar.h"
 #import "SystemState_Config.h"
-#import "UIView+Additions.h"
+#import "UIView+Debug_Additions.h"
 
 @interface SystemState_Debug ()
 
@@ -45,7 +45,7 @@
         _displayLink.paused = YES;
         [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         
-        _fpsStatusBar = [[SystemState_StatusBar alloc] initWithFrame:CGRectMake(0, DeviceIsIphoneX ? 24 : 0, kScreenWidth, 20)];
+        _fpsStatusBar = [[SystemState_StatusBar alloc] initWithFrame:CGRectMake(0, Debug_DeviceIsIphoneX ? 24 : 0, kDebug_ScreenWidth, 20)];
         
         self.statusBarWindow = [[UIWindow alloc] initWithFrame:_fpsStatusBar.frame];
         _statusBarWindow.hidden = YES;

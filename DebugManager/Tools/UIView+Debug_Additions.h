@@ -1,5 +1,5 @@
 //
-//  UIView+Additions.h
+//  UIView+Debug_Additions.h
 //  DebugController
 //
 //  Created by 闫士伟 on 2018/7/30.
@@ -8,30 +8,33 @@
 
 #import <UIKit/UIKit.h>
 
-#define kScreenHeight                       [[UIScreen mainScreen] bounds].size.height
-#define kScreenWidth                        [[UIScreen mainScreen] bounds].size.width
+#define kDebug_ScreenHeight                       [[UIScreen mainScreen] bounds].size.height
+#define kDebug_ScreenWidth                        [[UIScreen mainScreen] bounds].size.width
 
 //适配iPhoneX
-#define DeviceIsIphoneX     ((MIN(kScreenWidth,kScreenHeight) == 375 && MAX(kScreenWidth,kScreenHeight) == 812)?YES:NO)
-#define kNavBarHeight       44
-#define kStatusBarHeight    (DeviceIsIphoneX ? 44 : 20)
-#define kNavBarBottom       (kStatusBarHeight + kNavBarHeight)
+#define Debug_DeviceIsIphoneX     ((MIN(kDebug_ScreenWidth,kDebug_ScreenHeight) == 375 && MAX(kDebug_ScreenWidth,kDebug_ScreenHeight) == 812)?YES:NO)
+#define kDebug_NavBarHeight       44
+#define kDebug_StatusBarHeight    (Debug_DeviceIsIphoneX ? 44 : 20)
+#define kDebug_NavBarBottom       (kDebug_StatusBarHeight + kDebug_NavBarHeight)
 
 
 #define SandBox_ListView_Tag 10001
 #define DataFetch_ContentView_TAG 10002
+#define NetStatus_ContentView_TAG 10003
 
 static NSString *const kNotif_Name_SandBoxListRemoved = @"kNotif_Name_SandBoxListRemoved";
 static NSString *const kNotif_Name_DataFetchContentRemoved = @"kNotif_Name_DataFetchContentRemoved";
+static NSString *const kNotif_Name_NetStatusContentRemoved = @"kNotif_Name_NetStatusContentRemoved";
 
 static NSString *const kUserDefaults_SandBoxKey_DebugSwitch = @"kUserDefaults_SandBoxKey_DebugSwitch";
 static NSString *const kUserDefaults_SandBoxForWebKey_DebugSwitch = @"kUserDefaults_SandBoxForWebKey_DebugSwitch";
 static NSString *const kUserDefaults_SystemStateKey_DebugSwitch = @"kUserDefaults_SystemStateKey_DebugSwitch";
 static NSString *const kUserDefaults_DataFetchKey_DebugSwitch = @"kUserDefaults_DataFetchKey_DebugSwitch";
 static NSString *const kUserDefaults_OnlineTipsKey_DebugSwitch = @"kUserDefaults_OnlineTipsKey_DebugSwitch";
+static NSString *const KUserDefaults_NetMonitorKey_DebugSwitch = @"KUserDefaults_NetMonitorKey_DebugSwitch";
 
 
-@interface UIView (Additions)
+@interface UIView (Debug_Additions)
 /**
  * Shortcut for frame.origin.x.
  *
