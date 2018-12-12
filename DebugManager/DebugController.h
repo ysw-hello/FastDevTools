@@ -12,7 +12,7 @@
  self.view.backgroundColor = [UIColor brownColor];
  
  UIButton *button = [[UIButton alloc] initWithFrame:CGRectMake(10, self.view.bounds.size.height - 65, self.view.bounds.size.width - 20, 50)];
- [button setTitle:@"调试控制器" forState:UIControlStateNormal];
+ [button setTitle:@"潘多拉魔盒" forState:UIControlStateNormal];
  [button setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
  [button addTarget:self action:@selector(pushDebuger) forControlEvents:UIControlEventTouchUpInside];
  button.backgroundColor = [UIColor blackColor];

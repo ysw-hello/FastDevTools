@@ -36,7 +36,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
-    self.title =  @"调试控制器";
+    self.title =  @"潘多拉魔盒";
     self.titleArray = @[
                         @"系统状态开关",
                         @"本地沙盒目录",
