@@ -7,7 +7,7 @@
 //
 
 #import "DebugAlertView.h"
-#import "UIView+Additions.h"
+#import "UIView+Debug_Additions.h"
 #import <FastDevTools/YSW_TextField.h>
 
 static NSString *const DefaultStr = @"default";
@@ -230,7 +230,7 @@ static NSString *const DefaultStr = @"default";
     float keboardHeiht = endFrame.size.height;//键盘高度
     float duration = [[noti.userInfo objectForKey:UIKeyboardAnimationDurationUserInfoKey] floatValue];
     
-    CGFloat margin = (kScreenHeight - self.contentAlertView.height) / 2;
+    CGFloat margin = (kDebug_ScreenHeight - self.contentAlertView.height) / 2;
     if (margin > keboardHeiht) {
         return;
     }
