@@ -53,7 +53,7 @@
 
 #pragma mark - setters or getters
 - (void)setHostName:(NSString *)hostName {
-    _hostName = hostName;
+    _hostName = hostName ? : @"环境设置(点击输入)";
     [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:4 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
