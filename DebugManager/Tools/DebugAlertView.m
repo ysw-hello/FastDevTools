@@ -10,7 +10,7 @@
 #import "UIView+Debug_Additions.h"
 #import <FastDevTools/YSW_TextField.h>
 
-static NSString *const DefaultStr = @"default";
+static NSString *const DefaultStr = @"www.";
 
 @interface DebugAlertView ()
 
@@ -174,8 +174,8 @@ static NSString *const DefaultStr = @"default";
             button.layer.borderColor = [UIColor redColor].CGColor;
             [button setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
         
-            NSString *hostPrefix = [button.titleLabel.text isEqualToString:DefaultStr] ? @"www." : button.titleLabel.text;
-            self.hostTF.text = [NSString stringWithFormat:@"https://%@", hostPrefix];
+            NSString *hostPrefix = button.titleLabel.text;
+            self.hostTF.text = [NSString stringWithFormat:@"%@", hostPrefix];
             self.hostTF.keyboardType = [button.titleLabel.text isEqualToString:DefaultStr] ? UIKeyboardTypeURL : UIKeyboardTypeNumberPad;
             [self.hostTF becomeFirstResponder];
         } else {

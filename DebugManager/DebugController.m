@@ -137,14 +137,23 @@
             cell.debugSwitch.on = NO;
             break;
     }
+    __weak typeof(self) weakSelf = self;
     cell.debugSwithAction = ^(BOOL isOn, Debug_ModuleType moduleType) {
-        if (moduleType == kDebug_ModuleType_SandBox_Web) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (moduleType == kDebug_ModuleType_SandBox_Web) {//沙盒web调试
             [tableView reloadData];
-        } else if (moduleType == kDebug_ModuleType_TipsOnline) {
+        } else if (moduleType == kDebug_ModuleType_TipsOnline) {//Tips服务器
             [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
             //tips预上线服务器 action
-            if (self.tipsStateChangeBlock) {
-                self.tipsStateChangeBlock(isOn);
+            if (strongSelf.tipsStateChangeBlock) {
+                strongSelf.tipsStateChangeBlock(isOn);
+            }
+        } else if (moduleType == kDebug_ModuleType_NetStatus) {//网络状态分析
+            [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_NetMonitorKey_DebugSwitch];
+            if (isOn) {
+                [[NetStatus_Debug sharedInstance] showNetMonitorViewWithRootViewController:self.rootViewController uid:strongSelf.UIDStr ? : @""];
+            } else {
+                [[NetStatus_Debug sharedInstance] hideNetMonitorView];
             }
         }
         
@@ -346,23 +355,9 @@
             [self fetchData_actionWithState:switchState];
             break;
             
-        case kDebug_ModuleType_NetStatus://网络监测分析
-            [self netMonitor_actionWithState:switchState];
-            break;
-        
         default:
             break;
     }
-}
-
-- (void)netMonitor_actionWithState:(BOOL)state {
-    [[NSUserDefaults standardUserDefaults] setBool:state forKey:KUserDefaults_NetMonitorKey_DebugSwitch];
-    if (state) {
-        [[NetStatus_Debug sharedInstance] showNetMonitorViewWithRootViewController:self.rootViewController];
-    } else {
-        [[NetStatus_Debug sharedInstance] hideNetMonitorView];
-    }
-
 }
 
 - (void)fetchData_actionWithState:(BOOL)state {

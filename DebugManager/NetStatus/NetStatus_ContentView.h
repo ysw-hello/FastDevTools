@@ -9,4 +9,6 @@
 
 @interface NetStatus_ContentView : UIView
 
+- (instancetype)initWithFrame:(CGRect)frame  uid:(NSString *)uid;
+
 @end

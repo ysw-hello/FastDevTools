@@ -32,8 +32,8 @@
     return nt;
 }
 
-- (void)showNetMonitorViewWithRootViewController:(UIViewController *)rootViewController {
-    self.contentView = [[NetStatus_ContentView alloc] initWithFrame:CGRectMake(0, kDebug_StatusBarHeight, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_StatusBarHeight)];
+- (void)showNetMonitorViewWithRootViewController:(UIViewController *)rootViewController  uid:(NSString *)uid{
+    self.contentView = [[NetStatus_ContentView alloc] initWithFrame:CGRectMake(0, kDebug_StatusBarHeight, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_StatusBarHeight) uid:uid];
     _contentView.tag = NetStatus_ContentView_TAG;
     _contentView.alpha = 0.8;
     _contentView.backgroundColor = [UIColor blackColor];

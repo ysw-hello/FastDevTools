@@ -8,18 +8,20 @@
 #import "NetStatus_ContentView.h"
 #import "NetStatus_Debug.h"
 #import "UIView+Debug_Additions.h"
+#import "DebugAlertView.h"
 
-@interface NetStatus_ContentView () <UITextFieldDelegate>
+@interface NetStatus_ContentView ()
 
 /**
- 要诊断的域名 输入框
+ 要诊断的域名
  */
-@property (nonatomic, strong) UITextField *txtfield_dormain;
+@property (nonatomic, strong) UIButton *dormainBtn;
+@property (nonatomic, strong) NSString *currentDormain;
 
 /**
  开始诊断 按钮
  */
-@property (nonatomic, strong) UIButton *btn;
+@property (nonatomic, strong) UIButton *startBtn;
 
 /**
  诊断结果
@@ -40,13 +42,20 @@
  */
 @property (nonatomic, strong) UILabel *downloadSpeedLabel;
 
+/**
+ uid
+ */
+@property (nonatomic, strong) NSString *uid;
+
+
 @end
 
 @implementation NetStatus_ContentView
 
-- (instancetype)initWithFrame:(CGRect)frame {
+- (instancetype)initWithFrame:(CGRect)frame uid:(NSString *)uid{
     self = [super initWithFrame:frame];
     if (self) {
+        self.uid = uid ? : @"";
         UIPanGestureRecognizer *panGes = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
         [self addGestureRecognizer:panGes];
         [self customTitle];
@@ -180,24 +189,8 @@
 
 - (void)monitorNetService {
     //UI处理
-    _btn = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btn.frame = CGRectMake(10.0f, 150.0f, 100.0f, 50.0f);
-    [_btn setBackgroundColor:[UIColor lightGrayColor]];
-    [_btn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    [_btn.titleLabel setTextAlignment:NSTextAlignmentCenter];
-    [_btn.titleLabel setNumberOfLines:2];
-    [_btn setTitle:@"开始诊断" forState:UIControlStateNormal];
-    [_btn addTarget:self action:@selector(startNetDiagnosis) forControlEvents:UIControlEventTouchUpInside];
-    [self addSubview:_btn];
-    
-    _txtfield_dormain = [[UITextField alloc] initWithFrame:CGRectMake(130.0f, 150.0f, 180.0f, 50.0f)];
-    _txtfield_dormain.layer.borderColor = [UIColor lightGrayColor].CGColor;
-    _txtfield_dormain.textColor = [UIColor whiteColor];
-    _txtfield_dormain.layer.borderWidth = 1.f;
-    _txtfield_dormain.delegate = self;
-    _txtfield_dormain.returnKeyType = UIReturnKeyDone;
-    _txtfield_dormain.text = @"www.zybang.com";
-    [self addSubview:_txtfield_dormain];
+    _startBtn = [self customButtonWithFrame:CGRectMake(10.0f, 150.0f, 100.0f, 50.0f) selector:@selector(startNetDiagnosis) title:@"开始诊断" superView:self];
+    _dormainBtn = [self customButtonWithFrame:CGRectMake(130.0f, 150.0f, self.width - 130.f - 10.f, 50.0f) selector:@selector(domainInputAction:) title:@"www.zybang.com" superView:self];
     
     _txtView_log = [[UITextView alloc] initWithFrame:CGRectZero];
     _txtView_log.layer.borderWidth = 1.f;
@@ -213,25 +206,45 @@
     
 }
 
+- (void)domainInputAction:(UIButton *)button {
+    __weak typeof(self) weakSelf = self;
+    [DebugAlertView createAlertWithTitle:@"域名输入" content:@"可以配置也可以手动输入域名" textFieldPlaceorder:@"例如：www.zybang.com" hostPrefixBtnStrArr:@[@"test", @"qatest"] hostNameBtnStrArr:@[@".suanshubang.com", @".zybang.com"] bottomBtnStrArr:@[@"取消", @"确定"] bottomBtnTouchedHandler:^(NSInteger index, NSString *inputStr) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        if (index == 1) {
+            NSString *https = @"https://";
+            NSString *http = @"http://";
+            if ([inputStr hasPrefix:https]) {
+                inputStr = [inputStr substringFromIndex:https.length];
+            } else if ([inputStr hasPrefix:http]) {
+                inputStr = [inputStr substringFromIndex:http.length];
+            } else if (inputStr.length < 1) {
+                inputStr = @"www.zybang.com";
+            }
+            [button setTitle:inputStr forState:UIControlStateNormal];
+            strongSelf.currentDormain = inputStr;
+        }
+    }];
+
+}
+
 - (void)startNetDiagnosis {
-    [_txtfield_dormain resignFirstResponder];
     
     //数据逻辑处理
     __weak typeof(self) weakSelf = self;
     NetStatus_Debug *netManager = [NetStatus_Debug sharedInstance];
-    [netManager startAnalyzeNetServiceWithDormain:_txtfield_dormain.text uid:@"12345678" logStepInfoBlock:^(NSString *logInfo, BOOL isRunning) {
+    [netManager startAnalyzeNetServiceWithDormain:self.currentDormain uid:self.uid logStepInfoBlock:^(NSString *logInfo, BOOL isRunning) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         strongSelf.txtView_log.text = logInfo;
         
         if (isRunning) {
-            [strongSelf.btn setTitle:@"停止诊断" forState:UIControlStateNormal];
-            [strongSelf.btn setBackgroundColor:[UIColor colorWithWhite:0.3 alpha:1.0]];
-            [strongSelf.btn setUserInteractionEnabled:NO];
+            [strongSelf.startBtn setTitle:@"停止诊断" forState:UIControlStateNormal];
+            [strongSelf.startBtn setBackgroundColor:[UIColor colorWithWhite:0.3 alpha:1.0]];
+            [strongSelf.startBtn setUserInteractionEnabled:NO];
             
         } else {
-            [strongSelf.btn setTitle:@"开始诊断" forState:UIControlStateNormal];
-            [strongSelf.btn setBackgroundColor:[UIColor lightGrayColor]];
-            [strongSelf.btn setUserInteractionEnabled:YES];
+            [strongSelf.startBtn setTitle:@"开始诊断" forState:UIControlStateNormal];
+            [strongSelf.startBtn setBackgroundColor:[UIColor clearColor]];
+            [strongSelf.startBtn setUserInteractionEnabled:YES];
             [netManager stopAnalyzeNetService];
         }
         
@@ -240,10 +253,5 @@
     
 }
 
-#pragma mark - textFieldDelegate
-- (BOOL)textFieldShouldReturn:(UITextField *)textField {
-    [textField resignFirstResponder];
-    return YES;
-}
 
 @end

@@ -18,7 +18,7 @@
 #import "NetStatus_Ping.h"
 #import "NetStatus_TraceRoute.h"
 
-static NSString *const kPingOpenServerIP = @"";
+static NSString *const kPingOpenServerIP = @"61.135.169.121";//默认ping 百度的ip
 static NSString *const kCheckOutIPURL = @"";
 
 @interface NetStatus_Service () <NetStatus_PingDelegate, NetStatus_ConnectDelegate, NetStatus_TraceRouteDelegate>

@@ -24,7 +24,7 @@ typedef void(^NetAnalyzeBlock)(NSString *logInfo, BOOL isRunning);
 */
 + (instancetype)sharedInstance;
 
-- (void)showNetMonitorViewWithRootViewController:(UIViewController *)rootViewController;
+- (void)showNetMonitorViewWithRootViewController:(UIViewController *)rootViewController uid:(NSString *)uid;
 - (void)hideNetMonitorView;
 
 

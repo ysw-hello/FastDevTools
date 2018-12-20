@@ -238,6 +238,9 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen) {
     id<NSSimplePingDelegate>  strongDelegate;
     
     // data may be nil
+    if (self.hostAddress == nil) {
+        return;
+    }
     NSParameterAssert(self.hostAddress != nil);     // gotta wait for -simplePing:didStartWithAddress:
     
     // Construct the ping packet.
