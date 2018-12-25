@@ -64,7 +64,9 @@ static NSString *const DefaultStr = @"www.";
     }
 }
 
-- (void)initAlertWithTitle:(NSString *)title content:(NSString *)content textFieldPlaceorder:(NSString *)textFieldPlaceorder hostPrefixBtnStrArr:(NSArray<__kindof NSString *> *)hostPrefixBtnStrArr hostNameBtnStrArr:(NSArray<__kindof NSString *> *)hostNameBtnStrArr bottomBtnStrArr:(NSArray<__kindof NSString *> *)bottomBtnStrArr bottomBtnTouchedHandler:(BottomBtnTouchedBlock)bottomBtnTouchedHandler{
+- (void)customAlertWithTitle:(NSString *)title content:(NSString *)content textFieldPlaceorder:(NSString *)textFieldPlaceorder hostPrefixBtnStrArr:(NSArray<__kindof NSString *> *)hostPrefixBtnStrArr hostNameBtnStrArr:(NSArray<__kindof NSString *> *)hostNameBtnStrArr bottomBtnStrArr:(NSArray<__kindof NSString *> *)bottomBtnStrArr bottomBtnTouchedHandler:(BottomBtnTouchedBlock)bottomBtnTouchedHandler{
+    [self dismissDebugAlert];
+    self.frame = [UIScreen mainScreen].bounds;
     self.backgroundColor = [UIColor clearColor];
     [self addSubview:[self createCoverview]];
     self.bottomBtnblock = [bottomBtnTouchedHandler copy];
@@ -129,7 +131,7 @@ static NSString *const DefaultStr = @"www.";
 + (DebugAlertView *)createAlertWithTitle:(NSString *)title content:(NSString *)content textFieldPlaceorder:(NSString *)textFieldPlaceorder hostPrefixBtnStrArr:(NSArray<__kindof NSString *> *)hostPrefixBtnStrArr hostNameBtnStrArr:(NSArray<__kindof NSString *> *)hostNameBtnStrArr bottomBtnStrArr:(NSArray<__kindof NSString *> *)bottomBtnStrArr bottomBtnTouchedHandler:(BottomBtnTouchedBlock)bottomBtnTouchedHandler{
     DebugAlertView *alertView = [[DebugAlertView alloc] initWithFrame:[UIScreen mainScreen].bounds];
     [alertView dismissDebugAlert];
-    [alertView initAlertWithTitle:title content:content textFieldPlaceorder:textFieldPlaceorder hostPrefixBtnStrArr:hostPrefixBtnStrArr hostNameBtnStrArr:hostNameBtnStrArr bottomBtnStrArr:bottomBtnStrArr bottomBtnTouchedHandler:bottomBtnTouchedHandler];
+    [alertView customAlertWithTitle:title content:content textFieldPlaceorder:textFieldPlaceorder hostPrefixBtnStrArr:hostPrefixBtnStrArr hostNameBtnStrArr:hostNameBtnStrArr bottomBtnStrArr:bottomBtnStrArr bottomBtnTouchedHandler:bottomBtnTouchedHandler];
     return alertView;
 }
 

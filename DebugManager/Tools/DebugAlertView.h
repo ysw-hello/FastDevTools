@@ -31,7 +31,7 @@ typedef void(^BottomBtnTouchedBlock)(NSInteger index ,NSString *inputStr);
  */
 + (DebugAlertView *)createAlertWithTitle:(NSString *)title content:(NSString *)content textFieldPlaceorder:(NSString *)textFieldPlaceorder hostPrefixBtnStrArr:(NSArray<__kindof NSString *> *)hostPrefixBtnStrArr hostNameBtnStrArr:(NSArray<__kindof NSString *> *)hostNameBtnStrArr bottomBtnStrArr:(NSArray<__kindof NSString *> *)bottomBtnStrArr bottomBtnTouchedHandler:(BottomBtnTouchedBlock)bottomBtnTouchedHandler;
 
-- (void)initAlertWithTitle:(NSString *)title content:(NSString *)content textFieldPlaceorder:(NSString *)textFieldPlaceorder hostPrefixBtnStrArr:(NSArray<__kindof NSString *> *)hostPrefixBtnStrArr hostNameBtnStrArr:(NSArray<__kindof NSString *> *)hostNameBtnStrArr bottomBtnStrArr:(NSArray<__kindof NSString *> *)bottomBtnStrArr bottomBtnTouchedHandler:(BottomBtnTouchedBlock)bottomBtnTouchedHandler;
+- (void)customAlertWithTitle:(NSString *)title content:(NSString *)content textFieldPlaceorder:(NSString *)textFieldPlaceorder hostPrefixBtnStrArr:(NSArray<__kindof NSString *> *)hostPrefixBtnStrArr hostNameBtnStrArr:(NSArray<__kindof NSString *> *)hostNameBtnStrArr bottomBtnStrArr:(NSArray<__kindof NSString *> *)bottomBtnStrArr bottomBtnTouchedHandler:(BottomBtnTouchedBlock)bottomBtnTouchedHandler;
 
 
 

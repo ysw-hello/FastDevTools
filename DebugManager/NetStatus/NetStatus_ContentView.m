@@ -188,6 +188,7 @@
 }
 
 - (void)monitorNetService {
+    self.currentDormain = @"www.zybang.com";//默认域名
     //UI处理
     _startBtn = [self customButtonWithFrame:CGRectMake(10.0f, 150.0f, 100.0f, 50.0f) selector:@selector(startNetDiagnosis) title:@"开始诊断" superView:self];
     _dormainBtn = [self customButtonWithFrame:CGRectMake(130.0f, 150.0f, self.width - 130.f - 10.f, 50.0f) selector:@selector(domainInputAction:) title:@"www.zybang.com" superView:self];
