@@ -49,10 +49,6 @@
                     address = [self formatIPV4Address:((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr];
                 } else if (temp_addr->ifa_addr->sa_family == AF_INET6) {
                     address = [self formatIPV6Address:((struct sockaddr_in6 *)temp_addr->ifa_addr)->sin6_addr];
-                    //以fe80:开头的ipv6地址为单播地址
-                    if (address && ![address isEqualToString:@""] && ![address.uppercaseString hasPrefix:@"FE80"]) {
-                        break;
-                    }
                 }
             }
             temp_addr = temp_addr->ifa_next;
