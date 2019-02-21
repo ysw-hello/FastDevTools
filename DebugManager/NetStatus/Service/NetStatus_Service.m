@@ -17,6 +17,7 @@
 #import "NetStatus_Connect.h"
 #import "NetStatus_Ping.h"
 #import "NetStatus_TraceRoute.h"
+#import "NetStatus_WiFiInfo.h"
 
 static NSString *const kPingOpenServerIP = @"61.135.169.121";//默认ping 百度的ip
 static NSString *const kCheckOutIPURL = @"";
@@ -226,6 +227,22 @@ static NSString *const kCheckOutIPURL = @"";
         [self recordStepInfo:[NSString stringWithFormat:@"当前是否联网: 已联网"]];
         if (_curNetType > 0 && _curNetType < 6) {
             [self recordStepInfo:[NSString stringWithFormat:@"当前联网类型: %@", [typeArr objectAtIndex:_curNetType - 1]]];
+        }
+    }
+    
+    //WiFi路由器相关信息
+    if (_curNetType == NetworkType_WiFi) {
+        NSString *wifiSSID = [NetStatus_WiFiInfo getCurrentWiFiName];
+        [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi名称: %@", wifiSSID]];
+        NSArray *onlineDevices = [NetStatus_WiFiInfo getOnlineDevicesInfo];
+        [self recordStepInfo:[NSString stringWithFormat:@"当前WiFi在线设备数量: %ld台", onlineDevices.count]];
+        if (onlineDevices.count > 0) {
+            [self recordStepInfo:@"在线设备列表信息如下："];
+            for (NSString  *str in onlineDevices) {
+                NSInteger i = 1;
+                [self recordStepInfo:[NSString stringWithFormat:@"设备%ld         IP:%@", i, str]];
+                i++;
+            }
         }
     }
     
