@@ -26,6 +26,11 @@ typedef NS_ENUM(NSUInteger, NetworkType) {
 + (NSString *)deviceIPAdress;
 
 /**
+ 获取当前设备子网掩码
+ */
++ (NSString *)getSubnetMask;
+
+/**
  获取当前设备网关地址
  */
 + (NSString *)getGatewayIPAddress;

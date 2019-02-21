@@ -170,6 +170,7 @@ static NSString *const kCheckOutIPURL = @"";
             [pingAdd addObject:_gatewayIp];
             [pingInfo addObject:@"本地网关"];
         }
+        
         if ([_dnsServers count] > 0) {
             [pingAdd addObject:[_dnsServers objectAtIndex:0]];
             [pingInfo addObject:@"DNS服务器"];
@@ -232,8 +233,13 @@ static NSString *const kCheckOutIPURL = @"";
     
     //WiFi路由器相关信息
     if (_curNetType == NetworkType_WiFi) {
+        
         NSString *wifiSSID = [NetStatus_WiFiInfo getCurrentWiFiName];
         [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi名称: %@", wifiSSID]];
+        
+        NSString *wifiAdress = [NetStatus_WiFiInfo getCurrentWiFiMACAdress];
+        [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi的路由地址: %@", wifiAdress]];
+        
         NSArray *onlineDevices = [NetStatus_WiFiInfo getOnlineDevicesInfo];
         [self recordStepInfo:[NSString stringWithFormat:@"当前WiFi在线设备数量: %ld台", onlineDevices.count]];
         if (onlineDevices.count > 0) {
@@ -244,15 +250,18 @@ static NSString *const kCheckOutIPURL = @"";
                 i++;
             }
         }
+        
     }
     
     //本地ip信息
     _localIp = [NetStatus_GetAddress deviceIPAdress];
-    [self recordStepInfo:[NSString stringWithFormat:@"当前本地IP: %@", _localIp]];
+    [self recordStepInfo:[NSString stringWithFormat:@"\n当前本地IP: %@", _localIp]];
     
     if (_curNetType == NetworkType_WiFi) {
         _gatewayIp = [NetStatus_GetAddress getGatewayIPAddress];
         [self recordStepInfo:[NSString stringWithFormat:@"本地网关: %@", _gatewayIp]];
+        NSString *subnetMask = [NetStatus_GetAddress getSubnetMask];
+        [self recordStepInfo:[NSString stringWithFormat:@"本地子网掩码: %@", subnetMask]];
     } else {
         _gatewayIp = @"";
     }

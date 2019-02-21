@@ -10,21 +10,26 @@
 
 @implementation NetStatus_WiFiInfo
 
-+ (NSString *)getCurrentWiFiName {
-    NSString *ssid = @"--";
-    NSString *bssid = @"--";
++ (NSDictionary *)getCurrentWiFiInfo {
     CFArrayRef arrRef = CNCopySupportedInterfaces();
     if (arrRef) {
         CFDictionaryRef dictRef = CNCopyCurrentNetworkInfo(CFArrayGetValueAtIndex(arrRef, 0));
         if (dictRef) {
             NSDictionary *dict = (NSDictionary *)CFBridgingRelease(dictRef);
-            ssid = [dict valueForKey:@"SSID"];
-            bssid = [dict   valueForKey:@"BSSID"];
-            ssid = [ssid stringByAppendingString:[NSString stringWithFormat:@"  <WiFi路由地址：%@>", bssid]];
+            return dict;
         }
     }
-    return ssid;
+    return nil;
 }
+
++ (NSString *)getCurrentWiFiName {
+    return [[self getCurrentWiFiInfo] valueForKey:@"SSID"];
+}
+
++ (NSString *)getCurrentWiFiMACAdress {
+    return [[self getCurrentWiFiInfo] valueForKey:@"BSSID"];
+}
+
 
 + (NSArray *)getOnlineDevicesInfo {
     NSMutableArray *arr = @[].mutableCopy;

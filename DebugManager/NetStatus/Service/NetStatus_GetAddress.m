@@ -64,6 +64,28 @@
     }
 }
 
+//获取子网掩码
++ (NSString *)getSubnetMask {
+    NSString *subnetMask = @"";
+    struct ifaddrs *interfaces = NULL;
+    struct ifaddrs *temp_addr = NULL;
+    int success = 0;
+    success = getifaddrs(&interfaces);
+    if (success == 0) {
+        temp_addr = interfaces;
+        while (temp_addr != NULL) {
+            if (temp_addr->ifa_addr->sa_family == AF_INET) {
+                if ([[NSString stringWithUTF8String:temp_addr->ifa_name] isEqualToString:@"en0"]) {
+                    //WIFI & IPV4
+                    subnetMask = [self formatIPV4Address:((struct sockaddr_in *)temp_addr->ifa_netmask)->sin_addr];
+                }
+            }
+            temp_addr = temp_addr->ifa_next;
+        }
+    }
+    return subnetMask;
+}
+
 //获取当前网络DNS服务器地址
 + (NSArray *)outPutDNSServers {
     res_state res = malloc(sizeof(struct __res_state));
