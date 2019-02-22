@@ -12,7 +12,7 @@
 @implementation NetStatus_Timer
 
 /**
- * Retourne un timestamp en microsecondes.
+ * 获取当前时间的微秒时间戳
  */
 + (long)getMicroSeconds
 {
@@ -22,7 +22,7 @@
 }
 
 /**
- * Calcule une durée en millisecondes par rapport au timestamp passé en paramètre.
+ * 计算uTime至当前的微秒时间间隔
  */
 + (long)computeDurationSince:(long)uTime
 {
