@@ -112,8 +112,9 @@ static NSString *const kCheckOutIPURL = @"";
         } else {
             [self recordStepInfo:@"DNS解析失败，主机地址不可达"];
         }
+        
         if (_isRunning) {
-            [self pingService:!_connectSuccess];
+            [self pingService:!_connectSuccess]; //TCP连接成功则不ping本地，否则直接ping本地
         }
     }
     
@@ -162,17 +163,19 @@ static NSString *const kCheckOutIPURL = @"";
     NSMutableArray *pingAdd = [[NSMutableArray alloc] init];
     NSMutableArray *pingInfo = [[NSMutableArray alloc] init];
     if (pingLocal) {
-        [pingAdd addObject:@"127.0.0.1"];
+        [pingAdd addObject:@"127.0.0.1"]; //当操作系统初始化本机的TCP/IP协议栈时，设置协议栈本身的IP地址为127.0.0.1（保留地址），并注入路由表。当IP层接收到目的地址为127.0.0.1（准确的说是：网络号为127的IP）的数据包时，不调用网卡驱动进行二次封装，而是立即转发到本机IP层进行处理，由于不涉及底层操作，ping 127.0.0.1一般作为测试本机TCP/IP协议栈正常与否 localhost
         [pingInfo addObject:@"本机"];
-        [pingAdd addObject:_localIp];
+        
+        [pingAdd addObject:_localIp]; //ping局域网内本机网络IP
         [pingInfo addObject:@"本机IP"];
+        
         if (_gatewayIp && ![_gatewayIp isEqualToString:@""]) {
-            [pingAdd addObject:_gatewayIp];
+            [pingAdd addObject:_gatewayIp]; //ping本地路由网关IP
             [pingInfo addObject:@"本地网关"];
         }
         
         if ([_dnsServers count] > 0) {
-            [pingAdd addObject:[_dnsServers objectAtIndex:0]];
+            [pingAdd addObject:[_dnsServers objectAtIndex:0]]; //ping远端域名DNS解析结果首位IP
             [pingInfo addObject:@"DNS服务器"];
         }
     }
@@ -180,7 +183,7 @@ static NSString *const kCheckOutIPURL = @"";
     //不管服务器解析DNS是否到达，均需要ping指定的ip地址
     if ([_localIp rangeOfString:@":"].location == NSNotFound) {
         [pingAdd addObject:kPingOpenServerIP.length > 0 ? kPingOpenServerIP : _hostAddress.count > 0 ? [_hostAddress firstObject] : @""];
-        [pingInfo addObject:@"开发服务器"];
+        [pingInfo addObject:@"指定服务器IP"];//默认百度IP
     }
     
     [self recordStepInfo:@"\n开始ping..."];
@@ -188,11 +191,7 @@ static NSString *const kCheckOutIPURL = @"";
     _netPinger.delegate = self;
     for (int i = 0; i < [pingAdd count]; i++) {
         [self recordStepInfo:[NSString stringWithFormat:@"ping: %@ %@ ...", [pingInfo objectAtIndex:i], [pingAdd objectAtIndex:i]]];
-        if ([[pingAdd objectAtIndex:i] isEqualToString:kPingOpenServerIP]) {
-            [_netPinger runWithHostName:[pingAdd objectAtIndex:i] normalPing:YES];
-        } else {
-            [_netPinger runWithHostName:[pingAdd objectAtIndex:i] normalPing:YES];
-        }
+        [_netPinger runWithHostName:[pingAdd objectAtIndex:i] normalPing:YES];
     }
     
 }
@@ -240,17 +239,25 @@ static NSString *const kCheckOutIPURL = @"";
         NSString *wifiAdress = [NetStatus_WiFiInfo getCurrentWiFiMACAdress];
         [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi的路由地址: %@", wifiAdress]];
         
-        NSArray *onlineDevices = [NetStatus_WiFiInfo getOnlineDevicesInfo];
-        [self recordStepInfo:[NSString stringWithFormat:@"当前WiFi在线设备数量: %ld台", onlineDevices.count]];
-        if (onlineDevices.count > 0) {
-            [self recordStepInfo:@"在线设备列表信息如下："];
-            for (NSString  *str in onlineDevices) {
-                NSInteger i = 1;
-                [self recordStepInfo:[NSString stringWithFormat:@"设备%ld         IP:%@", i, str]];
-                i++;
+        NetStatus_WiFiInfo *wifiInfo = [[NetStatus_WiFiInfo alloc] init];
+        [self recordStepInfo:@"当前WiFi在线设备列表信息如下："];
+        __block NSArray *onlineHosts = @[];
+        __weak typeof(self) wSelf = self;
+        [wifiInfo fetchOnlineDevicesHosts:^(NSArray *hosts) {
+            __strong typeof(wSelf) sSelf = wSelf;
+            if (hosts.count > 0) {
+                onlineHosts = hosts;
+                NSInteger i = hosts.count;
+                NSString *curHost = [hosts lastObject];
+                if ([curHost isEqualToString:[NetStatus_GetAddress deviceIPAdress]]) {
+                    [sSelf recordStepInfo:[NSString stringWithFormat:@"设备%ld（本机）         IP: %@", i, curHost]];
+                } else {
+                    [sSelf recordStepInfo:[NSString stringWithFormat:@"设备%ld         IP: %@", i, curHost]];
+                }
             }
-        }
-        
+        }];
+        [self recordStepInfo:[NSString stringWithFormat:@"当前WiFi在线设备数量: %ld台", onlineHosts.count]];
+
     }
     
     //本地ip信息
