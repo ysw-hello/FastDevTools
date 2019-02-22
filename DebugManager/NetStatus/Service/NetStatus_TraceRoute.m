@@ -90,23 +90,23 @@
     //创建一个UDP套接口（用于发送）
     if ((send_sock  = socket(destination->sa_family, SOCK_DGRAM, 0)) < 0) {
         if (self.delegate  && [self.delegate respondsToSelector:@selector(appendRouteLog:)] && [self.delegate respondsToSelector:@selector(traceRouteDidEnd)]) {
-            [self.delegate appendRouteLog:@"TraceRoute>>> Could not create xmit socket"];
+            [self.delegate appendRouteLog:@"TraceRoute>>> Could not create send socket"];
             [self.delegate traceRouteDidEnd];
         }
         return false;
     }
     
-    char *cmsg = "GET / HTTP/1.1\r\n\r\n";
+    char *cmsg = "GET / HTTP/1.1\r\n\r\n"; //发送的报文
     socklen_t n = sizeof(fromAddr);
     char buf[100];
     
-    int ttl = 1;  // index sur le TTL en cours de traitement.
+    int ttl = 1;  // 处理过程中的TTL路由消息索引
     int timeoutTTL = 0;
-    bool icmp = false;  // Positionné à true lorsqu'on reçoit la trame ICMP en retour.
-    long startTime;     // Timestamp lors de l'émission du GET HTTP
-    long delta;         // Durée de l'aller-retour jusqu'au hop.
+    bool icmp = false;  // 当收到ICMP帧时，置为true.
+    long startTime;     // 开始的时间戳
+    long delta;         // 持续时长
     
-    // On progresse jusqu'à un nombre de TTLs max.
+    //判断消息转发次数是否达到最大
     while (ttl <= _maxTTL) {
         memset(&fromAddr, 0, sizeof(fromAddr));
         //设置sender 套接字的ttl
@@ -159,15 +159,17 @@
                     
                     //将“二进制整数” －> “点分十进制，获取hostAddress和hostName
                     if (fromAddr.sa_family == AF_INET) {
+                        
                         char display[INET_ADDRSTRLEN] = {0};
                         inet_ntop(AF_INET, &((struct sockaddr_in *)&fromAddr)->sin_addr.s_addr, display, sizeof(display));
                         hostAddress = [NSString stringWithFormat:@"%s", display];
-                    }
-                    
-                    else if (fromAddr.sa_family == AF_INET6) {
+                        
+                    } else if (fromAddr.sa_family == AF_INET6) {
+                        
                         char ip[INET6_ADDRSTRLEN];
                         inet_ntop(AF_INET6, &((struct sockaddr_in6 *)&fromAddr)->sin6_addr, ip, INET6_ADDRSTRLEN);
                         hostAddress = [NSString stringWithUTF8String:ip];
+                        
                     }
                     
                     if (try == 0) {
@@ -180,16 +182,15 @@
                 break;
             }
             
-            // On teste si l'utilisateur a demandé l'arrêt du traceroute
-            @synchronized(_running)
-            {
+            //监测是否要求停止追踪
+            @synchronized(_running) {
                 if (!_isrunning) {
                     ttl = _maxTTL;
-                    // On force le statut d'icmp pour ne pas générer un Hop en sortie de boucle;
                     icmp = true;
                     break;
                 }
             }
+            
         }
         
         //输出报文,如果三次都无法监控接收到报文，跳转结束
@@ -216,6 +217,7 @@
             }
         }
         
+        //当返回地址为域名DNS解析后的IP时，终止traceroute
         if ([hostAddress isEqualToString:ipAddr0]) {
             break;
         }
@@ -223,7 +225,7 @@
     }
     
     _isrunning = NO;
-    // On averti le delegate que le traceroute est terminé.
+    //通知代理，traceroute结束
     if (self.delegate && [self.delegate respondsToSelector:@selector(traceRouteDidEnd)]) {
         [self.delegate traceRouteDidEnd];
     }
@@ -231,12 +233,18 @@
     return error;
 }
 
+/**
+ 停止traceroute追踪
+ */
 - (void)stopTrace {
     @synchronized (_running) {
         _isrunning = NO;
     }
 }
 
+/**
+ 获取traceroute运行状态
+ */
 - (BOOL)isRunning {
     return _isrunning;
 }
