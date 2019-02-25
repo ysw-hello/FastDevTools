@@ -240,7 +240,7 @@ static NSString *const kCheckOutIPURL = @"";
         [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi的路由地址: %@", wifiAdress]];
         
         NetStatus_WiFiInfo *wifiInfo = [[NetStatus_WiFiInfo alloc] init];
-        [self recordStepInfo:@"当前WiFi在线设备列表信息如下："];
+        [self recordStepInfo:@"当前WiFi在线设备列表信息如下：<检测时长为50s左右>"];
         __block NSArray *onlineHosts = @[];
         __weak typeof(self) wSelf = self;
         [wifiInfo fetchOnlineDevicesHosts:^(NSArray *hosts) {
