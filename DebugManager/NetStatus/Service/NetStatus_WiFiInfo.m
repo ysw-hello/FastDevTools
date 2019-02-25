@@ -66,6 +66,7 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
     do {
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
     } while (self.pinger != nil || _sendCount <= MAXCount);
+
     
 }
 
@@ -193,7 +194,7 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
         _sendCount++;
         [self.pinger sendPingWithData:nil];
         //1s超时后，重发机制
-        _timer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(pingTimeout:) userInfo:[NSNumber numberWithInt:_sendCount] repeats:NO];
+        _timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(pingTimeout:) userInfo:[NSNumber numberWithInt:_sendCount] repeats:NO];
     }
 }
 
@@ -342,6 +343,7 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
     for (NSString *ip in ipArr) {
         [self.netPinger startPingWithHost:ip];
     }
+
 }
 
 #pragma mark - NetStatus_WiFiPingDelegate
@@ -350,6 +352,8 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
     if (self.onlineHostsBlock) {
         self.onlineHostsBlock(hosts);
     }
+
+    
 }
 
 

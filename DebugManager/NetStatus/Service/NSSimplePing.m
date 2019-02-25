@@ -743,6 +743,7 @@ static void HostResolveCallback(CFHostRef theHost, CFHostInfoType typeInfo, cons
     CFStreamError       streamError;
     
     assert(self.host == NULL);
+    
     assert(self.hostAddress == nil);
     
     self.host = (CFHostRef) CFAutorelease( CFHostCreateWithName(NULL, (__bridge CFStringRef) self.hostName) );
