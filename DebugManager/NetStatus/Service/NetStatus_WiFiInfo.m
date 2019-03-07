@@ -59,6 +59,7 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
 - (void)startPingWithHost:(NSString *)host{
     self.pinger = [[NSSimplePing alloc] initWithHostName:host];
     self.pinger.delegate = self;
+    self.pinger.addressStyle = NSSimplePingAddressStyleICMPv4;
     [self.pinger start];
     
     //在当前线程一直执行
@@ -188,12 +189,11 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
         if (self.delegate && [self.delegate respondsToSelector:@selector(pingDidEnd)]) {
             [self.delegate pingDidEnd];
         }
-    }
-    else {
+    } else {
         assert(self.pinger != nil);
         _sendCount++;
         [self.pinger sendPingWithData:nil];
-        //1s超时后，重发机制
+        //100ms超时后，重发机制
         _timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(pingTimeout:) userInfo:[NSNumber numberWithInt:_sendCount] repeats:NO];
     }
 }
@@ -338,12 +338,16 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
 - (void)fetchOnlineDevicesHosts:(NetStatus_OnlineHostsBlock)onlineHostsBlock {
     self.onlineHostsBlock = [onlineHostsBlock copy];
     NSArray *ipArr = [self calculateIPThreshod];
+    
     self.netPinger = [[NetStatus_WiFiPing alloc] init];
     self.netPinger.delegate = self;
+
     for (NSString *ip in ipArr) {
         [self.netPinger startPingWithHost:ip];
     }
 
+
+    
 }
 
 #pragma mark - NetStatus_WiFiPingDelegate
@@ -352,8 +356,6 @@ static NSInteger const MAXCount = 2;//遇到错误或者超时，自动重试一
     if (self.onlineHostsBlock) {
         self.onlineHostsBlock(hosts);
     }
-
-    
 }
 
 
