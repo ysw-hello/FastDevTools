@@ -11,8 +11,6 @@
 #import "NetStatus_Ping.h"
 #import "NetStatus_Timer.h"
 
-#define MAXCOUNT_PING 10
-
 @interface NetStatus_Ping () {
     BOOL _isStartSuccess; //监测第一次ping是否成功
     int _sendCount;  //当前执行次数
@@ -21,6 +19,8 @@
     BOOL _isLargePing;
     NSTimer *_timer;
 }
+
+@property (nonatomic, assign) NSUInteger maxCount_Ping;
 
 @property (nonatomic, strong) NSSimplePing *pinger;
 
@@ -35,16 +35,29 @@
 - (void)stopPing {
     [self->_pinger stop];
     self.pinger = nil;
-    _sendCount = MAXCOUNT_PING + 1;
+    _sendCount = self.maxCount_Ping + 1;
 }
+
+- (NSUInteger)maxCount_Ping {
+    if (_maxCount_Ping == 0) {
+        return 10;
+    }
+    return _maxCount_Ping;
+}
+
 
 /**
  调用pinger解析指定域名
  */
 - (void)runWithHostName:(NSString *)hostName normalPing:(BOOL)normalPing {
+    [self runWithHostName:hostName normalPing:normalPing maxCount:10];
+}
+- (void)runWithHostName:(NSString *)hostName normalPing:(BOOL)normalPing maxCount:(NSUInteger)maxCount{
     assert(self.pinger == nil);
     self.pinger = [[NSSimplePing alloc] initWithHostName:hostName];
     assert(self.pinger != nil);
+    
+    self.maxCount_Ping = maxCount;
     
     _isLargePing = !normalPing;
     self.pinger.delegate = self;
@@ -54,7 +67,7 @@
     _sendCount = 1;
     do {
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-    } while (self.pinger != nil || _sendCount <= MAXCOUNT_PING);
+    } while (self.pinger != nil || _sendCount <= self.maxCount_Ping);
 }
 
 /**
@@ -64,7 +77,7 @@
     if (_timer) {
         [_timer invalidate];
     }
-    if (_sendCount > MAXCOUNT_PING) {
+    if (_sendCount > self.maxCount_Ping) {
         _sendCount++;
         self.pinger = nil;
         if (self.delegate && [self.delegate respondsToSelector:@selector(netPingDidEnd)]) {
@@ -91,7 +104,7 @@
 }
 
 - (void)pingTimeout:(NSTimer *)index {
-    if ([[index userInfo] intValue] == _sendCount && _sendCount <= MAXCOUNT_PING + 1 && _sendCount > 1) {
+    if ([[index userInfo] intValue] == _sendCount && _sendCount <= self.maxCount_Ping + 1 && _sendCount > 1) {
         NSString *timeoutLog = [NSString stringWithFormat:@"ping: cannot resolve %@: TimeOut", _hostAddress];
         if (self.delegate && [self.delegate respondsToSelector:@selector(appendPingLog:)]) {
             [self.delegate appendPingLog:timeoutLog];

@@ -24,6 +24,8 @@
 
 @property (nonatomic, weak) id<NetStatus_PingDelegate> delegate;
 
+- (void)runWithHostName:(NSString *)hostName normalPing:(BOOL)normalPing maxCount:(NSUInteger)maxCount;
+
 - (void)runWithHostName:(NSString *)hostName normalPing:(BOOL)normalPing;
 
 - (void)stopPing;
