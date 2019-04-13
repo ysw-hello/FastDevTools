@@ -19,7 +19,7 @@ static const int TRACEROUTE_TIMEOUT = 5000000;
 @end
 
 /**
- TraceRoute：主要是通过模拟shell命令traceRoute的过程，监控网络站点间的跳转，默认执行20转，每转进行三次发送测速
+ TraceRoute：主要是通过模拟shell命令traceRoute的过程，监控网络站点间的跳转，默认执行30转，每转进行三次发送测速
  */
 @interface NetStatus_TraceRoute : NSObject {
     int _udpPort;      //执行端口

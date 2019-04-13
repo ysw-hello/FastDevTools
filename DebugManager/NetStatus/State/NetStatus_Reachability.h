@@ -31,7 +31,7 @@ typedef NS_ENUM(NSUInteger, NSWWANAccessType) {
 @protocol NSReachabilityDelegate <NSObject>
 @optional
 /**
-TODO:通过挂载一个定制的代理请求来检查网络，需要用户自己实现，我们会给出一个示例。可以通过这种方式规避解决http可用但icmp被阻止的场景下框架判断不正确的问题。
+TODO:通过挂载一个定制的代理请求来检查网络。可以通过这种方式规避解决http可用但icmp被阻止的场景下框架判断不正确的问题。
 (Update: 已经添加了判断VPN的相关逻辑，以解决这种场景下大概率误判的问题)
 此方法阻塞？同步返回？还是异步？如果阻塞主线程超过n秒是不行的。
 当CustomAgent的doubleCheck被启用时，ping的doubleCheck将不再工作。

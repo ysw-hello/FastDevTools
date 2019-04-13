@@ -13,9 +13,7 @@
 @interface SystemState_Debug : NSObject
 
 + (instancetype)sharedInstance;
-/**
- Run this service will create a window above status to show FPS,CPU and Memory usage.
- */
+
 - (void)run;
 
 - (void)stop;

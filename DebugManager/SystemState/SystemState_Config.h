@@ -15,9 +15,7 @@
 @property (nonatomic, assign) CGFloat goodThreshold;
 @property (nonatomic, assign) CGFloat warningthreshold;
 
-/**
- Default is NO. So,if value is greater than goodThreshold,then it is good.Just like FPS，the higher,the better.
- */
+
 @property (nonatomic, assign) BOOL lessIsBetter;
 
 + (instancetype)configWithGood:(CGFloat)good warning:(CGFloat)warning lessIsBetter:(BOOL)lessIsBetter;
