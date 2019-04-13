@@ -11,8 +11,8 @@
 
 @interface SystemState_DataSource : NSObject
 
-+ (CGFloat)usedMemoryInMB;
++ (CGFloat)ss_usedMemoryInMB;
 
-+ (CGFloat)usedCPUPercent;
++ (CGFloat)ss_usedCPUPercent;
 
 @end

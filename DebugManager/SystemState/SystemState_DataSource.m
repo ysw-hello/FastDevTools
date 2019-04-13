@@ -12,25 +12,25 @@
 @implementation SystemState_DataSource
 
 #pragma mark - public SEL
-+ (CGFloat)usedMemoryInMB {
-    vm_size_t memory = usedMemory();
++ (CGFloat)ss_usedMemoryInMB {
+    vm_size_t memory = ss_usedMemory();
     return memory / 1000.0 / 1000.0; //单位为MB
 }
 
-+ (CGFloat)usedCPUPercent {
-    float cpuUsedPercent = cpu_usage();
++ (CGFloat)ss_usedCPUPercent {
+    float cpuUsedPercent = ss_cpu_usage();
     return cpuUsedPercent;
 }
 
 #pragma mark - private SEL
-vm_size_t usedMemory(void) {
+vm_size_t ss_usedMemory(void) {
     struct task_basic_info info;
     mach_msg_type_number_t size = sizeof(info);
     kern_return_t kerr = task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &size);
     return (kerr == KERN_SUCCESS) ? info.resident_size : 0; //常驻内存：单位为bytes
 }
 
-float cpu_usage () {
+float ss_cpu_usage () {
     kern_return_t kr;
     task_info_data_t tinfo;
     mach_msg_type_number_t task_info_count;

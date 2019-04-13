@@ -93,11 +93,11 @@
     self.fpsStatusBar.fpsLabel.text = [NSString stringWithFormat:@"FPS:%d", (int)round(fps)];
     self.fpsStatusBar.fpsLabel.labelState = [self labelStateWith:kSystemState_LabelType_FPS value:fps];
     
-    CGFloat memory = [SystemState_DataSource usedMemoryInMB];
+    CGFloat memory = [SystemState_DataSource ss_usedMemoryInMB];
     self.fpsStatusBar.memoryLabel.text = [NSString stringWithFormat:@"Memory:%.2fMB", memory];
     self.fpsStatusBar.memoryLabel.labelState = [self labelStateWith:kSystemState_LabelType_Memory value:memory];
     
-    CGFloat cpu = [SystemState_DataSource usedCPUPercent];
+    CGFloat cpu = [SystemState_DataSource ss_usedCPUPercent];
     self.fpsStatusBar.cpuLabel.text = [NSString stringWithFormat:@"CPU:%.2f%%", cpu];
     self.fpsStatusBar.cpuLabel.labelState = [self labelStateWith:kSystemState_LabelType_CPU value:cpu];
     
