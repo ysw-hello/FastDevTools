@@ -45,6 +45,9 @@ Pod::Spec.new do |s|
     ss.dependency 'GCDWebServer/WebDAV'
     ss.dependency 'FastDevTools/CustomTextField'
     ss.libraries = 'resolv'
+
+    ss.ios.vendored_libraries = 'DebugManager/libFlex/DebugFLEX.a' #静态库
+
   end
 
 end
