@@ -9,15 +9,15 @@
 #import <UIKit/UIKit.h>
 
 typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
-    kDebug_ModuleType_SystemState = 1,      //系统状态开关
-    kDebug_ModuleType_SandBox = 2,          //本地沙盒目录
-    kDebug_ModuleType_SandBox_Web = 3,      //本地沙盒文件Web调试
-    kDebug_ModuleType_DataFetch = 4,        //请求抓包开关
-    kDebug_ModuleType_HostChange = 5,       //环境配置
-    kDebug_ModuleType_TipsOnline = 6,       //预上线tip服务器
-    kDebug_ModuleType_UIDPaste = 7,         //UID点击复制
-    kDebug_ModuleType_NetStatus = 8,        //网络监测
-    kDebug_ModuleType_FlexTools = 9,        //FLEX调试工具集
+    kDebug_ModuleType_SystemState   = 1,       //系统状态开关
+    kDebug_ModuleType_SandBox       = 2,       //本地沙盒目录
+    kDebug_ModuleType_SandBox_Web   = 3,       //本地沙盒文件Web调试
+    kDebug_ModuleType_DataFetch     = 4,       //请求抓包开关
+    kDebug_ModuleType_HostChange    = 5,       //环境配置
+    kDebug_ModuleType_TipsOnline    = 6,       //预上线tip服务器
+    kDebug_ModuleType_UIDPaste      = 7,       //UID点击复制
+    kDebug_ModuleType_NetStatus     = 8,       //网络监测
+    kDebug_ModuleType_FlexTools     = 9,       //FLEX调试工具集
 };
 
 typedef void(^ActionHandler)(void);
