@@ -13,6 +13,7 @@
 #import "SystemState_Debug.h"
 #import "NetStatus/NetStatus_Debug.h"
 #import "UIView+Debug_Additions.h"
+#import <FLEX/FLEXManager.h>
 
 @interface DebugController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -46,7 +47,8 @@
                         @"环境设置(点击输入)",
                         @"线上tips开关",
                         @"UID(点击复制)",
-                        @"网络状态监测"
+                        @"网络状态监测",
+                        @"FLEX工具集"
                         ];
     [self initTableView];
 }
@@ -133,6 +135,12 @@
             cell.moduleType = kDebug_ModuleType_NetStatus;
             break;
             
+        case 8:
+            cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_FlexToolsKey_DebugSwitch];
+            cell.moduleType = kDebug_ModuleType_FlexTools;
+            break;
+
+            
         default:
             cell.debugSwitch.on = NO;
             break;
@@ -155,6 +163,14 @@
             } else {
                 [[NetStatus_Debug sharedInstance] hideNetMonitorView];
             }
+        } else if (moduleType == kDebug_ModuleType_FlexTools) {//Flex 工具集调试
+            [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
+            if (isOn) {
+                [[FLEXManager sharedManager] showExplorer];
+            } else {
+                [[FLEXManager sharedManager] hideExplorer];
+            }
+            
         }
         
     };
@@ -210,6 +226,7 @@
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sandBoxListRemoved) name:kNotif_Name_SandBoxListRemoved object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataFetchContentRemoved) name:kNotif_Name_DataFetchContentRemoved object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(netStatusContentRemoved) name:kNotif_Name_NetStatusContentRemoved object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(flexToolsContentRemoved) name:kNotif_Name_FlexToolsContentRemoved object:nil];
 
     }
     return self;
@@ -299,6 +316,12 @@
     label.textAlignment = NSTextAlignmentLeft;
     [_webServerView addSubview:label];
     return label;
+}
+
+- (void)flexToolsContentRemoved {
+    if (self.moduleType == kDebug_ModuleType_FlexTools) {
+        self.debugSwitch.on = NO;
+    }
 }
 
 - (void)netStatusContentRemoved {

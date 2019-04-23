@@ -25,6 +25,8 @@
 static NSString *const kNotif_Name_SandBoxListRemoved = @"kNotif_Name_SandBoxListRemoved";
 static NSString *const kNotif_Name_DataFetchContentRemoved = @"kNotif_Name_DataFetchContentRemoved";
 static NSString *const kNotif_Name_NetStatusContentRemoved = @"kNotif_Name_NetStatusContentRemoved";
+static NSString *const kNotif_Name_FlexToolsContentRemoved = @"kNotif_Name_FlexToolsContentRemoved";
+
 
 static NSString *const kUserDefaults_SandBoxKey_DebugSwitch = @"kUserDefaults_SandBoxKey_DebugSwitch";
 static NSString *const kUserDefaults_SandBoxForWebKey_DebugSwitch = @"kUserDefaults_SandBoxForWebKey_DebugSwitch";
@@ -32,6 +34,7 @@ static NSString *const kUserDefaults_SystemStateKey_DebugSwitch = @"kUserDefault
 static NSString *const kUserDefaults_DataFetchKey_DebugSwitch = @"kUserDefaults_DataFetchKey_DebugSwitch";
 static NSString *const kUserDefaults_OnlineTipsKey_DebugSwitch = @"kUserDefaults_OnlineTipsKey_DebugSwitch";
 static NSString *const KUserDefaults_NetMonitorKey_DebugSwitch = @"KUserDefaults_NetMonitorKey_DebugSwitch";
+static NSString *const KUserDefaults_FlexToolsKey_DebugSwitch = @"KUserDefaults_FlexToolsKey_DebugSwitch";
 
 
 @interface UIView (Debug_Additions)

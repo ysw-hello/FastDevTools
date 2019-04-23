@@ -17,6 +17,7 @@ typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_TipsOnline = 6,       //预上线tip服务器
     kDebug_ModuleType_UIDPaste = 7,         //UID点击复制
     kDebug_ModuleType_NetStatus = 8,        //网络监测
+    kDebug_ModuleType_FlexTools = 9,        //FLEX调试工具集
 };
 
 typedef void(^ActionHandler)(void);
