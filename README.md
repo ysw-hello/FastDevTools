@@ -16,7 +16,7 @@ pod 'FastDevTools/Mp3Encode’
 定制TextField样式：（号码显示格式，placeHolder样式，输入区域偏移等）
 pod 'FastDevTools/CustomTextField'
 
-本地沙盒可视化和FPS、CPU、内存实时可视化以及应用内数据接口抓取
+本地沙盒可视化和FPS、CPU、内存实时可视化以及应用内数据接口、网络状态监测、FLEX工具集兼容抓取
 pod 'FastDevTools/DebugManager'
 
 
