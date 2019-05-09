@@ -178,7 +178,7 @@ static NSString *const DefaultStr = @"www.";
         
             NSString *hostPrefix = button.titleLabel.text;
             self.hostTF.text = [NSString stringWithFormat:@"%@", hostPrefix];
-            self.hostTF.keyboardType = [button.titleLabel.text isEqualToString:DefaultStr] ? UIKeyboardTypeURL : UIKeyboardTypeNumberPad;
+            self.hostTF.keyboardType = UIKeyboardTypeDefault;
             [self.hostTF becomeFirstResponder];
         } else {
             button.layer.borderColor = [UIColor lightGrayColor].CGColor;
