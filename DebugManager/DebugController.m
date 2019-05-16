@@ -282,21 +282,21 @@
     self.webServerURL = [self createLabelWithFrame:CGRectMake(10, 5, 100, 20)];
     NSString *str = @"浏览器访问地址为: ";
     NSMutableAttributedString *att = [[NSMutableAttributedString alloc] initWithString:[str stringByAppendingString:urlArr[0]]];
-    [att addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(str.length, [urlArr[0] length])];
+    [att addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str.length, [urlArr[0] length])];
     _webServerURL.attributedText = att;
     [_webServerURL sizeToFit];
     
     self.webUploaderServerURL = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webServerURL.bottom + 5, 100, 20)];
     NSString *str1 = @"WebUploader访问地址为: ";
     NSMutableAttributedString *att1 = [[NSMutableAttributedString alloc] initWithString:[str1 stringByAppendingString:urlArr[1]]];
-    [att1 addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(str1.length, [urlArr[1] length])];
+    [att1 addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str1.length, [urlArr[1] length])];
     _webUploaderServerURL.attributedText = att1;
     [_webUploaderServerURL sizeToFit];
     
     self.webDavServerURL = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webUploaderServerURL.bottom + 5, 100, 20)];
     NSString *str2 = @"WebDav服务器地址为: ";
     NSMutableAttributedString *att2 = [[NSMutableAttributedString alloc] initWithString:[str2 stringByAppendingString:urlArr[2]]];
-    [att2 addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(str2.length, [urlArr[2] length])];
+    [att2 addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str2.length, [urlArr[2] length])];
     _webDavServerURL.attributedText = att2;
     [_webDavServerURL sizeToFit];
     

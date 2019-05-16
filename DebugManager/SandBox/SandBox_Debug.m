@@ -96,7 +96,7 @@
 
 - (void)initTopView {
     UIView *topView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.width, 44)];
-    topView.backgroundColor = [UIColor redColor];
+    topView.backgroundColor = [UIColor blackColor];
     [self addSubview:topView];
     
     UILabel *titleLabel = [[UILabel alloc] init];
@@ -182,10 +182,21 @@
 - (void)showContent:(NSString *)content {
     UITextView *textView = [[UITextView alloc] initWithFrame:CGRectMake(0, 1, self.width, self.height-1)];
     textView.editable = NO;
+    textView.backgroundColor = [UIColor blackColor];
     
-    NSString *tips = @"温馨提示：双击移除ContentView\n";
-    NSMutableAttributedString *arrStr = [[NSMutableAttributedString alloc] initWithString:[tips stringByAppendingString:content]];
-    [arrStr addAttributes:@{NSFontAttributeName : [UIFont systemFontOfSize:25], NSForegroundColorAttributeName : [UIColor blueColor]} range:NSMakeRange(0, tips.length)];
+    NSString *tips = @"温馨提示：双击移除ContentView\n\n";
+    NSString *allStr = [tips stringByAppendingString:content];
+    NSMutableAttributedString *arrStr = [[NSMutableAttributedString alloc] initWithString:allStr];
+    [arrStr addAttributes:@{
+                            NSFontAttributeName : [UIFont systemFontOfSize:25],
+                            NSForegroundColorAttributeName : [UIColor redColor]
+                            }
+                    range:NSMakeRange(0, tips.length)];
+    [arrStr addAttributes:@{
+                            NSFontAttributeName : [UIFont systemFontOfSize:12],
+                            NSForegroundColorAttributeName : [UIColor greenColor]
+                            }
+                    range:NSMakeRange(tips.length, allStr.length-tips.length)];
     textView.attributedText = arrStr;
     
     UITapGestureRecognizer *doubleTapGestureRecognizer_ = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTap)];
@@ -215,7 +226,8 @@
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellId];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
-        cell.backgroundColor = [UIColor orangeColor];
+        cell.backgroundColor = [UIColor blackColor];
+        cell.textLabel.textColor = [UIColor greenColor];
     }
     cell.textLabel.text = [self.nameArray objectAtIndex:indexPath.row];
     cell.textLabel.minimumScaleFactor = 0.3f;

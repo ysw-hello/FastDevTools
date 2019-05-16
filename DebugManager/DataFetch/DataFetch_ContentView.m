@@ -118,7 +118,7 @@
 - (void)configSubviews {
     //header
     UIView *topView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.width, 44)];
-    topView.backgroundColor = [UIColor redColor];
+    topView.backgroundColor = [UIColor blackColor];
     [self addSubview:topView];
     
     UILabel *titleLabel = [[UILabel alloc] init];
