@@ -39,8 +39,10 @@
     dispatch_once(&onceToken, ^{
         dataFetcher = [DataFetch_Debug new];
         dataFetcher.dataArr = [NSMutableArray array];
-        if (NSClassFromString(@"AFURLSessionManager")) [NSClassFromString(@"AFURLSessionManager") swizzleTaskRequest];
-         if (NSClassFromString(@"AFHTTPRequestOperationManager")) [NSClassFromString(@"AFHTTPRequestOperationManager")  swizzleTaskRequest];
+        if (NSClassFromString(@"AFURLSessionManager")) [NSClassFromString(@"AFURLSessionManager") swizzleTaskRequest]; //AFN 3.x 版本
+        if (NSClassFromString(@"AFHTTPRequestOperationManager")) [NSClassFromString(@"AFHTTPRequestOperationManager")  swizzleTaskRequest]; //AFN 2.x 版本
+        if (NSClassFromString(@"NSURLSession")) [NSClassFromString(@"NSURLSession")  swizzleTaskRequest]; //系统 NSURLSession
+        
     });
     return dataFetcher;
 }
