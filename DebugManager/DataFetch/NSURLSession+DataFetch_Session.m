@@ -22,7 +22,7 @@
 }
 
 - (NSURLSessionDataTask *)debugLog_dataTaskWithRequest:(NSURLRequest *)request completionHandler:(void (^)(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error))completionHandler {
-    return [self debugLog_dataTaskWithRequest:request completionHandler:^(NSURLResponse *response, id  _Nullable responseObject, NSError * _Nullable error) {
+    return [self debugLog_dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError * _Nullable error) {
         
         NSString *requestBody = [[[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding] encodeFormat];
         //        NSLog(@"Succeed:URL:%@,\n param:%@,\n  method:%@,\n response:%@,\n error:%@\n", request.URL, requestBody, request.HTTPMethod, responseObject, error);
@@ -31,7 +31,7 @@
         model.URL = [NSString stringWithFormat:@"%@", request.URL];
         model.requestHeader = [NSString stringWithFormat:@"%@", request.allHTTPHeaderFields];
         model.requestBody = [NSString stringWithFormat:@"%@", requestBody];
-        model.responseBody = [NSString stringWithFormat:@"%@", responseObject];
+        model.responseBody = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         model.error = error;
         NSMutableArray *arr = [DataFetch_Debug sharedInstance].dataArr;
         [arr insertObject:model atIndex:0];
@@ -40,7 +40,7 @@
             [[DataFetch_Debug sharedInstance].dataArr removeLastObject];
         }
         
-        completionHandler(response, responseObject, error);
+        completionHandler(data, response, error);
     }];
     
 }
