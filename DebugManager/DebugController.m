@@ -13,7 +13,6 @@
 #import "SystemState_Debug.h"
 #import "NetStatus/NetStatus_Debug.h"
 #import "UIView+Debug_Additions.h"
-#import <FLEX/FLEXManager.h>
 
 @interface DebugController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -164,13 +163,18 @@
                 [[NetStatus_Debug sharedInstance] hideNetMonitorView];
             }
         } else if (moduleType == kDebug_ModuleType_FlexTools) {//Flex 工具集调试
-            [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
-            if (isOn) {
-                [[FLEXManager sharedManager] showExplorer];
-            } else {
-                [[FLEXManager sharedManager] hideExplorer];
+            Class flexManagerClass = NSClassFromString(@"FLEXManager");
+            if (flexManagerClass && [flexManagerClass instancesRespondToSelector:NSSelectorFromString(@"sharedManager")]) {
+                [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
+                
+                id flexManager = [flexManagerClass performSelector:NSSelectorFromString(@"sharedManager")];
+                if (isOn && [flexManager respondsToSelector:NSSelectorFromString(@"showExplorer")]) {
+                    [flexManager performSelector:NSSelectorFromString(@"showExplorer")];
+                } else if ([flexManager respondsToSelector:NSSelectorFromString(@"hideExplorer")]) {
+                    [flexManager performSelector:NSSelectorFromString(@"hideExplorer")];
+                }
+                
             }
-            
         }
         
     };

@@ -22,16 +22,17 @@
 }
 
 - (NSURLSessionDataTask *)debugLog_dataTaskWithRequest:(NSURLRequest *)request completionHandler:(void (^)(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error))completionHandler {
+    
     return [self debugLog_dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError * _Nullable error) {
         
         NSString *requestBody = [[[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding] encodeFormat];
-        //        NSLog(@"Succeed:URL:%@,\n param:%@,\n  method:%@,\n response:%@,\n error:%@\n", request.URL, requestBody, request.HTTPMethod, responseObject, error);
         DataFetch_Model *model = [DataFetch_Model new];
         model.method = request.HTTPMethod;
         model.URL = [NSString stringWithFormat:@"%@", request.URL];
         model.requestHeader = [NSString stringWithFormat:@"%@", request.allHTTPHeaderFields];
         model.requestBody = [NSString stringWithFormat:@"%@", requestBody];
-        model.responseBody = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        NSString *responseCode = [NSString stringWithFormat:@"StatusCode:%ld\n", [(NSHTTPURLResponse *)response statusCode]];
+        model.responseBody = [responseCode stringByAppendingString:[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]];
         model.error = error;
         NSMutableArray *arr = [DataFetch_Debug sharedInstance].dataArr;
         [arr insertObject:model atIndex:0];
