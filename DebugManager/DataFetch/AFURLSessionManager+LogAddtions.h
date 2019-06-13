@@ -18,4 +18,5 @@
                                                         downloadProgress:(nullable void (^)(NSProgress * _Nonnull downloadProgress))downloadProgressBlock
                                                        completionHandler:(nullable void (^)(NSURLResponse * _Nullable response, id _Nullable responseObject,  NSError * _Nullable error))completionHandler;
 @end
+
 #endif

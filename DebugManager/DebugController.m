@@ -58,6 +58,13 @@
     [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:4 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
+- (UIViewController *)rootViewController {
+    if (!_rootViewController) {
+        _rootViewController = [UIApplication sharedApplication].keyWindow.rootViewController;
+    }
+    return _rootViewController;
+}
+
 #pragma mark - private SEL
 
 - (void)initTableView {
@@ -164,7 +171,8 @@
             }
         } else if (moduleType == kDebug_ModuleType_FlexTools) {//Flex 工具集调试
             Class flexManagerClass = NSClassFromString(@"FLEXManager");
-            if (flexManagerClass && [flexManagerClass instancesRespondToSelector:NSSelectorFromString(@"sharedManager")]) {
+            if (flexManagerClass && [flexManagerClass respondsToSelector:NSSelectorFromString(@"sharedManager")]) {
+                
                 [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
                 
                 id flexManager = [flexManagerClass performSelector:NSSelectorFromString(@"sharedManager")];
@@ -173,6 +181,8 @@
                 } else if ([flexManager respondsToSelector:NSSelectorFromString(@"hideExplorer")]) {
                     [flexManager performSelector:NSSelectorFromString(@"hideExplorer")];
                 }
+                
+                
                 
             }
         }

@@ -5,6 +5,7 @@
 //  Created by 闫士伟 on 2018/8/2.
 //  Copyright © 2018年 com.ysw. All rights reserved.
 //
+#if __has_include(<AFNetworking/AFURLSessionManager.h>)
 
 #import "AFURLSessionManager+LogAddtions.h"
 #import <objc/runtime.h>
@@ -51,3 +52,5 @@
 
 
 @end
+
+#endif

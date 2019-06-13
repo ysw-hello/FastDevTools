@@ -5,7 +5,7 @@
 //  Created by TimmyYan on 2019/4/23.
 //
 
-#if __has_include(<FLEX/FLEXManager.h>)
+#if __has_include(<FLEXManager.h>)
 
 #import "FLEXManager.h"
 

@@ -5,6 +5,8 @@
 //  Created by TimmyYan on 2019/4/23.
 //
 
+#if __has_include(<FLEXManager.h>)
+
 #import "FLEXManager+HookHide.h"
 #import <objc/runtime.h>
 
@@ -27,3 +29,6 @@
 }
 
 @end
+
+#endif
+
