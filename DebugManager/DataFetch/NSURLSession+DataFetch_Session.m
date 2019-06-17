@@ -41,7 +41,10 @@
             [[DataFetch_Debug sharedInstance].dataArr removeLastObject];
         }
         
-        completionHandler(data, response, error);
+        if (completionHandler) {
+          completionHandler(data, response, error);
+        }
+        
     }];
     
 }
