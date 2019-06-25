@@ -66,6 +66,14 @@ typedef UIViewController *(^FLEXNetworkDetailRowSelectionFuture)(void);
     [self.tableView registerClass:[FLEXMultilineTableViewCell class] forCellReuseIdentifier:kFLEXMultilineTableViewCellIdentifier];
 }
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    CGFloat top = [UIApplication sharedApplication].statusBarFrame.size.height + self.navigationController.navigationBar.frame.size.height;
+    CGSize size = [UIScreen mainScreen].bounds.size;
+    self.tableView.frame = CGRectMake(0, top, size.width, size.height - top);
+    self.navigationController.navigationBar.backgroundColor = [UIColor whiteColor];
+}
+
 - (void)setTransaction:(FLEXNetworkTransaction *)transaction
 {
     if (![_transaction isEqual:transaction]) {
