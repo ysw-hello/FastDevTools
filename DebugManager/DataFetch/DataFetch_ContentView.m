@@ -105,7 +105,14 @@
 -(void)setDataArray:(NSArray *)dataArray {
     _dataArray = dataArray;
     
-    [self.tableView reloadData];
+    if ([NSThread isMainThread]) {
+        [self.tableView reloadData];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView reloadData];
+        });
+    }
+    
 }
 
 #pragma mark - private SEL
