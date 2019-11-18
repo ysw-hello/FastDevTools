@@ -41,7 +41,6 @@ typedef void(^ActionHandler_State)(BOOL state);
  */
 @property (nonatomic, strong) NSString *UIDStr;
 
-
 //预上线tip服务器 开关action
 @property (nonatomic, copy) ActionHandler_State tipsStateChangeBlock;
 
