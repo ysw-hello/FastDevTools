@@ -7,7 +7,7 @@
 //
 #if __has_include(<AFNetworking/AFURLSessionManager.h>)
 
-#import "AFURLSessionManager.h"
+#import <AFNetworking/AFURLSessionManager.h>
 
 @interface AFURLSessionManager (LogAddtions)
 

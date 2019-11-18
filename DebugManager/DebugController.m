@@ -15,16 +15,19 @@
 #import "UIView+Debug_Additions.h"
 
 ///主标题
-static NSString *const kDebugControl_MainTitle         =    @"潘多拉魔盒";
+static NSString *const kDebugControl_MainTitle         =    @"PandoraBox";
 
 //子标题 数据源
+//业务定制
+static NSString *const kDebugControl_UIDPaste          =    @"UID(点击复制)";
+static NSString *const kDebugControl_HostChange        =    @"环境设置(点击输入)";
+static NSString *const kDebugControl_TipsOnline        =    @"线上tips开关";
+
+//调试工具
 static NSString *const kDebugControl_SystemState       =    @"系统状态开关";
 static NSString *const kDebugControl_SandBox           =    @"本地沙盒目录";
 static NSString *const kDebugControl_SandBox_Web       =    @"本地沙盒Web调试";
 static NSString *const kDebugControl_DataFetch         =    @"请求抓包开关";
-static NSString *const kDebugControl_HostChange        =    @"环境设置(点击输入)";
-static NSString *const kDebugControl_TipsOnline        =    @"线上tips开关";
-static NSString *const kDebugControl_UIDPaste          =    @"UID(点击复制)";
 static NSString *const kDebugControl_NetStatus         =    @"网络状态监测";
 static NSString *const kDebugControl_FlexTools         =    @"FLEX工具集";
 
@@ -38,6 +41,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, strong) NSMutableArray *titleArray;
+@property (nonatomic, strong) NSMutableArray *sectionTitleArray;
 
 @end
 
@@ -58,18 +62,24 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.title =  kDebugControl_MainTitle;
-    self.titleArray = @[kDebugControl_SystemState,          //系统状态开关
-                        kDebugControl_SandBox,              //本地沙盒目录
-                        kDebugControl_SandBox_Web,          //本地沙盒文件Web调试
-                        kDebugControl_DataFetch,            //请求抓包开关
-                        kDebugControl_HostChange,           //环境配置
-                        kDebugControl_UIDPaste,             //UID点击复制
-                        kDebugControl_TipsOnline,           //预上线tip服务器
-                        kDebugControl_NetStatus             //网络监测
-                        ].mutableCopy;
+    NSArray *busiArr = @[
+                         kDebugControl_UIDPaste,             //UID点击复制
+                         kDebugControl_HostChange,           //环境配置
+                         kDebugControl_TipsOnline,           //预上线tip服务器
+                         ];
+    NSArray *toolArr = @[
+                         kDebugControl_SystemState,          //系统状态开关
+                         kDebugControl_SandBox,              //本地沙盒目录
+                         kDebugControl_SandBox_Web,          //本地沙盒文件Web调试
+                         kDebugControl_DataFetch,            //请求抓包开关
+                         kDebugControl_NetStatus             //网络监测
+                         ];
+    self.titleArray = [NSMutableArray arrayWithObjects:busiArr, toolArr, nil];
+    self.sectionTitleArray = [NSMutableArray arrayWithObjects:@"业务定制", @"调试工具", nil];
     //flex调试工具
     if (NSClassFromString(Class_FLEXManager)) {
-        [self.titleArray addObject:kDebugControl_FlexTools];
+        [self.titleArray addObject:@[kDebugControl_FlexTools]];
+        [self.sectionTitleArray addObject:@"FLEX<提审前，移除>"];
     }
     [self initTableView];
 }
@@ -108,7 +118,24 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 #pragma mark - tableView Deleagate & DataSource
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [[_titleArray objectAtIndex:section] count];
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
     return _titleArray.count;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    UILabel *title = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, kDebug_ScreenWidth, 25)];
+    title.text = [NSString stringWithFormat:@"  %@", [_sectionTitleArray objectAtIndex:section]];
+    title.font = [UIFont systemFontOfSize:15];
+    title.textColor = [UIColor greenColor];
+    title.backgroundColor = [UIColor blackColor];
+    return title;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 25;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -118,44 +145,46 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         cell = [[DebugCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
     }
     
-    cell.title = [_titleArray objectAtIndex:indexPath.row];
+    cell.title = [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     
     NSInteger curRow = indexPath.row;
-    if (curRow == [_titleArray indexOfObject:kDebugControl_SystemState]) {
+    NSArray *curArr = [_titleArray objectAtIndex:indexPath.section];
+    
+    if (curRow == [curArr indexOfObject:kDebugControl_SystemState]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SystemStateKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_SystemState;
         
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_SandBox]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_SandBox]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_SandBox;
         
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_SandBox_Web]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_SandBox_Web]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_SandBox_Web;
 
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_DataFetch]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_DataFetch]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_DataFetchKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_DataFetch;
 
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_HostChange]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_HostChange]) {
         cell.debugSwitch.hidden = YES;
         cell.moduleType = kDebug_ModuleType_HostChange;
-        cell.title = _hostName.length > 1 ? [NSString stringWithFormat:@"当前Host：%@", _hostName] : [_titleArray objectAtIndex:indexPath.row];
+        cell.title = _hostName.length > 1 ? [NSString stringWithFormat:@"当前Host：%@", _hostName] : [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
 
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_TipsOnline]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_TipsOnline]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_TipsOnline;
 
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_UIDPaste]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_UIDPaste]) {
         cell.debugSwitch.hidden = YES;
         cell.moduleType = kDebug_ModuleType_UIDPaste;
         cell.title = [NSString stringWithFormat:@"UID(点击复制)：%@", self.UIDStr];
 
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_NetStatus]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_NetStatus]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_NetMonitorKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_NetStatus;
 
-    } else if (curRow == [_titleArray indexOfObject:kDebugControl_FlexTools]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_FlexTools]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_FlexToolsKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_FlexTools;
 
@@ -207,7 +236,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == [_titleArray indexOfObject:kDebugControl_SandBox_Web] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
+    if (indexPath.row == [[_titleArray objectAtIndex:indexPath.section] indexOfObject:kDebugControl_SandBox_Web] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
         return 50 + 40*3;
     }
     return 50;
@@ -215,9 +244,10 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     //无switch，直接点击cell的action
-    if (indexPath.row == [_titleArray indexOfObject:kDebugControl_HostChange] && self.hostChangeBlock) {
+    NSArray *curArr = [_titleArray objectAtIndex:indexPath.section];
+    if (indexPath.row == [curArr indexOfObject:kDebugControl_HostChange] && self.hostChangeBlock) {
         self.hostChangeBlock();
-    } else if (indexPath.row == [_titleArray indexOfObject:kDebugControl_UIDPaste] && self.UIDStr.length > 0) {
+    } else if (indexPath.row == [curArr indexOfObject:kDebugControl_UIDPaste] && self.UIDStr.length > 0) {
         UIPasteboard *pasteBoard = [UIPasteboard generalPasteboard];
         [pasteBoard setString:self.UIDStr];
         [self.view showAlertWithMessage:@"UID复制成功!"];
