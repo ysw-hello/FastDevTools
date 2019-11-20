@@ -13,6 +13,7 @@
 #import "SystemState_Debug.h"
 #import "NetStatus/NetStatus_Debug.h"
 #import "UIView+Debug_Additions.h"
+#import "WebServer/WebServerManager_Debug.h"
 
 ///主标题
 static NSString *const kDebugControl_MainTitle         =    @"PandoraBox";
@@ -26,7 +27,7 @@ static NSString *const kDebugControl_TipsOnline        =    @"线上tips开关";
 //调试工具
 static NSString *const kDebugControl_SystemState       =    @"系统状态开关";
 static NSString *const kDebugControl_SandBox           =    @"本地沙盒目录";
-static NSString *const kDebugControl_SandBox_Web       =    @"本地沙盒Web调试";
+static NSString *const kDebugControl_WebServer         =    @"WebServer调试";
 static NSString *const kDebugControl_DataFetch         =    @"请求抓包开关";
 static NSString *const kDebugControl_NetStatus         =    @"网络状态监测";
 static NSString *const kDebugControl_FlexTools         =    @"FLEX工具集";
@@ -70,7 +71,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     NSArray *toolArr = @[
                          kDebugControl_SystemState,          //系统状态开关
                          kDebugControl_SandBox,              //本地沙盒目录
-                         kDebugControl_SandBox_Web,          //本地沙盒文件Web调试
+                         kDebugControl_WebServer,            //Web调试
                          kDebugControl_DataFetch,            //请求抓包开关
                          kDebugControl_NetStatus             //网络监测
                          ];
@@ -158,9 +159,9 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_SandBox;
         
-    } else if (curRow == [curArr indexOfObject:kDebugControl_SandBox_Web]) {
+    } else if (curRow == [curArr indexOfObject:kDebugControl_WebServer]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
-        cell.moduleType = kDebug_ModuleType_SandBox_Web;
+        cell.moduleType = kDebug_ModuleType_WebServer;
 
     } else if (curRow == [curArr indexOfObject:kDebugControl_DataFetch]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_DataFetchKey_DebugSwitch];
@@ -194,7 +195,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     __weak typeof(self) weakSelf = self;
     cell.debugSwithAction = ^(BOOL isOn, Debug_ModuleType moduleType) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        if (moduleType == kDebug_ModuleType_SandBox_Web) {//沙盒web调试
+        if (moduleType == kDebug_ModuleType_WebServer) {//web调试
             [tableView reloadData];
             
         } else if (moduleType == kDebug_ModuleType_TipsOnline) {//Tips服务器
@@ -236,8 +237,8 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == [[_titleArray objectAtIndex:indexPath.section] indexOfObject:kDebugControl_SandBox_Web] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
-        return 50 + 40*3;
+    if (indexPath.row == [[_titleArray objectAtIndex:indexPath.section] indexOfObject:kDebugControl_WebServer] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
+        return 50 + 40 * [WebServerManager_Debug sharedInstance].webServerURL_Array.count;
     }
     return 50;
 }
@@ -262,14 +263,6 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 /*************************************  DebugCell  *******************************************/
 @interface DebugCell ()
 @property (nonatomic, strong) UILabel *titleLabel;
-
-@property (nonatomic, strong) UIView *webServerView;
-@property (nonatomic, strong) UILabel *webServerURL;
-@property (nonatomic, strong) UILabel *webUploaderServerURL;
-@property (nonatomic, strong) UILabel *webDavServerURL;
-
-@property (nonatomic, strong) UILabel *tipsLabel;
-
 
 @end
 
@@ -299,9 +292,12 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (void)setModuleType:(Debug_ModuleType)moduleType {
     _moduleType = moduleType;
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch] && _moduleType == kDebug_ModuleType_SandBox_Web) {
-        if ([SandBox_Web_Debug sharedInstance].webServerURL_Array.count == 3) {
-            [self customWebServerViewWithUrls:[SandBox_Web_Debug sharedInstance].webServerURL_Array];
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch] && _moduleType == kDebug_ModuleType_WebServer) {
+        WebServerManager_Debug *ws_Obj = [WebServerManager_Debug sharedInstance];
+        if (ws_Obj.webServerURL_Array.count > 0) {
+            UIView *view = [ws_Obj customWebServerView];
+            if(view.superview) [view removeFromSuperview];
+            [self addSubview:view];
         } else {
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
             self.debugSwitch.on = NO;
@@ -314,13 +310,12 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 - (void)layoutSubviews {
     [super layoutSubviews];
     _titleLabel.left = 10;
-    _titleLabel.centerY = _moduleType == kDebug_ModuleType_SandBox_Web ? 50/2 : self.height/2;
+    _titleLabel.centerY = _moduleType == kDebug_ModuleType_WebServer ? 50/2 : self.height/2;
     
     _debugSwitch.left = self.width - _debugSwitch.width - 10;
     _debugSwitch.centerY = _titleLabel.centerY;
     
-    _webServerView.frame = CGRectMake(0, self.debugSwitch.bottom + 5, self.width, self.height - self.debugSwitch.bottom - 10);
-    _tipsLabel.width = _webServerView.width;
+    [WebServerManager_Debug sharedInstance].webServerView.frame = CGRectMake(0, self.debugSwitch.bottom + 5, self.width, self.height - self.debugSwitch.bottom - 10);
 }
 
 - (void)dealloc {
@@ -328,54 +323,6 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 #pragma mark - private SEL
-- (void)customWebServerViewWithUrls:(NSArray *)urlArr {
-    if (urlArr.count < 3) {
-        return;
-    }
-    [self.webServerView removeFromSuperview];
-    self.webServerView = [[UIView alloc] initWithFrame:CGRectZero];
-    _webServerView.backgroundColor = [UIColor blackColor];
-    [self addSubview:_webServerView];
-    
-    self.webServerURL = [self createLabelWithFrame:CGRectMake(10, 5, 100, 20)];
-    NSString *str = @"浏览器访问地址为: ";
-    NSMutableAttributedString *att = [[NSMutableAttributedString alloc] initWithString:[str stringByAppendingString:urlArr[0]]];
-    [att addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str.length, [urlArr[0] length])];
-    _webServerURL.attributedText = att;
-    [_webServerURL sizeToFit];
-    
-    self.webUploaderServerURL = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webServerURL.bottom + 5, 100, 20)];
-    NSString *str1 = @"WebUploader访问地址为: ";
-    NSMutableAttributedString *att1 = [[NSMutableAttributedString alloc] initWithString:[str1 stringByAppendingString:urlArr[1]]];
-    [att1 addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str1.length, [urlArr[1] length])];
-    _webUploaderServerURL.attributedText = att1;
-    [_webUploaderServerURL sizeToFit];
-    
-    self.webDavServerURL = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webUploaderServerURL.bottom + 5, 100, 20)];
-    NSString *str2 = @"WebDav服务器地址为: ";
-    NSMutableAttributedString *att2 = [[NSMutableAttributedString alloc] initWithString:[str2 stringByAppendingString:urlArr[2]]];
-    [att2 addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str2.length, [urlArr[2] length])];
-    _webDavServerURL.attributedText = att2;
-    [_webDavServerURL sizeToFit];
-    
-    UILabel *tipsLabel = [self createLabelWithFrame:CGRectMake(_webServerURL.left, _webDavServerURL.bottom + 5, 100, 20)];
-    tipsLabel.text = @"温馨提示：WebDav Mac客户端建议使用'Transmit' \n<xclient.info有破解版下载> ";
-    tipsLabel.textColor = [UIColor redColor];
-    tipsLabel.numberOfLines = 2;
-    [tipsLabel sizeToFit];
-    [_webServerView addSubview:tipsLabel];
-    self.tipsLabel = tipsLabel;
-}
-
-- (UILabel *)createLabelWithFrame:(CGRect)frame {
-    UILabel *label = [[UILabel alloc] initWithFrame:frame];
-    label.textColor = [UIColor whiteColor];
-    label.font = [UIFont systemFontOfSize:15];
-    label.textAlignment = NSTextAlignmentLeft;
-    [_webServerView addSubview:label];
-    return label;
-}
-
 - (void)flexToolsContentRemoved {
     if (self.moduleType == kDebug_ModuleType_FlexTools) {
         self.debugSwitch.on = NO;
@@ -428,7 +375,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
             [self sandBox_actionWithState:switchState];
             break;
           
-        case kDebug_ModuleType_SandBox_Web://本地沙盒Web调试
+        case kDebug_ModuleType_WebServer://Web调试
             [self sandBoxForWeb_actionWithState:switchState];
             break;
             
@@ -461,12 +408,14 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 - (void)sandBoxForWeb_actionWithState:(BOOL)state {
     [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+    WebServerManager_Debug *ws_Obj = [WebServerManager_Debug sharedInstance];
     if (state) {
-        NSArray *urlArr = [[SandBox_Web_Debug sharedInstance] run];
-        [self customWebServerViewWithUrls:urlArr];
+        [ws_Obj run];
+        [self addSubview:[ws_Obj customWebServerView]];
     } else {
-        [[SandBox_Web_Debug sharedInstance] stop];
-        [self.webServerView removeFromSuperview];
+        [ws_Obj stop];
+        [ws_Obj.webServerView removeFromSuperview];
+        ws_Obj.webServerView = nil;
     }
     
 }

@@ -46,6 +46,8 @@ Pod::Spec.new do |s|
     dm.dependency 'GCDWebServer/WebDAV'
     dm.dependency 'FastDevTools/CustomTextField'
     
+    dm.resources = 'DebugManager/WebServer/WebDebugger/Resources/*.bundle'
+    
     dm.libraries = 'resolv'
   end
   

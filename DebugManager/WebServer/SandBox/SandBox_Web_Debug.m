@@ -20,31 +20,23 @@
 @end
 
 @implementation SandBox_Web_Debug
-+ (instancetype)sharedInstance {
-    static SandBox_Web_Debug *sandBox_Web = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sandBox_Web = [SandBox_Web_Debug new];
-    });
-    return sandBox_Web;
-}
 
-- (NSArray *)run {
-    self.webServerURL_Array = [NSMutableArray array];
+#pragma mark - public SEL
+- (NSArray *)sb_run {
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    BOOL ret1 = [self fileContentHtml];
+    [arr addObject:ret1 ? _webServer.serverURL.description ? : @"--" : @"webServer 服务开启失败"];
     
-    BOOL ret1 = [[SandBox_Web_Debug sharedInstance] fileContentHtml];
-    [self.webServerURL_Array addObject:ret1 ? _webServer.serverURL.description ? : @"--" : @"webServer 服务开启失败"];
-
-    BOOL ret2 = [[SandBox_Web_Debug sharedInstance] sandBox_Uploader];
-    [self.webServerURL_Array addObject:ret2 ? _uploader.serverURL.description ? : @"--" : @"webUploader 服务开启失败"];
-
-    BOOL ret3 = [[SandBox_Web_Debug sharedInstance] sandBox_WebDav];
-    [self.webServerURL_Array addObject:ret3 ? _webDavServer.serverURL.description ? : @"--" : @"webDavServer 服务开启失败"];
-
-    return _webServerURL_Array;
+    BOOL ret2 = [self sandBox_Uploader];
+    [arr addObject:ret2 ? _uploader.serverURL.description ? : @"--" : @"webUploader 服务开启失败"];
+    
+    BOOL ret3 = [self sandBox_WebDav];
+    [arr addObject:ret3 ? _webDavServer.serverURL.description ? : @"--" : @"webDavServer 服务开启失败"];
+    
+    return arr;
 }
 
-- (void)stop {
+- (void)sb_stop {
     [self.webServer stop];
     self.webServer = nil;
     
@@ -54,18 +46,15 @@
     [self.webDavServer stop];
     self.webDavServer = nil;
     
-    [self.webServerURL_Array removeAllObjects];
-    self.webServerURL_Array = nil;
-    
 }
 
-#pragma mark - private SEL
+
 - (BOOL)fileContentHtml {
     GCDWebServer *webServer = [GCDWebServer new];
     [webServer addGETHandlerForBasePath:@"/" directoryPath:NSHomeDirectory() indexFilename:nil cacheAge:3600 allowRangeRequests:YES];
     BOOL ret = [webServer startWithPort:8080 bonjourName:@"GCD Web Server"];
     NSLog(@"Visit %@ in your web browser", webServer.serverURL);
-    
+
     self.webServer = webServer;
     return ret;
 
@@ -74,7 +63,7 @@
     GCDWebUploader *uploaderServer = [[GCDWebUploader alloc] initWithUploadDirectory:NSHomeDirectory()];
     BOOL ret = [uploaderServer startWithPort:8081 bonjourName:@"Uploader Server"];
     NSLog(@"Visit %@ in your webDav browser", uploaderServer.serverURL);
-    
+
     self.uploader = uploaderServer;
     return ret;
 }
@@ -82,7 +71,7 @@
     GCDWebDAVServer *webDavServer = [[GCDWebDAVServer alloc] initWithUploadDirectory:NSHomeDirectory()];
     BOOL ret = [webDavServer startWithPort:8082 bonjourName:@"WebDav Server"];
     NSLog(@"Visit %@ in your webDav browser", webDavServer.serverURL);
-    
+
     self.webDavServer = webDavServer;
     return ret;
 }
