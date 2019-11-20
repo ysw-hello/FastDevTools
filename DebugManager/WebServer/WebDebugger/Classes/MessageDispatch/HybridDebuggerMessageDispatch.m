@@ -1,18 +1,19 @@
 //
 //  HybridDebuggerMessageDispatch.m
-//  ZYBHybrid
+//  FastDevTools
 //
 //  Created by TimmyYan on 2019/9/19.
 //
 
 #import "HybridDebuggerMessageDispatch.h"
 #import "HybridDebuggerDefine.h"
-#import "ZYBBaseWebViewController+Scripts.h"
-#import "ZYBBaseWebViewController+Utils.h"
+#import "WKWebView+ScriptsInject.h"
+#import "NSObject+Util.h"
 
-#import <ZYBHybrid/ZYBHybridUtil.h>
+#import <ZYBHybrid/ZYBBaseWKWebView+PluginList.h>
 #import <ZYBHybrid/ZYBBaseWebViewController.h>
-#import <ZYBHybrid/ZYBBaseWebViewController+LocalFile.h>
+
+//#import <ZYBHybrid/ZYBBaseWebViewController+LocalFile.h>
 
 #import <YYModel/YYModel.h>
 
@@ -78,15 +79,15 @@
                          }];
     
     [scripts enumerateObjectsUsingBlock:^(NSDictionary  * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [ZYBBaseWebViewController prepareJavaScript:[obj objectForKey:@"code"] when:[[obj objectForKey:@"when"] integerValue] key:[obj objectForKey:@"key"]];
+        [WKWebView prepareJavaScript:[obj objectForKey:@"code"] when:[[obj objectForKey:@"when"] integerValue] key:[obj objectForKey:@"key"]];
     }];
 }
 
 - (void)debugCommand:(NSString *)action param:(NSDictionary *)param {
     if (action.length > 0) {
-        // 检查当前是否有 ZYBBaseWebViewController 正在展示，如果有则使用此界面，如果没有新开一个页面
-        UIViewController *topViewController = [ZYBHybridUtil getCurrentVC];
-        if (![topViewController isKindOfClass:ZYBBaseWebViewController.class]) {
+        // 检查当前是否有 ZYBBaseWKWebView 正在展示，如果有则使用此界面，如果没有新开一个页面
+        WKWebView *veryWebView = [[self class] topVCIncludeVeryWebViewClass:NSClassFromString(@"ZYBBaseWKWebView")];
+        if (!veryWebView) {
             ZYBWebFeatureManager *config = [[ZYBWebFeatureManager alloc] init];
             config.hideNavBar = NO;
             config.hideStatusBar = NO;
@@ -111,18 +112,19 @@
             
             ZYBBaseWebViewController *sam = [[ZYBBaseWebViewController alloc] initWithFeatureConfig:config];
             if (is_Core_OpenWindow) {
-               
                 if ([action isEqualToString:@"eval"]) { // 切割字符串取 pageURL 的值
                     NSString *str1 = [codeStr componentsSeparatedByString:@"pageUrl"][1];
                     if ([str1 containsString:@"\""]) {
                         urlStr = [str1 componentsSeparatedByString:@"\""][1];
                     }
                 }
-                
                 sam.urlString = [urlStr hasPrefix:@"http"] ? urlStr : @"https://www.baidu.com";
+                
             } else {
                 sam.urlString = @"https://www.baidu.com";
             }
+            
+            UIViewController *topViewController = [[self class] getCurrentVC];
             if (!topViewController.navigationController) {
                 UIWindow *win = [UIApplication sharedApplication].keyWindow;
                 win.rootViewController = sam;
@@ -131,10 +133,10 @@
                 [topViewController.navigationController pushViewController:sam animated:YES];
             }
             topViewController = sam;
+            veryWebView = sam.webView;
         }
-        [self dispathMessageWithWebViewVC:(ZYBBaseWebViewController *)topViewController action:action param:param?:@{}];
-    } else {
-        NSLog(@"irregular param %@",param);
+        
+        [self dispathMessageWithVeryWebView:veryWebView action:action param:param?:@{}];
     }
 }
 
@@ -142,24 +144,24 @@
 // 保存 weinre 注入脚本的地址，方便在加载其它页面时也能自动注入。
 static NSString *kLastWeinreScript = nil;
 
-- (void)dispathMessageWithWebViewVC:(ZYBBaseWebViewController *)webviewVC action:(NSString *)action param:(NSDictionary *)param {
+- (void)dispathMessageWithVeryWebView:(__kindof WKWebView *)veryWebView action:(NSString *)action param:(NSDictionary *)param {
     if ([action isEqualToString:@"eval"]) {
-        [webviewVC evalExpression:[param objectForKey:@"code"] completion:^(id  _Nonnull result, NSString * _Nonnull err) {
+        [veryWebView evalExpression:[param objectForKey:@"code"] completion:^(id  _Nonnull result, NSString * _Nonnull err) {
             NSDictionary *res = nil;
             if (result) {
                 res = @{@"result" : [NSString stringWithFormat:@"%@", result]};
             } else {
                 res = @{@"error" : [NSString stringWithFormat:@"%@", err]};
             }
-            [webviewVC fire:@"eval" param:res];
+            [veryWebView fire:@"eval" param:res];
         }];
         
     } else if ([action isEqualToString:@"list"]) { // 列出所有支持的action列表
-        [webviewVC fire:@"list" param:[webviewVC getPluginAndActionsList]];
+        [veryWebView fire:@"list" param:[veryWebView getPluginAndActionsList]];
         
     } else if ([action isEqualToString:@"about"]) { 
         NSString *signature = [param objectForKey:@"signature"];
-        Class pluginCls = [webviewVC getClassForSignature:signature];
+        Class pluginCls = [veryWebView getClassForSignature:signature];
         SEL targetMethod = debugger_doc_selector(signature);
         NSString *funcName = [@"about." stringByAppendingString:signature];
         if (pluginCls && [pluginCls respondsToSelector:targetMethod]) {
@@ -167,7 +169,7 @@ static NSString *kLastWeinreScript = nil;
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
             NSDictionary *doc = [pluginCls performSelector:targetMethod withObject:nil];
 #pragma clang diagnostic pop
-            [webviewVC fire:funcName param:doc];
+            [veryWebView fire:funcName param:doc];
         } else {
             NSString *errMsg = nil;
             if (pluginCls) {
@@ -175,16 +177,16 @@ static NSString *kLastWeinreScript = nil;
             } else {
                 errMsg = [NSString stringWithFormat:@"The method (%@) does not exsit!", signature];
             }
-            [webviewVC fire:funcName param:@{@"errMsg" : errMsg}];
+            [veryWebView fire:funcName param:@{@"errMsg" : errMsg}];
         }
         
     } else if ([action isEqualToString:@"timing"]) {
         BOOL mobile = [[param objectForKey:@"mobile"] boolValue];
         if (mobile) {
-            [webviewVC fire:@"requestToTiming" param:@{}];
+            [veryWebView fire:@"requestToTiming" param:@{}];
         } else {
-            [webviewVC.webView evaluateJavaScript:@"window.performance.timing.toJSON()" completionHandler:^(NSDictionary *_Nullable res, NSError * _Nullable error) {
-                [webviewVC fire:@"requestToTiming_on_mac" param:res];
+            [veryWebView evaluateJavaScript:@"window.performance.timing.toJSON()" completionHandler:^(NSDictionary *_Nullable res, NSError * _Nullable error) {
+                [veryWebView fire:@"requestToTiming_on_mac" param:res];
             }];
         }
 
@@ -195,7 +197,7 @@ static NSString *kLastWeinreScript = nil;
             [cookies enumerateObjectsUsingBlock:^(NSHTTPCookie * _Nonnull cookie, NSUInteger idx, BOOL * _Nonnull stop) {
                 [cookieStorage deleteCookie:cookie completionHandler:nil];
             }];
-            [webviewVC fire:@"clearCookieDone" param:@{@"count":@(cookies.count)}];
+            [veryWebView fire:@"clearCookieDone" param:@{@"count":@(cookies.count)}];
         }];
 
     } else if ([action isEqualToString:@"console.log"]) {
@@ -204,26 +206,26 @@ static NSString *kLastWeinreScript = nil;
         ZYBHybridLog(@"Browser Command is console.log");
     } else if ([action isEqualToString:@"weinre"]) {
         // $ weinre --boundHost 10.242.24.59 --httpPort 9090
-        BOOL disabled = [[param objectForKey:@"disabled"] boolValue];
-        if (disabled) {
-            kLastWeinreScript = nil;
-            [ZYBBaseWebViewController removeJavaScriptForKey:@"weinre.js"];
-        } else {
-            kLastWeinreScript = [param objectForKey:@"url"];
-            if (kLastWeinreScript.length > 0) {
-                [ZYBBaseWebViewController prepareJavaScript:[NSURL URLWithString:kLastWeinreScript] when:WKUserScriptInjectionTimeAtDocumentEnd key:@"weinre.js"];
-                [webviewVC fire:@"weinre.enable" param:@{@"jsURL": kLastWeinreScript}];
-            }
-        }
+//        BOOL disabled = [[param objectForKey:@"disabled"] boolValue];
+//        if (disabled) {
+//            kLastWeinreScript = nil;
+//            [WKWebView removeJavaScriptForKey:@"weinre.js"];
+//        } else {
+//            kLastWeinreScript = [param objectForKey:@"url"];
+//            if (kLastWeinreScript.length > 0) {
+//                [WKWebView prepareJavaScript:[NSURL URLWithString:kLastWeinreScript] when:WKUserScriptInjectionTimeAtDocumentEnd key:@"weinre.js"];
+//                [webviewVC.webView fire:@"weinre.enable" param:@{@"jsURL": kLastWeinreScript}];
+//            }
+//        }
 
     } else if ([action isEqualToString:@"testcase"]) {
         // 检查是否有文件生成，如果没有则遍历
-        NSString *docsdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-        NSString *file = [docsdir stringByAppendingPathComponent:kHybridAutoTestCaseFileName];
-        if (![[NSFileManager defaultManager] fileExistsAtPath:file]) {
-            [self generatorHtmlWithWebVC:webviewVC];
-        }
-        [webviewVC loadLocalFile:[NSURL fileURLWithPath:file] domain:kHybridAutoTestDomain];
+//        NSString *docsdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+//        NSString *file = [docsdir stringByAppendingPathComponent:kHybridAutoTestCaseFileName];
+//        if (![[NSFileManager defaultManager] fileExistsAtPath:file]) {
+//            [self generatorHtmlWithWebVC:webviewVC];
+//        }
+//        [webviewVC loadLocalFile:[NSURL fileURLWithPath:file] domain:kHybridAutoTestDomain];
 
     } else {
         ZYBHybridLog(@"Command is not yet supported!!!");
@@ -262,7 +264,7 @@ static NSString *kLastWeinreScript = nil;
         ZYBHybridLog(@"正在解析");
         int funcAutoTestBaseIdx = 0;
         int funcNonAutoTestBaseIdx = 0; // 不支持自动化测试的函数
-        NSArray *allClazz = [webVC getAllPlugins];
+        NSArray *allClazz = [webVC.webView getAllPlugins];
         NSMutableArray *docsHtml = [NSMutableArray arrayWithCapacity:4];
         for (Class clazz in allClazz) {
             NSDictionary* supportFunc = [clazz supportActionList];

@@ -1,6 +1,6 @@
 //
 //  HybridDebuggerLogger.m
-//  ZYBHybrid
+//  FastDevTools
 //
 //  Created by TimmyYan on 2019/10/24.
 //
@@ -63,7 +63,7 @@ static dispatch_semaphore_t _sync_log_semaphore;
                 
             } else {
                 dispatch_semaphore_signal(_sync_log_semaphore);
-                ZYBHybridLog(@"The message '%@' is not written", message);
+                WSLog(@"The message '%@' is not written", message);
             }
         }
     }];
@@ -76,7 +76,7 @@ static dispatch_semaphore_t _sync_log_semaphore;
     if (!_logFile_io) {
         NSString *docsdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
         NSString *logFile = [docsdir stringByAppendingPathComponent:kHybridDebuggerLogFile];
-        ZYBHybridLog(@"Document = %@", docsdir);
+        WSLog(@"Document = %@", docsdir);
         NSError *err = nil;
         if ([[NSFileManager defaultManager] fileExistsAtPath:logFile]) {
             [[NSFileManager defaultManager] removeItemAtPath:logFile error:&err];
@@ -97,10 +97,10 @@ static dispatch_semaphore_t _sync_log_semaphore;
                                                        dq, ^(int error) {
                                                            // Cleanup code for normal channel operation.
                                                            // Assumes that dispatch_io_close was called elsewhere.
-                                                           ZYBHybridLog(@"I am ok ");
+                                                           WSLog(@"I am ok ");
                                                        });
         } else {
-            ZYBHybridLog(@"创建日志文件失败");
+            WSLog(@"创建日志文件失败");
         }
         
     }
@@ -147,7 +147,7 @@ static dispatch_semaphore_t _sync_log_semaphore;
                 }
                 
             } else if (error != 0) {
-                ZYBHybridLog(@"日志出错了");
+                WSLog(@"日志出错了");
                 [strongSelf recordLogWithMessage:@"ReadLogError，errCode：%d", error];
             }
             
@@ -163,7 +163,7 @@ static dispatch_semaphore_t _sync_log_semaphore;
         [[[HybridDebuggerServerManager sharedInstance] getLocalServer] logInfo:@"%@", [[NSString alloc] initWithFormat:format arguments:arguments]];
         va_end(arguments);
     } else {
-        ZYBHybridLog(@"xxx-DebugServerNotStart!!!");
+        WSLog(@"xxx-DebugServerNotStart!!!");
     }
 }
 

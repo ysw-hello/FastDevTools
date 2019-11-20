@@ -37,7 +37,7 @@ Pod::Spec.new do |s|
 
   #DebugManager 本地沙盒可视化，FPS & CPU & 内存 性能可视化
   s.subspec 'DebugManager' do |dm|
-    dm.source_files = 'DebugManager/*.{h,m}' , 'DebugManager/**/*.{h,m}'
+    dm.source_files = 'DebugManager/**/*.{h,m}'
     
     dm.dependency 'FMDB'
     dm.dependency 'AFNetworking'

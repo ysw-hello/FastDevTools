@@ -1,17 +1,15 @@
 //
-//  ZYBBaseWebViewController+Scripts.h
-//  ZYBHybrid
+//  WKWebView+ScriptsInject.h
+//  FastDevTools
 //
-//  Created by TimmyYan on 2019/9/20.
+//  Created by TimmyYan on 2019/11/20.
 //
 
-#import "ZYBBaseWebViewController.h"
+#import <WebKit/WebKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class WKUserContentController;
-
-@interface ZYBBaseWebViewController (Scripts)
+@interface WKWebView (ScriptsInject)
 
 #pragma mark - WKUserScript 脚本注入 <WKWebView 初始化之前>
 /**
@@ -26,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  注入脚本
-
+ 
  @param userContent wkwebview初始化时的配置模型的userContentController属性
  */
 - (void)injectScriptsToUserContent:(WKUserContentController *)userContent;
@@ -37,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - evaluateJavaScript 脚本执行 <WKWebView 初始化之后>
 /**
  界面加载完成的回调中，注入支持调用的action列表
-
+ 
  @param json action列表键值对<包含：插件支持的action列表（value为端内具体的插件类以及相应的action实现方法）及手动维护的debugAction列表（value为0,不支持端内FE调用）>
  @param appProperty 动态注入的JS属性
  */

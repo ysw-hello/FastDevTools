@@ -1,14 +1,14 @@
 //
-//  ZYBBaseWebViewController+Scripts.m
-//  ZYBHybrid
+//  WKWebView+ScriptsInject.m
+//  FastDevTools
 //
-//  Created by TimmyYan on 2019/9/20.
+//  Created by TimmyYan on 2019/11/20.
 //
 
-#import "ZYBBaseWebViewController+Scripts.h"
+#import "WKWebView+ScriptsInject.h"
 #import "HybridDebuggerDefine.h"
 
-@implementation ZYBBaseWebViewController (Scripts)
+@implementation WKWebView (ScriptsInject)
 
 #pragma mark - WKUserScript 脚本注入 <WKWebView 初始化之前>
 static NSMutableArray *kHybridCustomJavscripts = nil;
@@ -34,7 +34,7 @@ static NSMutableArray *kHybridCustomJavscripts = nil;
             [self _addJavaScript:result when:injectTime forKey:key];
         }
     } else {
-       ZYBHybridLog(@"fail to inject javascript");
+        WSLog(@"fail to inject javascript");
     }
 }
 
@@ -69,14 +69,14 @@ static NSString *kDebugBridgeSource = nil, *kDebugEvalSource = nil;
         kDebugBridgeSource = [NSString stringWithContentsOfURL:jsLibURL encoding:NSUTF8StringEncoding error:nil];
     }
     [self.class _addJavaScript:kDebugBridgeSource when:WKUserScriptInjectionTimeAtDocumentStart forKey:@"debuggerBridge.js"];
-
+    
     if (kDebugEvalSource.length < 1) {
         NSURL *evalLibURL = [[debuggerBundle bundleURL] URLByAppendingPathComponent:@"eval.js"];
         kDebugEvalSource = [NSString stringWithContentsOfURL:evalLibURL encoding:NSUTF8StringEncoding error:nil];
     }
     [self.class _addJavaScript:kDebugEvalSource when:WKUserScriptInjectionTimeAtDocumentEnd forKey:@"eval.js"];
-
-    // 注入脚本，用来代替 self.webView evaluateJavaScript:javaScriptString completionHandler:nil
+    
+    // 注入脚本，用来代替 selfevaluateJavaScript:javaScriptString completionHandler:nil
     // 因为 evaluateJavaScript 的返回值不支持那么多的序列化结构的数据结构，还有内存泄漏的问题
     [kHybridCustomJavscripts enumerateObjectsUsingBlock:^(NSDictionary *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
         WKUserScript *cookieScript = [[WKUserScript alloc] initWithSource:[obj objectForKey:@"script"] injectionTime:[[obj objectForKey:@"when"] integerValue] forMainFrameOnly:YES];
@@ -89,7 +89,7 @@ static NSString *kDebugBridgeSource = nil, *kDebugEvalSource = nil;
 - (void)insertData:(NSDictionary *)json intoPageWithVarName:(NSString *)appProperty {
     NSData *objectOfJSON = nil;
     NSError *contentParseError = nil;
-
+    
     objectOfJSON = [NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted error:&contentParseError];
     if (contentParseError == nil && objectOfJSON) {
         NSString *str = [[NSString alloc] initWithData:objectOfJSON encoding:NSUTF8StringEncoding];
@@ -100,11 +100,11 @@ static NSString *kDebugBridgeSource = nil, *kDebugEvalSource = nil;
 }
 
 - (void)executeJavaScriptString:(NSString *)javaScriptString completionHandler:(void (^ _Nullable)(_Nullable id data, NSError * _Nullable error))completionHandler {
-    [self.webView evaluateJavaScript:javaScriptString completionHandler:[completionHandler copy]];
+    [self evaluateJavaScript:javaScriptString completionHandler:[completionHandler copy]];
 }
 
 - (void)evalExpression:(NSString *)jsCode completion:(void (^)(id result, NSString *err))completion {
-    [self.webView evaluateJavaScript:[NSString stringWithFormat:@"window.debugger_eval(%@)", jsCode] completionHandler:^(NSDictionary *data, NSError * _Nullable error) {
+    [self evaluateJavaScript:[NSString stringWithFormat:@"window.debugger_eval(%@)", jsCode] completionHandler:^(NSDictionary *data, NSError * _Nullable error) {
         if (completion) {
             completion([data objectForKey:@"result"], [data objectForKey:@"err"]);
         } else {

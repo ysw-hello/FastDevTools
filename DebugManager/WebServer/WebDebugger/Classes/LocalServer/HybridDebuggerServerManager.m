@@ -1,6 +1,6 @@
 //
 //  HybridDebuggerServerManager.m
-//  ZYBHybrid
+//  FastDevTools
 //
 //  Created by TimmyYan on 2019/8/16.
 //
@@ -103,7 +103,7 @@ static NSString *bonjourName = @"me.local";
                     NSError *error;
                     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:obj options:NSJSONWritingPrettyPrinted error:&error];
                     if (!jsonData) {
-                        ZYBHybridLog(@"%s: error: %@", __func__, error.localizedDescription);
+                        WSLog(@"%s: error: %@", __func__, error.localizedDescription);
                     } else {
                         [logStrs addObject:[[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding]];
                     }
@@ -134,12 +134,12 @@ static NSString *bonjourName = @"me.local";
             } else {
                 // 异常记录
                 if (action.length < 1) {
-                    ZYBHybridLog(@"action 为空");
+                    WSLog(@"action 为空");
                     [strongSelf.webServer logInfo:@"Command input is nil"];
                 }
                 
                 if (![contentJSON isKindOfClass:[NSDictionary class]] || contentParseError) {
-                    ZYBHybridLog(@"参数解析或类型错误, err:%@", contentParseError.localizedDescription);
+                    WSLog(@"参数解析或类型错误, err:%@", contentParseError.localizedDescription);
                 }
                 [strongSelf.webServer logInfo:@"ParamParseError, err:%@", contentParseError.localizedDescription];
             }
@@ -174,7 +174,7 @@ static NSString *bonjourName = @"me.local";
         return;
     }
     
-    UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(ZYBHybrid_Screen_Width - 60, 150, 55.f, 46.f)];
+    UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake([UIScreen mainScreen].bounds.size.width - 60, 150, 55.f, 46.f)];
     window.backgroundColor = [UIColor clearColor];
     window.windowLevel = UIWindowLevelStatusBar - 1;
     window.hidden = NO;
@@ -229,9 +229,9 @@ static NSString *bonjourName = @"me.local";
     BOOL res = [_webServer startWithPort:port bonjourName:bonjourName];
     if (res) {
       [_webServer logInfo:@"HybridLogServer -- start(url:%@)", _webServer.serverURL];
-        ZYBHybridLog(@"xxx-DebugServerStartSuccess!!!");
+        WSLog(@"xxx-DebugServerStartSuccess!!!");
     } else {
-        ZYBHybridLog(@"xxx-DebugServerStartFailure!!!");
+        WSLog(@"xxx-DebugServerStartFailure!!!");
     }
 }
 
@@ -251,7 +251,7 @@ static NSString *bonjourName = @"me.local";
 
 - (NSString *)stringDecodeURIComponent:(NSString *)encoded {
     NSString *decoded = [encoded stringByRemovingPercentEncoding];
-    ZYBHybridLog(@"DecodedString %@", decoded);
+    WSLog(@"DecodedString %@", decoded);
     return decoded;
 }
 
@@ -311,7 +311,7 @@ static NSString *bonjourName = @"me.local";
 
 #pragma mark - Protocol Conform
 - (void)onCloseWindow:(HybridDebuggerViewController *)viewController {
-    self.debugWindow.frame = CGRectMake(ZYBHybrid_Screen_Width - 60, 150, 55.f, 46.f);
+    self.debugWindow.frame = CGRectMake([UIScreen mainScreen].bounds.size.width - 60, 150, 55.f, 46.f);
     self.toggleButton.hidden = NO;
     [self.debugWindow bringSubviewToFront:self.toggleButton];
     self.debugWindow.rootViewController = nil;

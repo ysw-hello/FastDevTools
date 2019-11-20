@@ -1,6 +1,6 @@
 //
 //  HybridDebuggerDefine.h
-//  ZYBHybrid
+//  FastDevTools
 //
 //  Created by TimmyYan on 2019/8/21.
 //
@@ -8,7 +8,14 @@
 #ifndef HybridDebuggerDefine_h
 #define HybridDebuggerDefine_h
 
-#import <ZYBHybrid/ZYBHybridDefine.h>
+#define Hybrid_DebuggerSwitch 1 // 调试模式开关
+#define Hybrid_Debug __has_include(<FastDevTools/HybridDebuggerServerManager.h>) ? ZYBHybrid_DebuggerSwitch : 0
+
+#ifndef WSLog
+    #define WSLog(format, ...)  do {\
+                (NSLog)((@"[WebServer] " format), ##__VA_ARGS__); \
+            } while (0)
+#endif
 
 static BOOL kGCDWebServer_logging_enabled = YES; //调试日志开关
 
