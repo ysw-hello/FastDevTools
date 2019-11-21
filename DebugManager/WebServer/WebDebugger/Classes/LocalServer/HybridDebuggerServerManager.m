@@ -156,7 +156,7 @@ static NSString *bonjourName = @"me.local";
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         _manager = [[HybridDebuggerServerManager alloc] init];
-        _manager.logQueue = dispatch_queue_create("com.zybhybrid.syncQueue", DISPATCH_QUEUE_SERIAL);
+        _manager.logQueue = dispatch_queue_create("com.wslogger.syncQueue", DISPATCH_QUEUE_SERIAL);
         
     });
     return _manager;

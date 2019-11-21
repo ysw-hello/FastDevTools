@@ -9,7 +9,7 @@
 #define HybridDebuggerDefine_h
 
 #define Hybrid_DebuggerSwitch 1 // 调试模式开关
-#define Hybrid_Debug __has_include(<FastDevTools/HybridDebuggerServerManager.h>) ? ZYBHybrid_DebuggerSwitch : 0
+#define Hybrid_Debug __has_include(<FastDevTools/HybridDebuggerServerManager.h>) ? Hybrid_DebuggerSwitch : 0
 
 #ifndef WSLog
     #define WSLog(format, ...)  do {\

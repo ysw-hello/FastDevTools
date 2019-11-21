@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+@class WKWebView;
+
 typedef NS_ENUM(NSUInteger, Debug_ModuleType) {
     kDebug_ModuleType_SystemState   = 1,       //系统状态开关
     kDebug_ModuleType_SandBox       = 2,       //本地沙盒目录
@@ -43,6 +45,7 @@ typedef void(^ActionHandler_State)(BOOL state);
 
 //预上线tip服务器 开关action
 @property (nonatomic, copy) ActionHandler_State tipsStateChangeBlock;
+
 
 
 @end
