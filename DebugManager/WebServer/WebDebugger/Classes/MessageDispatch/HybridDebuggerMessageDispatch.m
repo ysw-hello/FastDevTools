@@ -153,17 +153,17 @@ static NSString *kLastWeinreScript = nil;
         WSLog(@"Browser Command is console.log");
     } else if ([action isEqualToString:@"weinre"]) {
         // $ weinre --boundHost 10.242.24.59 --httpPort 9090
-//        BOOL disabled = [[param objectForKey:@"disabled"] boolValue];
-//        if (disabled) {
-//            kLastWeinreScript = nil;
-//            [WKWebView removeJavaScriptForKey:@"weinre.js"];
-//        } else {
-//            kLastWeinreScript = [param objectForKey:@"url"];
-//            if (kLastWeinreScript.length > 0) {
-//                [WKWebView prepareJavaScript:[NSURL URLWithString:kLastWeinreScript] when:WKUserScriptInjectionTimeAtDocumentEnd key:@"weinre.js"];
-//                [webviewVC.webView fire:@"weinre.enable" param:@{@"jsURL": kLastWeinreScript}];
-//            }
-//        }
+        BOOL disabled = [[param objectForKey:@"disabled"] boolValue];
+        if (disabled) {
+            kLastWeinreScript = nil;
+            [WKWebView removeJavaScriptForKey:@"weinre.js"];
+        } else {
+            kLastWeinreScript = [param objectForKey:@"url"];
+            if (kLastWeinreScript.length > 0) {
+                [WKWebView prepareJavaScript:[NSURL URLWithString:kLastWeinreScript] when:WKUserScriptInjectionTimeAtDocumentEnd key:@"weinre.js"];
+                [veryWebView fire:@"weinre.enable" param:@{@"jsURL": kLastWeinreScript}];
+            }
+        }
 
     } else if ([action isEqualToString:@"testcase"]) {
         // 检查是否有文件生成，如果没有则遍历

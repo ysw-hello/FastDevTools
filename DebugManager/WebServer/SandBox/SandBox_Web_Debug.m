@@ -25,13 +25,13 @@
 - (NSArray *)sb_run {
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     BOOL ret1 = [self fileContentHtml];
-    [arr addObject:ret1 ? _webServer.serverURL.description ? : @"--" : @"webServer 服务开启失败"];
+    [arr addObject:ret1 ? _webServer.serverURL.absoluteString ? : @"--" : @"webServer 服务开启失败"];
     
     BOOL ret2 = [self sandBox_Uploader];
-    [arr addObject:ret2 ? _uploader.serverURL.description ? : @"--" : @"webUploader 服务开启失败"];
+    [arr addObject:ret2 ? _uploader.serverURL.absoluteString ? : @"--" : @"webUploader 服务开启失败"];
     
     BOOL ret3 = [self sandBox_WebDav];
-    [arr addObject:ret3 ? _webDavServer.serverURL.description ? : @"--" : @"webDavServer 服务开启失败"];
+    [arr addObject:ret3 ? _webDavServer.serverURL.absoluteString ? : @"--" : @"webDavServer 服务开启失败"];
     
     return arr;
 }

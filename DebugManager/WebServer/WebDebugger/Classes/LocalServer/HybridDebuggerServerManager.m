@@ -204,10 +204,13 @@ static NSString *bonjourName = @"me.local";
     [window addGestureRecognizer:pan];
 }
 
-- (void)startDebugServer {
+- (__kindof NSString *)startDebugServer {
     if (_webServer) {
-        return;
+        return _webServer.serverURL.absoluteString?:@"--";
     }
+    
+    [self showDebugWindow];
+    
     // Create server
     _webServer = [[GCDWebServer alloc] init];
     
@@ -233,6 +236,8 @@ static NSString *bonjourName = @"me.local";
     } else {
         WSLog(@"xxx-DebugServerStartFailure!!!");
     }
+    
+    return res ? _webServer.serverURL.description?:@"--" : @"webServer 服务开启失败";
 }
 
 - (GCDWebServer *)getWebServer {
@@ -240,7 +245,11 @@ static NSString *bonjourName = @"me.local";
 }
 
 - (void)stopDebugServer {
-    [_webServer stop];
+    if (_webServer.isRunning) {
+      [_webServer stop];
+        _webServer = nil;
+    }
+    [self hideDebugWindow];
 }
 
 #pragma mark - pravite SEL

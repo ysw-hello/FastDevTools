@@ -30,8 +30,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  开启DebugServer
+ 返回server地址
  */
-- (void)startDebugServer;
+- (__kindof NSString *)startDebugServer;
 
 /**
  获取webServer

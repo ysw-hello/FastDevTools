@@ -238,7 +238,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     if (indexPath.row == [[_titleArray objectAtIndex:indexPath.section] indexOfObject:kDebugControl_WebServer] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
-        return 50 + 40 * [WebServerManager_Debug sharedInstance].webServerURL_Array.count;
+        return 50 + [WebServerManager_Debug sharedInstance].webServerView.height;
     }
     return 50;
 }
