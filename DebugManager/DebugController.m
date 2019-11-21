@@ -40,6 +40,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 @interface DebugController () <UITableViewDelegate, UITableViewDataSource>
 
+@property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, strong) NSMutableArray *titleArray;
 @property (nonatomic, strong) NSMutableArray *sectionTitleArray;
@@ -98,15 +99,77 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     return _rootViewController;
 }
 
+- (UIView *)headerView {
+    if (!_headerView) {
+        _headerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 0)];
+        _headerView.backgroundColor = [UIColor clearColor];
+        
+        NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+        NSString *iconName = [[infoDictionary valueForKeyPath:@"CFBundleIcons.CFBundlePrimaryIcon.CFBundleIconFiles"] lastObject];
+        NSString *appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
+        NSString *appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+        NSString *bundleID = [infoDictionary objectForKey:@"CFBundleIdentifier"];
+        NSString *title = [NSString stringWithFormat:@"APP名称：%@\n版本号：%@\nBundleID：%@", appName, appVersion, bundleID];
+        UIImage *image = [UIImage imageNamed:iconName];
+        if (!image) {
+            NSBundle *debuggerBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"HybridDebugger" withExtension:@"bundle"]];
+            NSString *imagePath = [debuggerBundle.bundlePath stringByAppendingString:@"/images/debuggerLogo.png"];
+            image = [UIImage imageWithContentsOfFile:imagePath];
+        }
+        UIView *iconView = [self createViewWithImage:image title:title iconSize:CGSizeMake(70, 70) space:20];
+        iconView.top = 20;
+        iconView.centerX = _headerView.centerX;
+        [_headerView addSubview:iconView];
+        for (UIView *view in iconView.subviews) {
+            if ([view isKindOfClass:[UIImageView class]]) {
+                view.layer.cornerRadius = 14;
+                view.layer.masksToBounds = YES;
+            } else if ([view isKindOfClass:[UILabel class]]) {
+                [(UILabel *)view setTextColor:[UIColor colorWithRed:153/255.f green:153/255.f blue:153/255.f alpha:1.f]];
+            }
+        }
+        
+        _headerView.height = 20 + iconView.height + 20;
+    }
+    return _headerView;
+}
+
 #pragma mark - private SEL
+- (UIView *)createViewWithImage:(UIImage*)image title:(NSString *)title iconSize:(CGSize)iconSize space:(CGFloat)space {
+    UIView *view = [[UIView alloc] init];
+    
+    //icon
+    UIImageView *icon = [[UIImageView alloc] initWithImage:image];
+    icon.size = iconSize;
+    [view addSubview:icon];
+    
+    //label
+    UILabel *label = [[UILabel alloc] init];
+    label.top = icon.bottom + space;
+    label.width = 320;
+    label.textAlignment = NSTextAlignmentCenter;
+    label.numberOfLines = 0;
+    label.font = [UIFont systemFontOfSize:16];
+    label.text = title;
+    label.textColor = [UIColor colorWithRed:51/255.f green:51/255.f blue:51/255.f alpha:1.f];
+    [label sizeToFit];
+    [view addSubview:label];
+    
+    view.width = MAX(icon.width, label.width);
+    view.height = icon.height + space +label.height;
+    icon.centerX = view.centerX;
+    label.centerX = view.centerX;
+    
+    return view;
+}
 
 - (void)initTableView {
-    
     CGFloat top = self.view.height == kDebug_ScreenHeight ? kDebug_NavBarBottom : 0;
     self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, top, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_NavBarBottom) style:UITableViewStylePlain];
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.tableFooterView = [UIView new];
+    _tableView.tableHeaderView = self.headerView;
     [self.view addSubview:_tableView];
     
 }
