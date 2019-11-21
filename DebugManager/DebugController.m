@@ -44,6 +44,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 @property (nonatomic, strong) UITableView *tableView;
 @property (nonatomic, strong) NSMutableArray *titleArray;
 @property (nonatomic, strong) NSMutableArray *sectionTitleArray;
+@property (nonatomic, assign) BOOL preNavBarHidden;
 
 @end
 
@@ -51,11 +52,14 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    self.preNavBarHidden = self.navigationController.navigationBar.hidden;
+    [self.navigationController setNavigationBarHidden:NO];
     [self.navigationController.navigationBar setShadowImage:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    [self.navigationController setNavigationBarHidden:self.preNavBarHidden];
     [self.navigationController.navigationBar setShadowImage:[UIImage new]];
 }
 
