@@ -9,10 +9,6 @@
 #import "HybridDebuggerDefine.h"
 #import "WKWebView+ScriptsInject.h"
 
-@interface HybridDebuggerMessageDispatch ()
-
-@end
-
 @implementation HybridDebuggerMessageDispatch
 
 #pragma mark - Public SEL

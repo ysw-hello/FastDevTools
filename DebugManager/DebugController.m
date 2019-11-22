@@ -45,6 +45,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 @property (nonatomic, strong) NSMutableArray *titleArray;
 @property (nonatomic, strong) NSMutableArray *sectionTitleArray;
 @property (nonatomic, assign) BOOL preNavBarHidden;
+@property (nonatomic, strong) UIViewController *rootViewController;
 
 @end
 
@@ -93,7 +94,8 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 #pragma mark - setters or getters
 - (void)setHostName:(NSString *)hostName {
     _hostName = hostName ? : @"环境设置(点击输入)";
-    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:4 inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
+    NSUInteger row = [[self.titleArray firstObject] indexOfObject:kDebugControl_HostChange];
+    [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:row inSection:0]] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (UIViewController *)rootViewController {

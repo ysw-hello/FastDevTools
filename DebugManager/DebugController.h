@@ -28,7 +28,6 @@ typedef void(^ActionHandler)(void);
 typedef void(^ActionHandler_State)(BOOL state);
 
 @interface DebugController : UIViewController
-@property (nonatomic, strong) UIViewController *rootViewController;
 
 /**
  环境切换 action
@@ -47,7 +46,6 @@ typedef void(^ActionHandler_State)(BOOL state);
 
 //预上线tip服务器 开关action
 @property (nonatomic, copy) ActionHandler_State tipsStateChangeBlock;
-
 
 
 @end
