@@ -17,7 +17,7 @@
             } while (0)
 #endif
 
-static BOOL kGCDWebServer_logging_enabled = YES; //调试日志开关
+static BOOL kGCDWebServer_logging_enabled = YES; // 调试日志开关
 
 static NSString *const kHybridDebuggerActionKey = @"action";
 static NSString *const kHybridDebuggerParamKey = @"param";
@@ -28,8 +28,8 @@ static NSString *const kHybridDebuggerInvokeResponseEvent = @"kHybridDebuggerInv
 static NSString *const kHybridDebuggerBundleName = @"HybridDebugger";
 static NSString *const kHybridDebuggerLogFile = @"__HybridLogger__.txt"; // server日志，本地文件名
 
-static NSString *const kHybridAutoTestCaseFileName = @"testcase.html"; // 自动化测试生成的示例html
-static NSString *const kHybridAutoTestDomain = @"http://you.163.com"; // 自动化测试示例域名
+//static NSString *const kHybridAutoTestCaseFileName = @"testcase.html"; // 自动化测试生成的示例html
+//static NSString *const kHybridAutoTestDomain = @"http://www.baidu.com"; // 自动化测试示例域名
 
 // 多行文字转字符串
 #define HybridDebugger_ML(str) @#str

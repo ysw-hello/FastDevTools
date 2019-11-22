@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
  
  @param userContent wkwebview初始化时的配置模型的userContentController属性
  */
-- (void)injectScriptsToUserContent:(WKUserContentController *)userContent;
++ (void)injectScriptsToUserContent:(WKUserContentController *)userContent;
 
 
 

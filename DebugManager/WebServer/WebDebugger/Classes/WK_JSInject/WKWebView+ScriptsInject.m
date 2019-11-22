@@ -62,19 +62,19 @@ static NSMutableArray *kHybridCustomJavscripts = nil;
 }
 
 static NSString *kDebugBridgeSource = nil, *kDebugEvalSource = nil;
-- (void)injectScriptsToUserContent:(WKUserContentController *)userContentController {
++ (void)injectScriptsToUserContent:(WKUserContentController *)userContentController {
     NSBundle *debuggerBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:kHybridDebuggerBundleName withExtension:@"bundle"]];
     if (kDebugBridgeSource.length < 1) {
         NSURL *jsLibURL = [[debuggerBundle bundleURL] URLByAppendingPathComponent:@"hybrid_debugger_bridge.js"];
         kDebugBridgeSource = [NSString stringWithContentsOfURL:jsLibURL encoding:NSUTF8StringEncoding error:nil];
     }
-    [self.class _addJavaScript:kDebugBridgeSource when:WKUserScriptInjectionTimeAtDocumentStart forKey:@"debuggerBridge.js"];
+    [self _addJavaScript:kDebugBridgeSource when:WKUserScriptInjectionTimeAtDocumentStart forKey:@"debuggerBridge.js"];
     
     if (kDebugEvalSource.length < 1) {
         NSURL *evalLibURL = [[debuggerBundle bundleURL] URLByAppendingPathComponent:@"eval.js"];
         kDebugEvalSource = [NSString stringWithContentsOfURL:evalLibURL encoding:NSUTF8StringEncoding error:nil];
     }
-    [self.class _addJavaScript:kDebugEvalSource when:WKUserScriptInjectionTimeAtDocumentEnd forKey:@"eval.js"];
+    [self _addJavaScript:kDebugEvalSource when:WKUserScriptInjectionTimeAtDocumentEnd forKey:@"eval.js"];
     
     // 注入脚本，用来代替 selfevaluateJavaScript:javaScriptString completionHandler:nil
     // 因为 evaluateJavaScript 的返回值不支持那么多的序列化结构的数据结构，还有内存泄漏的问题

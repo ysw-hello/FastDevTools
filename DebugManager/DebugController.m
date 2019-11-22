@@ -66,6 +66,13 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appEnterBackground) name:UIApplicationDidEnterBackgroundNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillTerminate) name:UIApplicationWillTerminateNotification object:nil];
+    });
+    
     // Do any additional setup after loading the view.
     self.view.backgroundColor = [UIColor lightGrayColor];
     self.title =  kDebugControl_MainTitle;
@@ -141,6 +148,21 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 #pragma mark - private SEL
+-(void)appEnterBackground{
+    [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:nil];
+}
+
+- (void)applicationWillTerminate {
+    //APP退出
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_SandBoxKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_WebServerKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_SystemStateKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_DataFetchKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:KUserDefaults_NetMonitorKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
+}
+
 - (UIView *)createViewWithImage:(UIImage*)image title:(NSString *)title iconSize:(CGSize)iconSize space:(CGFloat)space {
     UIView *view = [[UIView alloc] init];
     
@@ -229,7 +251,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         cell.moduleType = kDebug_ModuleType_SandBox;
         
     } else if (curRow == [curArr indexOfObject:kDebugControl_WebServer]) {
-        cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+        cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_WebServerKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_WebServer;
 
     } else if (curRow == [curArr indexOfObject:kDebugControl_DataFetch]) {
@@ -306,7 +328,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (indexPath.row == [[_titleArray objectAtIndex:indexPath.section] indexOfObject:kDebugControl_WebServer] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch]) {
+    if (indexPath.row == [[_titleArray objectAtIndex:indexPath.section] indexOfObject:kDebugControl_WebServer] && [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_WebServerKey_DebugSwitch]) {
         return 50 + [WebServerManager_Debug sharedInstance].webServerView.height;
     }
     return 50;
@@ -361,14 +383,14 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (void)setModuleType:(Debug_ModuleType)moduleType {
     _moduleType = moduleType;
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_SandBoxForWebKey_DebugSwitch] && _moduleType == kDebug_ModuleType_WebServer) {
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaults_WebServerKey_DebugSwitch] && _moduleType == kDebug_ModuleType_WebServer) {
         WebServerManager_Debug *ws_Obj = [WebServerManager_Debug sharedInstance];
         if (ws_Obj.webServerURL_Array.count > 0) {
             UIView *view = [ws_Obj customWebServerView];
             if(view.superview) [view removeFromSuperview];
             [self addSubview:view];
         } else {
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_WebServerKey_DebugSwitch];
             self.debugSwitch.on = NO;
         }
         
@@ -476,7 +498,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     
 }
 - (void)sandBoxForWeb_actionWithState:(BOOL)state {
-    [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_SandBoxForWebKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:state forKey:kUserDefaults_WebServerKey_DebugSwitch];
     WebServerManager_Debug *ws_Obj = [WebServerManager_Debug sharedInstance];
     if (state) {
         [ws_Obj run];
