@@ -93,12 +93,12 @@ static NSString *bonjourName = @"me.local";
         typeof(weakSelf) __strong strongSelf = weakSelf;
 
         NSURL *url = request.URL;
-        NSDictionary __block *result = @{};
+        __block NSDictionary *result = @{};
         
         if ([url.path hasPrefix:@"/react_log.do"]) {
             dispatch_sync(strongSelf->_logQueue, ^{
                 NSMutableArray *logStrs = [NSMutableArray arrayWithCapacity:10];
-                [strongSelf->_eventLogs enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
+                [strongSelf.eventLogs enumerateObjectsUsingBlock:^(id _Nonnull obj, NSUInteger idx, BOOL *_Nonnull stop) {
                     
                     NSError *error;
                     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:obj options:NSJSONWritingPrettyPrinted error:&error];
@@ -109,6 +109,7 @@ static NSString *bonjourName = @"me.local";
                     }
                 }];
                 result = @{ @"count" : @(strongSelf->_eventLogs.count), @"logs" : logStrs };
+                
                 [strongSelf.eventLogs removeAllObjects];
             });
             
@@ -144,7 +145,8 @@ static NSString *bonjourName = @"me.local";
                 [strongSelf.webServer logInfo:@"ParamParseError, err:%@", contentParseError.localizedDescription];
             }
         }
-        return [GCDWebServerDataResponse responseWithJSONObject:@{ @"code" : @"OK", @"data" : result }];
+        
+        return [GCDWebServerDataResponse responseWithJSONObject:@{@"code" : @"OK", @"data" : result.mutableCopy}];
         
     };
     return [block copy];

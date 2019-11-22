@@ -1,3 +1,6 @@
+pre {
+    overflow-x: auto;
+}
 /** widget **/
 .f-hide{
     display: none;

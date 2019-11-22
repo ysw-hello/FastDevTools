@@ -83,12 +83,21 @@ function _renderLogs(logs) {
                 "e4x": false,
                 "indent_empty_lines": false
             }
-            var formatMessage = window.js_beautify( logVal.param.text,formatMessageConfig )
-            addStore({
-                     type: "console.log",
-                     message: formatMessage
-                     
-                     });
+            var paramStr = JSON.stringify(logVal.param.text, function(key, val) {
+                                                           if (typeof val === 'function') {
+                                                           return val + '';
+                                                           }
+                                                           return val;
+                                                           });
+            
+            if (logVal.param.text) {
+                var formatMessage = window.js_beautify(paramStr, formatMessageConfig )
+                addStore({
+                         type: "console.log",
+                         message: formatMessage
+                         
+                         });
+            }
         } else {
             // 先显示日志类型，
             var eleId = "eid" + window.kLogIndex++;
