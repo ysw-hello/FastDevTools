@@ -30,7 +30,13 @@ Vue.component("tool-panel", {
                     clsName: "w-tool-item w-tool-timing",
                     title: "Audit",
                     text: "Timing"
-                }
+                },
+                {
+                    action: "clear",
+                    clsName: "w-tool-item w-tool-clear",
+                    title: "清空屏幕",
+                    text: "Clear"
+                    }
             ]
         };
     },
@@ -65,7 +71,8 @@ Vue.component("tool-panel", {
                     break;
                 case 'help':
                 case 'list':
-                case 'timing':
+               case 'clear':
+              case 'timing':
                     {
                         window.debugger_env.isMobile = false;
                         _real_switch_env();
