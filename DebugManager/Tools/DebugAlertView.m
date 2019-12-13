@@ -86,7 +86,7 @@ static NSString *const DefaultStr = @"www.";
     titleLabel.centerX = contentView.width/2;
     [contentView addSubview:titleLabel];
     //hostPrefixButton
-    if (hostPrefixBtnStrArr.count > 0) {
+    if (hostPrefixBtnStrArr.count > 0 && ![hostPrefixBtnStrArr containsObject:DefaultStr]) {
         hostPrefixBtnStrArr = [hostPrefixBtnStrArr arrayByAddingObject:DefaultStr];
     }
     NSInteger count = hostPrefixBtnStrArr.count > 4 ? 4 : hostPrefixBtnStrArr.count;

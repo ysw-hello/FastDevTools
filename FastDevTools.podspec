@@ -35,6 +35,13 @@ Pod::Spec.new do |s|
     tf.source_files = 'CustomTextField/*.{h,m}'
   end
 
+  #APM界面级无痕埋点
+  s.subspec 'APMRecord' do |apm|
+    apm.source_files = 'APM/*.{h,m}'
+    apm.resources = 'APM/APM_VCBlackList.bundle' #黑名单界面<不采集apm数据>
+    apm.dependency 'YYModel'
+  end
+    
   #DebugManager 本地沙盒可视化，FPS & CPU & 内存 性能可视化
   s.subspec 'DebugManager' do |dm|
     dm.source_files = 'DebugManager/**/*.{h,m}'
@@ -45,10 +52,12 @@ Pod::Spec.new do |s|
     dm.dependency 'GCDWebServer/WebUploader'
     dm.dependency 'GCDWebServer/WebDAV'
     dm.dependency 'FastDevTools/CustomTextField'
+    dm.dependency 'FastDevTools/APMRecord'
     
     dm.resources = 'DebugManager/WebServer/WebDebugger/Resources/*.bundle'
     
     dm.libraries = 'resolv'
+    dm.pod_target_xcconfig = {'HEADER_SEARCH_PATHS' => "$(SDK_DIR)/usr/include/libresolv"}
   end
   
   #Flex 第三方调试工具

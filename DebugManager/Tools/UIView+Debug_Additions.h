@@ -35,7 +35,7 @@ static NSString *const kUserDefaults_DataFetchKey_DebugSwitch = @"kUserDefaults_
 static NSString *const kUserDefaults_OnlineTipsKey_DebugSwitch = @"kUserDefaults_OnlineTipsKey_DebugSwitch";
 static NSString *const KUserDefaults_NetMonitorKey_DebugSwitch = @"KUserDefaults_NetMonitorKey_DebugSwitch";
 static NSString *const KUserDefaults_FlexToolsKey_DebugSwitch = @"KUserDefaults_FlexToolsKey_DebugSwitch";
-
+static NSString *const KUserDefaults_APMRecordKey_DebugSwitch = @"KUserDefaults_APMRecordKey_DebugSwitch";
 
 @interface UIView (Debug_Additions)
 /**

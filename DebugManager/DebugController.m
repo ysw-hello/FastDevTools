@@ -14,6 +14,9 @@
 #import "NetStatus/NetStatus_Debug.h"
 #import "UIView+Debug_Additions.h"
 #import "WebServer/WebServerManager_Debug.h"
+#import <FastDevTools/APM_LogRecorder.h>
+#import <FastDevTools/APM_LogTraceless.h>
+#import <FastDevTools/DebugAlertView.h>
 
 ///主标题
 static NSString *const kDebugControl_MainTitle         =    @"PandoraBox";
@@ -24,12 +27,17 @@ static NSString *const kDebugControl_UIDPaste          =    @"UID(点击复制)"
 static NSString *const kDebugControl_HostChange        =    @"环境设置(点击输入)";
 static NSString *const kDebugControl_TipsOnline        =    @"线上tips开关";
 
+//技术日志
+static NSString *const kDebugControl_APM               =    @"APM页面级无痕埋点(点击输入接收url)";
+
 //调试工具
 static NSString *const kDebugControl_SystemState       =    @"系统状态开关";
 static NSString *const kDebugControl_SandBox           =    @"本地沙盒目录";
 static NSString *const kDebugControl_WebServer         =    @"WebServer调试";
 static NSString *const kDebugControl_DataFetch         =    @"请求抓包开关";
 static NSString *const kDebugControl_NetStatus         =    @"网络状态监测";
+
+//FLEX<提审前，移除>
 static NSString *const kDebugControl_FlexTools         =    @"FLEX工具集";
 
 //可插拔组件
@@ -81,6 +89,11 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
                          kDebugControl_HostChange,           //环境配置
                          kDebugControl_TipsOnline,           //预上线tip服务器
                          ];
+    
+    NSArray *logArr  = @[
+                         kDebugControl_APM                   //APM无痕埋点
+                         ];
+    
     NSArray *toolArr = @[
                          kDebugControl_SystemState,          //系统状态开关
                          kDebugControl_SandBox,              //本地沙盒目录
@@ -88,8 +101,9 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
                          kDebugControl_DataFetch,            //请求抓包开关
                          kDebugControl_NetStatus             //网络监测
                          ];
-    self.titleArray = [NSMutableArray arrayWithObjects:busiArr, toolArr, nil];
-    self.sectionTitleArray = [NSMutableArray arrayWithObjects:@"业务定制", @"调试工具", nil];
+    
+    self.titleArray = [NSMutableArray arrayWithObjects:busiArr, logArr, toolArr, nil];
+    self.sectionTitleArray = [NSMutableArray arrayWithObjects:@"业务定制", @"无痕日志", @"调试工具", nil];
     //flex调试工具
     if (NSClassFromString(Class_FLEXManager)) {
         [self.titleArray addObject:@[kDebugControl_FlexTools]];
@@ -161,6 +175,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:KUserDefaults_NetMonitorKey_DebugSwitch];
     [[NSUserDefaults standardUserDefaults] setBool:NO forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
+    [[NSUserDefaults standardUserDefaults] setBool:NO forKey:KUserDefaults_APMRecordKey_DebugSwitch];
 }
 
 - (UIView *)createViewWithImage:(UIImage*)image title:(NSString *)title iconSize:(CGSize)iconSize space:(CGFloat)space {
@@ -280,6 +295,11 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     } else if (curRow == [curArr indexOfObject:kDebugControl_FlexTools]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_FlexToolsKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_FlexTools;
+        
+    } else if (curRow == [curArr indexOfObject:kDebugControl_APM]) {
+        cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_APMRecordKey_DebugSwitch];
+        cell.moduleType = kDebug_ModuleType_APMRecord;
+        cell.title = [APM_LogRecorder sharedInstance].receiveUrl.length > 3 ? [NSString stringWithFormat:@"APM-URL:%@", [APM_LogRecorder sharedInstance].receiveUrl?:@"--"] : [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     }
 
     //action 响应 (需要依赖于当前控制器)
@@ -319,6 +339,13 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
                 
             }
             
+        } else if (moduleType == kDebug_ModuleType_APMRecord) {//APM无痕埋点
+            [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_APMRecordKey_DebugSwitch];
+            if (isOn) {
+                [[APM_LogTraceless sharedInstance] startAPMLogTraceless];
+            } else {
+                [[APM_LogTraceless sharedInstance] stopAPMLogTraceless];
+            }
         }
         
     };
@@ -343,6 +370,21 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         UIPasteboard *pasteBoard = [UIPasteboard generalPasteboard];
         [pasteBoard setString:self.UIDStr];
         [self.view showAlertWithMessage:@"UID复制成功!"];
+    } else if (indexPath.row == [curArr indexOfObject:kDebugControl_APM]) {
+        DebugAlertView *alert = [[DebugAlertView alloc] init];
+        __weak typeof(self) weakSelf = self;
+        [alert customAlertWithTitle:@"请输入接收APM数据的服务器url" content:nil textFieldPlaceorder:[APM_LogRecorder sharedInstance].receiveUrl? : @"例如：http://192.168.2.1:8808/ios" hostPrefixBtnStrArr:@[@"http://", @"https://"] hostNameBtnStrArr:nil bottomBtnStrArr:@[@"取消", @"确定"] bottomBtnTouchedHandler:^(NSInteger index, NSString *inputStr) {
+            if (index == 1 && inputStr.length > 3) {
+                if ([inputStr rangeOfString:@"://"].location == NSNotFound) {
+                    inputStr = [@"http://" stringByAppendingString:inputStr];
+                }
+                APM_RecorderSetURL(inputStr);
+                NSUInteger row = [self.titleArray[1] indexOfObject:kDebugControl_APM];
+                [weakSelf.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:row inSection:1]] withRowAnimation:UITableViewRowAnimationNone];
+            }
+
+        }];
+
     }
 }
 
