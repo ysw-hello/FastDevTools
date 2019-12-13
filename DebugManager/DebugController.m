@@ -237,6 +237,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         cell = [[DebugCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
     }
     
+    cell.debugSwitch.hidden = NO;
     cell.title = [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     
     NSInteger curRow = indexPath.row;
@@ -279,7 +280,6 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     } else if (curRow == [curArr indexOfObject:kDebugControl_FlexTools]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_FlexToolsKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_FlexTools;
-
     }
 
     //action 响应 (需要依赖于当前控制器)
