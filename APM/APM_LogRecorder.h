@@ -34,7 +34,14 @@
           @"cpuUsage" : @(0.85), //cpu占有率 <多核累加> <浮点型>
           @"cpuUsagePerProcessor" : @[@(0.25), @(0.6)] //cpu每个核心占有率 <数组>
           },
-  
+ 
+  @"app" : @{
+          @"appVersion" : @"4.3.2", //app版本号 <字符串>
+          @"appName" : @"ApmTest", //app名称 <字符串>
+          @"appBuildNum" : @"4.3.3" //app构建版本号 <字符串>
+          @"appBundleID" : @"com.apm.test" //app包签名ID <字符串>
+          },
+ 
   @"param" : @{}, //外部植入
   @"fps" : @(60), //整型
   @"name" : @"" //字符串

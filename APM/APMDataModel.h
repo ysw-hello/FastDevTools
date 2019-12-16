@@ -74,6 +74,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *appVersion;
 @property (nonatomic, strong) NSString *appName;
 @property (nonatomic, strong) NSString *appBuildNum;
+@property (nonatomic, strong) NSString *appBundleID;
 
 @end
 

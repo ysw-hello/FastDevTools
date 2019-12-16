@@ -14,8 +14,14 @@ typedef NS_ENUM(NSUInteger, DebugAlertType) {
 };
 
 typedef void(^BottomBtnTouchedBlock)(NSInteger index ,NSString *inputStr);
+typedef void(^MidBottomBtnTouchedBlock)(NSInteger index);
 
 @interface DebugAlertView : UIView
+
+/**
+ 二级域名按钮<或底部content>点击block
+ */
+@property (nonatomic, copy) MidBottomBtnTouchedBlock midBottomBtnBlock;
 
 /**
  切换域名弹窗

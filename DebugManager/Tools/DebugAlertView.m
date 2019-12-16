@@ -177,7 +177,13 @@ static NSString *const DefaultStr = @"www.";
             [button setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
         
             NSString *hostPrefix = button.titleLabel.text;
-            self.hostTF.text = [NSString stringWithFormat:@"%@", hostPrefix];
+            BOOL www = [hostPrefix isEqualToString:DefaultStr] && ([self.hostTF.text hasPrefix:@"http://"] || [self.hostTF.text hasPrefix:@"https://"]);
+            BOOL com = [hostPrefix isEqualToString:@".com"];
+            if (www || com) {
+                self.hostTF.text = [self.hostTF.text stringByAppendingString:hostPrefix];
+            } else {
+                self.hostTF.text = [NSString stringWithFormat:@"%@", hostPrefix];
+            }
             self.hostTF.keyboardType = UIKeyboardTypeDefault;
             [self.hostTF becomeFirstResponder];
         } else {
@@ -192,10 +198,15 @@ static NSString *const DefaultStr = @"www.";
         if (button.tag == btn.tag) {
             button.layer.borderColor = [UIColor redColor].CGColor;
             [button setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-            if ([_hostTF.text containsString:@"."]) {
-                self.hostTF.text = [[[_hostTF.text componentsSeparatedByString:@"."] firstObject] stringByAppendingString:button.titleLabel.text];
+            NSString *subStr = button.titleLabel.text;
+            if (![subStr hasSuffix:@".com"] && self.midBottomBtnBlock) {
+                self.midBottomBtnBlock(button.tag - 100);
             } else {
-                self.hostTF.text = [_hostTF.text stringByAppendingString:button.titleLabel.text];
+                if ([_hostTF.text containsString:@"."]) { //二级域名处理
+                    self.hostTF.text = [[[_hostTF.text componentsSeparatedByString:@"."] firstObject] stringByAppendingString:subStr];
+                } else {
+                    self.hostTF.text = [_hostTF.text stringByAppendingString:subStr];
+                }
             }
         } else {
             button.layer.borderColor = [UIColor lightGrayColor].CGColor;
@@ -219,7 +230,9 @@ static NSString *const DefaultStr = @"www.";
         }
     }
     
-    self.bottomBtnblock(btn.tag-100, self.hostTF.text);
+    if (self.bottomBtnblock) {
+     self.bottomBtnblock(btn.tag-100, self.hostTF.text);
+    }
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self dismissDebugAlert];

@@ -14,6 +14,8 @@
 #import "NetStatus/NetStatus_Debug.h"
 #import "UIView+Debug_Additions.h"
 #import "WebServer/WebServerManager_Debug.h"
+#import "NSString+EncodeFormat.h"
+
 #import <FastDevTools/APM_LogRecorder.h>
 #import <FastDevTools/APM_LogTraceless.h>
 #import <FastDevTools/DebugAlertView.h>
@@ -373,7 +375,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     } else if (indexPath.row == [curArr indexOfObject:kDebugControl_APM]) {
         DebugAlertView *alert = [[DebugAlertView alloc] init];
         __weak typeof(self) weakSelf = self;
-        [alert customAlertWithTitle:@"请输入接收APM数据的服务器url" content:nil textFieldPlaceorder:[APM_LogRecorder sharedInstance].receiveUrl? : @"例如：http://192.168.2.1:8808/ios" hostPrefixBtnStrArr:@[@"http://", @"https://"] hostNameBtnStrArr:nil bottomBtnStrArr:@[@"取消", @"确定"] bottomBtnTouchedHandler:^(NSInteger index, NSString *inputStr) {
+        [alert customAlertWithTitle:@"请输入接收APM数据的服务器url" content:nil textFieldPlaceorder:[APM_LogRecorder sharedInstance].receiveUrl? : @"例如：http://192.168.2.1:8808/ios" hostPrefixBtnStrArr:@[@"http://", @"https://", @"www.", @".com"] hostNameBtnStrArr:@[@"查看APM数据上传的数据结构"] bottomBtnStrArr:@[@"取消", @"确定"] bottomBtnTouchedHandler:^(NSInteger index, NSString *inputStr) {
             if (index == 1 && inputStr.length > 3) {
                 if ([inputStr rangeOfString:@"://"].location == NSNotFound) {
                     inputStr = [@"http://" stringByAppendingString:inputStr];
@@ -384,6 +386,53 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
             }
 
         }];
+        
+        alert.midBottomBtnBlock = ^(NSInteger index) {
+            if (index == 0) { //展示APM上传的数据结构
+                NSDictionary *dic = @{
+                                      @"device <字符串>" : @{
+                                              @"machineModel <机器型号>" : @"iPhone6,1",
+                                              @"machineName <机器名称>" : @"iPhone 5s",
+                                              @"systemVersion <系统版本号>" : @"12.0.1"
+                                              },
+                                      
+                                      @"disk <长整型 单位(byte)>" : @{
+                                              @"diskSpace <硬盘总大小>" : @(12345),
+                                              @"diskSpaceFree <硬盘可用空间>" : @(111),
+                                              @"diskSpaceUsed <硬盘已用空间>" : @(11222)
+                                              },
+                                      
+                                      @"memory <长整型 单位(byte)>" : @{
+                                              @"memoryTotal <物理内存总大小>" : @(10000),
+                                              @"memoryUsed <占有内存大小>" : @(9100),
+                                              @"memoryFree <可用内存大小>" : @(650),
+                                              @"memoryActive <活跃内存大小>" : @(1000),
+                                              @"memoryInactive <最近被使用过，目前处于不活跃内存大小>" : @(2000),
+                                              @"memoryWired <内核服务占用内存大小>" : @(6000),
+                                              @"memoryPurgable <大块内存大小 内存警告时，优先释放>" : @(25),
+                                              },
+                                      
+                                      @"cpu" : @{
+                                              @"cpuCount <cpu核心数 整型>" : @(2),
+                                              @"cpuUsage <cpu占有率 多核累加 浮点型>" : @(0.85),
+                                              @"cpuUsagePerProcessor <cpu每个核心占有率 数组>" : @[@(0.25), @(0.6)]
+                                              },
+                                      
+                                      @"app" : @{
+                                              @"appVersion <app版本号 字符串>" : @"4.3.2",
+                                              @"appName <app名称 字符串>" : @"ApmTest",
+                                              @"appBuildNum <app构建版本号 字符串>" : @"4.3.3",
+                                              @"appBundleID <app包签名ID 字符串>" : @"com.apm.test"
+                                              },
+                                      
+                                      @"param <外部植入 字典>" : @{},
+                                      @"fps <帧率 整型>" : @(60),
+                                      @"name <点位名称 字符串>" : @"APMData",
+                                      @"timeInterval <时间戳(毫秒) 长整型>" : @(1234567)
+                                      };
+                [[UIApplication sharedApplication].keyWindow showAlertWithMessage:[[dic yy_modelDescription] encodeFormat]];
+            }
+        };
 
     }
 }

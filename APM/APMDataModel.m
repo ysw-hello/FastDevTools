@@ -36,9 +36,10 @@ static UIDevice *_device = nil;
 + (instancetype)customCreate {
     APPModel_APM *appInfo = [[APPModel_APM alloc] init];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-    appInfo.appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
-    appInfo.appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
-    appInfo.appBuildNum = [infoDictionary objectForKey:@"CFBundleVersion"];
+    appInfo.appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"] ? : @"--";
+    appInfo.appName = [infoDictionary objectForKey:@"CFBundleDisplayName"] ? : @"--";
+    appInfo.appBuildNum = [infoDictionary objectForKey:@"CFBundleVersion"] ? : @"--";
+    appInfo.appBundleID = [infoDictionary objectForKey:@"CFBundleIdentifier"] ? : @"--";
     return appInfo;
 }
 
