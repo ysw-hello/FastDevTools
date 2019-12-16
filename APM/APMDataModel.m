@@ -25,11 +25,24 @@ static UIDevice *_device = nil;
     model.memory = [MemoryModel_APM customCreate];
     model.cpu = [CPUModel_APM customCreate];
     model.timeInterval = (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
+    model.app = [APPModel_APM customCreate];
     return model;
 }
 
 @end
 
+@implementation APPModel_APM
+
++ (instancetype)customCreate {
+    APPModel_APM *appInfo = [[APPModel_APM alloc] init];
+    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    appInfo.appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+    appInfo.appName = [infoDictionary objectForKey:@"CFBundleDisplayName"];
+    appInfo.appBuildNum = [infoDictionary objectForKey:@"CFBundleVersion"];
+    return appInfo;
+}
+
+@end
 
 @implementation DeviceModel_APM
 
