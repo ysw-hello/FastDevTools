@@ -6,23 +6,30 @@
     var callbackPool = {};
     var ack_no = 1;
     
-    window.debuggerBridge.isJson = function(obj) {
-        var isjson = typeof(obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
-        return isjson;
-    }
+//    window.debuggerBridge.isJson = function(obj) {
+//        if (!obj)
+//            return false;
+//        var isjson = typeof(obj) == "object" && Object.prototype.toString.call(obj).toLowerCase() == "[object object]" && !obj.length;
+//        return isjson;
+//    }
+    
     window.debuggerBridge.invoke = function(_action, _data, _callback) {
         var rndKey = 'cbk_' + new Date().getTime();
         
         //兼容处理 _data与_callback顺序混乱的问题
-        if (!debuggerBridge.isjson(_data)) {
-            var third = _data;
-            if (debuggerBridge.isjson(_callback)) {
-                _data = _callback;
-            }
-            if (typeof third == 'function') {
-                _callback = third;
-            }
-        }
+//        if (_data) {
+//            if (!window.debuggerBridge.isjson(_data)) {
+//                var third = _data;
+//                if (_callback) {
+//                    if (window.debuggerBridge.isjson(_callback)) {
+//                        _data = _callback;
+//                    }
+//                }
+//                if (typeof third == 'function') {
+//                    _callback = third;
+//                }
+//            }
+//        }
         
         var fullParam = {
             action: _action,

@@ -41,11 +41,15 @@ static NSMutableArray *kHybridCustomJavscripts = nil;
 + (void)_addJavaScript:(NSString *)script when:(WKUserScriptInjectionTime)injectTime forKey:(NSString *)key {
     @synchronized (kHybridCustomJavscripts) {
         if (script && key) {
-            [kHybridCustomJavscripts addObject:@{
-                                                 @"script": script,
-                                                 @"when": @(injectTime),
-                                                 @"key":key
-                                                 }];
+            NSDictionary *dic = @{
+                                  @"script": script,
+                                  @"when": @(injectTime),
+                                  @"key":key
+                                  };
+            if (![kHybridCustomJavscripts containsObject:dic]) {
+                [kHybridCustomJavscripts addObject:dic];
+            }
+            
         }
     }
 }
