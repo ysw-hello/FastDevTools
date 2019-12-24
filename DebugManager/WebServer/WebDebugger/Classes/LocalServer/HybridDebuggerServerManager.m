@@ -12,6 +12,9 @@
 #import "HybridDebuggerDefine.h"
 #import <GCDWebServer/GCDWebServerPrivate.h>
 
+#import <YYModel/YYModel.h>
+#import <FastDevTools/APMDataModel.h>
+
 @interface HybridDebuggerServerManager () <HybridDebuggerViewDelegate>
 
 #pragma mark - Properties
@@ -55,10 +58,9 @@ static NSString *bonjourName = @"me.local";
         
         NSBundle *bundle = [weakSelf getDebuggerBundle];
         NSString *filePath = request.URL.path;
-        
         if ([filePath isEqualToString:@"/"]) {
             filePath = @"server.html";
-        }
+        } 
         
         NSString *dataType = @"text";
         NSString *contentType = @"text/plain";
@@ -144,6 +146,8 @@ static NSString *bonjourName = @"me.local";
                 }
                 [strongSelf.webServer logInfo:@"ParamParseError, err:%@", contentParseError.localizedDescription];
             }
+        } else if ([url.path containsString:APMDataPath]) {
+            [strongSelf proceeAPMData:request.data];
         }
         
         return [GCDWebServerDataResponse responseWithJSONObject:@{@"code" : @"OK", @"data" : result.mutableCopy}];
@@ -242,7 +246,7 @@ static NSString *bonjourName = @"me.local";
     return res ? _webServer.serverURL.description?:@"--" : @"webServer 服务开启失败";
 }
 
-- (GCDWebServer *)getWebServer {
+- (GCDWebServer *)getLocalServer {
     return _webServer;
 }
 
@@ -255,6 +259,12 @@ static NSString *bonjourName = @"me.local";
 }
 
 #pragma mark - pravite SEL
+- (void)proceeAPMData:(NSData *)bodyData {
+    APMDataModel *apmModel = [APMDataModel yy_modelWithJSON:bodyData];
+    NSLog(@"webServer接收的APM数据:%@", [apmModel yy_modelToJSONObject]);
+    //TODO: 数据存储及web轮询请求
+}
+
 - (NSBundle *)getDebuggerBundle {
     NSBundle *debuggerBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:kHybridDebuggerBundleName withExtension:@"bundle"]];
     return debuggerBundle;

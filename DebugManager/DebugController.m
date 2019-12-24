@@ -20,6 +20,9 @@
 #import <FastDevTools/APM_LogTraceless.h>
 #import <FastDevTools/DebugAlertView.h>
 
+#import <FastDevTools/HybridDebuggerServerManager.h>
+#import <GCDWebServer/GCDWebServer.h>
+
 ///主标题
 static NSString *const kDebugControl_MainTitle         =    @"PandoraBox";
 
@@ -301,7 +304,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     } else if (curRow == [curArr indexOfObject:kDebugControl_APM]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_APMRecordKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_APMRecord;
-        cell.title = [APM_LogRecorder sharedInstance].receiveUrl.length > 3 ? [NSString stringWithFormat:@"APM-URL:%@", [APM_LogRecorder sharedInstance].receiveUrl?:@"--"] : [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+        cell.title = [APM_LogRecorder sharedInstance].receiveUrl.length > 3 ? [NSString stringWithFormat:@"APM-URL:%@", [APM_LogRecorder sharedInstance].receiveUrl] : [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     }
 
     //action 响应 (需要依赖于当前控制器)
@@ -309,6 +312,14 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     cell.debugSwithAction = ^(BOOL isOn, Debug_ModuleType moduleType) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (moduleType == kDebug_ModuleType_WebServer) {//web调试
+            if ([APM_LogRecorder sharedInstance].receiveUrl.length < 3) {
+                GCDWebServer *webServer = [[HybridDebuggerServerManager sharedInstance] getLocalServer];
+                NSString *apmUrlStr = webServer.isRunning ? [webServer.serverURL.absoluteString stringByAppendingString:APMDataPath] : @"";
+                APM_RecorderSetURL(apmUrlStr);
+            } else if (!isOn && [[APM_LogRecorder sharedInstance].receiveUrl containsString:[@":8181/" stringByAppendingString:APMDataPath]]) {
+                APM_RecorderSetURL(@"");
+            }
+            
             [tableView reloadData];
             
         } else if (moduleType == kDebug_ModuleType_TipsOnline) {//Tips服务器
@@ -348,6 +359,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
             } else {
                 [[APM_LogTraceless sharedInstance] stopAPMLogTraceless];
             }
+            
         }
         
     };
@@ -599,7 +611,6 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         [ws_Obj.webServerView removeFromSuperview];
         ws_Obj.webServerView = nil;
     }
-    
 }
 
 - (void)systemState_actionWithState:(BOOL)state {

@@ -13,7 +13,7 @@
 //        return isjson;
 //    }
     
-    window.debuggerBridge.invoke = function(_action, _data, _callback) {        
+    window.debuggerBridge.invoke = function(_action, _data, _callback) {
         //兼容处理 _data与_callback顺序混乱的问题
 //        if (_data) {
 //            if (!window.debuggerBridge.isjson(_data)) {

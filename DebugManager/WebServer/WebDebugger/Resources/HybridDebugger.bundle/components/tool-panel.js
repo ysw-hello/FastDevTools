@@ -36,7 +36,13 @@ Vue.component("tool-panel", {
                     clsName: "w-tool-item w-tool-clear",
                     title: "清空屏幕",
                     text: "Clear"
-                    }
+                },
+                {
+                    action: "apm",
+                    clsName: "w-tool-item w-tool-apm",
+                    title: "APM数据图表",
+                    text: "APM"
+                }
             ]
         };
     },
@@ -63,22 +69,25 @@ Vue.component("tool-panel", {
             var ele = e.target;
             var action = ele.dataset.action;
             switch (action) {
-                case "switch":
+              case "switch":
                     {
                         window.debugger_env.isMobile = !window.debugger_env.isMobile;
                         _real_switch_env();
                     }
-                    break;
-                case 'help':
-                case 'list':
-               case 'clear':
+                break;
+              case 'apm': location.href = "charts/WSChartView.html";
+                break;
+              case 'help':
+              case 'list':
               case 'timing':
                     {
                         window.debugger_env.isMobile = false;
                         _real_switch_env();
                         _run_command(':' + action);
                     }
-                    break;
+                break;
+              
+
             }
         }
     },

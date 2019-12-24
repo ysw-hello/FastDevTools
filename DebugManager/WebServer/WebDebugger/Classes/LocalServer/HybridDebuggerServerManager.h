@@ -11,6 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class GCDWebServer;
 
+static NSString *const APMDataPath = @"charts/apm";
+
 @interface HybridDebuggerServerManager : NSObject
 
 /**
