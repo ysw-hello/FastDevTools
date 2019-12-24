@@ -13,9 +13,7 @@
 //        return isjson;
 //    }
     
-    window.debuggerBridge.invoke = function(_action, _data, _callback) {
-        var rndKey = 'cbk_' + new Date().getTime();
-        
+    window.debuggerBridge.invoke = function(_action, _data, _callback) {        
         //兼容处理 _data与_callback顺序混乱的问题
 //        if (_data) {
 //            if (!window.debuggerBridge.isjson(_data)) {
@@ -65,12 +63,13 @@
             func(_data);
         }
     }
-    window.debuggerBridge.__callback = function(_callbackKey, _param) {
+    window.debuggerBridge.__callback = function(_data) {
+        var _callbackKey = _data["callbackKey"];
         var func = callbackPool[_callbackKey];
         if (typeof func == 'function') {
-            func(_param);
+            func(_data);
             // 释放,只用一次
-            callbackPool[_callbackKey] = nil;
+            callbackPool[_callbackKey] = null;
         }
     }
 }(window);

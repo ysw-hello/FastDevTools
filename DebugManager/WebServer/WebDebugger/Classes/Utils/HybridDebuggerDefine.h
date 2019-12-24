@@ -19,6 +19,7 @@
 
 static BOOL kGCDWebServer_logging_enabled = YES; // 调试日志开关
 
+static NSString *const kHybridDebuggerCallBackFunction = @"window.debuggerBridge.__callback";
 static NSString *const kHybridDebuggerActionKey = @"action";
 static NSString *const kHybridDebuggerParamKey = @"param";
 
