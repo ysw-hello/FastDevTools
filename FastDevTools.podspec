@@ -48,9 +48,11 @@ Pod::Spec.new do |s|
     
     dm.dependency 'FMDB'
     dm.dependency 'AFNetworking'
+    
     dm.dependency 'GCDWebServer'
     dm.dependency 'GCDWebServer/WebUploader'
     dm.dependency 'GCDWebServer/WebDAV'
+    
     dm.dependency 'FastDevTools/CustomTextField'
     dm.dependency 'FastDevTools/APMRecord'
     

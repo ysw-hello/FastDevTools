@@ -10,10 +10,11 @@
 #import "HybridDebuggerViewController.h"
 #import "HybridDebuggerLogger.h"
 #import "HybridDebuggerDefine.h"
-#import <GCDWebServer/GCDWebServerPrivate.h>
-
-#import <YYModel/YYModel.h>
 #import <FastDevTools/APMDataModel.h>
+
+#import <GCDWebServer/GCDWebServerPrivate.h>
+#import <YYModel/YYModel.h>
+#import <FMDB/FMDB.h>
 
 @interface HybridDebuggerServerManager () <HybridDebuggerViewDelegate>
 
