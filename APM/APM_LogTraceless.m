@@ -78,8 +78,8 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
                
                 UIViewController *vc = (UIViewController *)self;
                 [[APM_LogTraceless sharedInstance] fetchURLStrWithView:vc.view]; //递归subviews获取webview的url
-                [[APM_LogRecorder sharedInstance] logRecordWithName:NSStringFromClass([self class]) param:[APM_LogTraceless sharedInstance].param interval:5 dataHandler:^(APMDataModel *apmData) { //Native回调 实时绘制性能图表
-                    NSLog(@"Native回调APM数据:%@", [APM_LogTraceless dictionaryWithJsonString:[apmData yy_modelToJSONString]]);
+                [[APM_LogRecorder sharedInstance] logRecordWithName:NSStringFromClass([self class]) param:[APM_LogTraceless sharedInstance].param interval:RecordInterval_APM dataHandler:^(APMDataModel *apmData) { //Native回调 实时绘制性能图表
+//                    NSLog(@"Native回调APM数据:\n%@", [apmData yy_modelToJSONString]);
                 }];
             });
         }
