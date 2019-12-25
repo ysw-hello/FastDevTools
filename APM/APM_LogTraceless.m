@@ -16,11 +16,13 @@
 
 @property (nonatomic, assign) BOOL isRunning;
 @property (nonatomic, strong) dispatch_queue_t safeQueue;
+@property (nonatomic, strong) NSMutableDictionary *param;
 
 @end
 
 @implementation APM_LogTraceless
 
+#pragma mark - swizzle
 static inline void apm_swizzleSelector(Class theClass, SEL originalSelector, SEL swizzledSelector) {
     Method originalMethod = class_getInstanceMethod(theClass, originalSelector);
     Method swizzledMethod = class_getInstanceMethod(theClass, swizzledSelector);
@@ -74,20 +76,9 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSLog(@"apm_viewDidAppear：%@", className);
                
-                NSDictionary *param = nil;
                 UIViewController *vc = (UIViewController *)self;
-                for (UIView *view in vc.view.subviews) {
-                    if ([view isKindOfClass:[WKWebView class]] ) {
-                        param = @{@"webUrl":[(WKWebView *)view URL].absoluteString, @"viewClass":NSStringFromClass([view class]), @"webCoreTyepe" : @"WKWebView"};
-                        break;
-                    }
-                    
-                    if ([view isKindOfClass:[UIWebView class]]) {
-                        param = @{@"webUrl":[(UIWebView *)view request].URL.absoluteString, @"viewClass":NSStringFromClass([view class]), @"webCoreTyepe" : @"UIWebView"};
-                        break;
-                    }
-                }
-                [[APM_LogRecorder sharedInstance] logRecordWithName:NSStringFromClass([self class]) param:@{@"func" : @"viewWillAppear"} interval:5 dataHandler:^(APMDataModel *apmData) { //TODO：实时绘制性能图表
+                [[APM_LogTraceless sharedInstance] fetchURLStrWithView:vc.view]; //递归subviews获取webview的url
+                [[APM_LogRecorder sharedInstance] logRecordWithName:NSStringFromClass([self class]) param:[APM_LogTraceless sharedInstance].param interval:5 dataHandler:^(APMDataModel *apmData) { //TODO：实时绘制性能图表
                     NSLog(@"%@", [APM_LogTraceless dictionaryWithJsonString:[apmData yy_modelToJSONString]]);
                 }];
             });
@@ -96,6 +87,46 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
     }
     
     [self apm_viewWillAppear:animated];
+}
+
+// 递归获取子视图
+- (void)fetchURLStrWithView:(UIView *)view{
+    NSArray *subviews = [view subviews];
+    NSMutableDictionary *param = @{@"func" : @"viewWillAppear"}.mutableCopy;
+
+    if (subviews.count == 0) {
+        if ([view isKindOfClass:[WKWebView class]] && [view respondsToSelector:@selector(URL)]) {
+            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[view performSelector:@selector(URL)] absoluteString], @"viewClass":NSStringFromClass([view class]), @"webCoreTyepe" : @"WKWebView"}];
+            self.param = param;
+            return;
+        }
+        
+        if ([view isKindOfClass:[UIWebView class]] && [view respondsToSelector:@selector(request)]) {
+            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[(NSURLRequest *)[view performSelector:@selector(request)] URL] absoluteString], @"viewClass":NSStringFromClass([view class]), @"webCoreTyepe" : @"UIWebView"}];
+            self.param = param;
+            return;
+        }
+        
+        self.param = param;
+        return;
+    }
+
+    for (UIView *subview in subviews) {
+        if ([subview isKindOfClass:[WKWebView class]] && [subview respondsToSelector:@selector(URL)]) {
+            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[subview performSelector:@selector(URL)] absoluteString], @"viewClass":NSStringFromClass([subview class]), @"webCoreTyepe" : @"WKWebView"}];
+            self.param = param;
+            return;
+        }
+        
+        if ([subview isKindOfClass:[UIWebView class]] && [subview respondsToSelector:@selector(request)]) {
+            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[(NSURLRequest *)[subview performSelector:@selector(request)] URL] absoluteString], @"viewClass":NSStringFromClass([subview class]), @"webCoreTyepe" : @"UIWebView"}];
+            self.param = param;
+            return;
+        }
+        
+        [[APM_LogTraceless sharedInstance] fetchURLStrWithView:subview];
+    }
+    
 }
 
 + (NSDictionary *)dictionaryWithJsonString:(NSString *)jsonString {
