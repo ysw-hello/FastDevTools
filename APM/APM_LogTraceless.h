@@ -60,7 +60,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 ///APM数据无痕采集时间间隔(s)
-static NSUInteger const RecordInterval_APM = 5;
+static NSUInteger const RecordInterval_APM = 2;
 
 @interface APM_LogTraceless : NSObject
 

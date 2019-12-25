@@ -67,6 +67,10 @@ APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     [self fetchDeviceAPMWithName:name param:param SamplingCount:ULONG_MAX interval:interval dataHandler:dataHandler];
 }
 
+- (void)tracelessRecordWithPageModel:(PageModel_APM *)pageModel interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler {
+    [self logRecordWithName:pageModel.pageName param:[pageModel yy_modelToJSONObject] interval:interval dataHandler:dataHandler];;
+}
+
 - (void)fetchDeviceAPMWithName:(NSString *)name param:(NSDictionary * __nullable)param SamplingCount:(NSUInteger)count interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler {
     if (self.receiveUrl.length < 3) {
         return;

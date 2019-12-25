@@ -10,14 +10,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class DeviceModel_APM, DiskModel_APM, MemoryModel_APM, CPUModel_APM, APPModel_APM;
+@class DeviceModel_APM, DiskModel_APM, MemoryModel_APM, CPUModel_APM, APPModel_APM, PageModel_APM;
 
 @interface APMDataModel : NSObject
 
 /**
- 机器信息
+ 机器信息 <APP生命周期内，只传一次>
  */
 @property (nonatomic, strong) DeviceModel_APM *device;
+
+/**
+ app信息 <APP生命周期内，只传一次>
+ */
+@property (nonatomic, strong) APPModel_APM *app;
 
 /**
  硬盘信息
@@ -37,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  外部植入参数
  */
-@property (nonatomic, strong) NSDictionary *param;
+@property (nonatomic, strong) NSDictionary *busiParam;
 
 /**
  点位名称
@@ -45,29 +50,26 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *name;
 
 /**
- 帧率
+ 页面信息
  */
-@property (nonatomic, assign) NSUInteger fps;
-
-/**
- 时间戳(ms)
- */
-@property (nonatomic, assign) int64_t timeInterval;
-
-/**
- app信息
- */
-@property (nonatomic, strong) APPModel_APM *app;
+@property (nonatomic, strong) PageModel_APM *page;
 
 
 + (APMDataModel *)createAPMDataWithName:(NSString *)name param:(NSDictionary *)param fps:(NSUInteger)fps;
 
 @end
 
+@interface PageModel_APM : NSObject
 
+@property (nonatomic, strong) NSString *pageName;
+@property (nonatomic, assign) NSUInteger fps;
+@property (nonatomic, assign) int64_t entryInterval;
+@property (nonatomic, strong) NSString *webUrl;
+@property (nonatomic, strong) NSString *viewClass;
+@property (nonatomic, strong) NSString *webCoreType;
+@property (nonatomic, strong) NSString *naFunc;
 
-
-
+@end
 
 @interface APPModel_APM : NSObject <APMModelDelegate>
 
@@ -75,6 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *appName;
 @property (nonatomic, strong) NSString *appBuildNum;
 @property (nonatomic, strong) NSString *appBundleID;
+@property (nonatomic, assign) int64_t curInterval;
 
 @end
 
@@ -83,6 +86,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong) NSString *machineModel_;
 @property (nonatomic, strong) NSString *machineName_;
 @property (nonatomic, strong) NSString *systemVersion_;
+@property (nonatomic, assign) int64_t curInterval;
 
 @end
 
@@ -92,6 +96,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) int64_t diskSpace;
 @property (nonatomic, assign) int64_t diskSpaceFree;
 @property (nonatomic, assign) int64_t diskSpaceUsed;
+@property (nonatomic, assign) int64_t curInterval;
 
 @end
 
@@ -105,6 +110,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) int64_t memoryInactive;
 @property (nonatomic, assign) int64_t memoryWired;
 @property (nonatomic, assign) int64_t memoryPurgable;
+@property (nonatomic, assign) int64_t curInterval;
 
 @end
 
@@ -114,6 +120,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) NSUInteger cpuCount;
 @property (nonatomic, assign) float cpuUsage;
 @property (nonatomic, strong) NSArray <__kindof NSNumber *> *cpuUsagePerProcessor;
+@property (nonatomic, assign) int64_t curInterval;
 
 @end
 

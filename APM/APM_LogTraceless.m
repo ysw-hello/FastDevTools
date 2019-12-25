@@ -7,6 +7,8 @@
 
 #import "APM_LogTraceless.h"
 #import "APM_LogRecorder.h"
+#import "APMDataModel.h"
+
 #import <objc/runtime.h>
 #import <WebKit/WebKit.h>
 
@@ -16,7 +18,7 @@
 
 @property (nonatomic, assign) BOOL isRunning;
 @property (nonatomic, strong) dispatch_queue_t safeQueue;
-@property (nonatomic, strong) NSMutableDictionary *param;
+@property (nonatomic, strong) PageModel_APM *pageModel;
 
 @end
 
@@ -69,17 +71,25 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
 
 #pragma mark - private SEL
 - (void)apm_viewWillAppear:(BOOL)animated {
-    if ([APM_LogTraceless sharedInstance].isRunning) {
+    APM_LogTraceless *apmTraceless = [APM_LogTraceless sharedInstance];
+    if (apmTraceless.isRunning) {
         NSString *className = NSStringFromClass([self class]);
         
-        if ([[APM_LogTraceless sharedInstance] shouldTrackWithController:(UIViewController *)self]) {
+        if ([apmTraceless shouldTrackWithController:(UIViewController *)self]) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSLog(@"apm_viewDidAppear：%@", className);
                
                 UIViewController *vc = (UIViewController *)self;
-                [[APM_LogTraceless sharedInstance] fetchURLStrWithView:vc.view]; //递归subviews获取webview的url
-                [[APM_LogRecorder sharedInstance] logRecordWithName:NSStringFromClass([self class]) param:[APM_LogTraceless sharedInstance].param interval:RecordInterval_APM dataHandler:^(APMDataModel *apmData) { //Native回调 实时绘制性能图表
+                //递归subviews获取webview的url
+                [apmTraceless fetchURLStrWithView:vc.view];
+                
+                apmTraceless.pageModel.naFunc = @"viewWillAppear";
+                apmTraceless.pageModel.pageName = NSStringFromClass([self class]);
+                apmTraceless.pageModel.entryInterval = (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
+                
+                [[APM_LogRecorder sharedInstance] tracelessRecordWithPageModel:apmTraceless.pageModel interval:RecordInterval_APM dataHandler:^(APMDataModel *apmData) { //Native回调
 //                    NSLog(@"Native回调APM数据:\n%@", [apmData yy_modelToJSONString]);
+
                 }];
             });
         }
@@ -92,35 +102,43 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
 // 递归获取子视图
 - (void)fetchURLStrWithView:(UIView *)view{
     NSArray *subviews = [view subviews];
-    NSMutableDictionary *param = @{@"func" : @"viewWillAppear"}.mutableCopy;
+    PageModel_APM *page = [[PageModel_APM alloc] init];
 
     if (subviews.count == 0) {
         if ([view isKindOfClass:[WKWebView class]] && [view respondsToSelector:@selector(URL)]) {
-            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[view performSelector:@selector(URL)] absoluteString], @"viewClass":NSStringFromClass([view class]), @"webCoreTyepe" : @"WKWebView"}];
-            self.param = param;
+            page.webUrl = [(NSURL *)[view performSelector:@selector(URL)] absoluteString];
+            page.viewClass = NSStringFromClass([view class]);
+            page.webCoreType = @"WKWebView";
+            self.pageModel = page;
             return;
         }
         
         if ([view isKindOfClass:[UIWebView class]] && [view respondsToSelector:@selector(request)]) {
-            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[(NSURLRequest *)[view performSelector:@selector(request)] URL] absoluteString], @"viewClass":NSStringFromClass([view class]), @"webCoreTyepe" : @"UIWebView"}];
-            self.param = param;
+            page.webUrl = [(NSURL *)[(NSURLRequest *)[view performSelector:@selector(request)] URL] absoluteString];
+            page.viewClass = NSStringFromClass([view class]);
+            page.webCoreType = @"UIWebView";
+            self.pageModel = page;
             return;
         }
         
-        self.param = param;
+        self.pageModel = page;
         return;
     }
 
     for (UIView *subview in subviews) {
         if ([subview isKindOfClass:[WKWebView class]] && [subview respondsToSelector:@selector(URL)]) {
-            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[subview performSelector:@selector(URL)] absoluteString], @"viewClass":NSStringFromClass([subview class]), @"webCoreTyepe" : @"WKWebView"}];
-            self.param = param;
+            page.webUrl = [(NSURL *)[subview performSelector:@selector(URL)] absoluteString];
+            page.viewClass = NSStringFromClass([subview class]);
+            page.webCoreType = @"WKWebView";
+            self.pageModel = page;
             return;
         }
         
         if ([subview isKindOfClass:[UIWebView class]] && [subview respondsToSelector:@selector(request)]) {
-            [param addEntriesFromDictionary:@{@"webUrl":[(NSURL *)[(NSURLRequest *)[subview performSelector:@selector(request)] URL] absoluteString], @"viewClass":NSStringFromClass([subview class]), @"webCoreTyepe" : @"UIWebView"}];
-            self.param = param;
+            page.webUrl = [(NSURL *)[(NSURLRequest *)[subview performSelector:@selector(request)] URL] absoluteString];
+            page.viewClass = NSStringFromClass([subview class]);
+            page.webCoreType = @"UIWebView";
+            self.pageModel = page;
             return;
         }
         

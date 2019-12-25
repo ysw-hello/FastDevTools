@@ -14,7 +14,7 @@
 
 #import <GCDWebServer/GCDWebServerPrivate.h>
 #import <YYModel/YYModel.h>
-#import <FMDB/FMDB.h>
+#import "WSFMDB.h"
 
 @interface HybridDebuggerServerManager () <HybridDebuggerViewDelegate>
 
@@ -30,6 +30,8 @@
 @property (nonatomic, copy) NSMutableArray *eventLogs;
 
 @property (nonatomic, strong) HybridDebuggerViewController *debugVC;
+
+@property (nonatomic, strong) WSFMDB *apm_db;
 
 #pragma mark - SEL
 
@@ -48,6 +50,20 @@ static NSString *bonjourName = @"me.local";
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(requestEventOccur:) name:kHybridDebuggerInvokeRequestEvent object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(responseEventOccur:) name:kHybridDebuggerInvokeResponseEvent object:nil];
         [[HybridDebuggerMessageDispatch sharedInstance] setupDebugger];
+        
+        self.logQueue = dispatch_queue_create("com.wslogger.syncQueue", DISPATCH_QUEUE_SERIAL);
+        //初始化db
+        NSString *dbName = @"APM_DB.sqlite";
+        NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+        [[NSFileManager defaultManager] removeItemAtPath:[path stringByAppendingPathComponent:dbName] error:nil];
+        self.apm_db = [WSFMDB shareDatabase:dbName path:path];
+        [_apm_db jq_createTable:@"apm_page" dicOrModel:[PageModel_APM class]];
+        [_apm_db jq_createTable:@"apm_device" dicOrModel:[DeviceModel_APM class]];
+        [_apm_db jq_createTable:@"apm_cpu" dicOrModel:[CPUModel_APM class]];
+        [_apm_db jq_createTable:@"apm_memory" dicOrModel:[MemoryModel_APM class]];
+        [_apm_db jq_createTable:@"apm_disk" dicOrModel:[DiskModel_APM class]];
+        [_apm_db jq_createTable:@"apm_app" dicOrModel:[APPModel_APM class]];        
+
     }
     return self;
 }
@@ -162,9 +178,7 @@ static NSString *bonjourName = @"me.local";
     static HybridDebuggerServerManager *_manager;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        _manager = [[HybridDebuggerServerManager alloc] init];
-        _manager.logQueue = dispatch_queue_create("com.wslogger.syncQueue", DISPATCH_QUEUE_SERIAL);
-        
+        _manager = [[HybridDebuggerServerManager alloc] init];        
     });
     return _manager;
 }
@@ -260,10 +274,34 @@ static NSString *bonjourName = @"me.local";
 }
 
 #pragma mark - pravite SEL
-- (void)proceeAPMData:(NSData *)bodyData {
-    NSDictionary *apmDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
-    NSLog(@"webServer接收的APM数据:\n%@",apmDic);
-    //TODO: 数据存储及web轮询请求
+- (void)proceeAPMData:(NSData *)bodyData { //TODO: web轮询请求
+    __weak typeof(self) weakSelf = self;
+    [_apm_db jq_inDatabase:^{
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        
+        NSDictionary *apmDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
+        APMDataModel *model = [APMDataModel yy_modelWithJSON:bodyData];
+        if (model.page.fps > 0) {
+            static dispatch_once_t onceToken;
+            dispatch_once(&onceToken, ^{
+                [strongSelf.apm_db jq_insertTable:@"apm_device" dicOrModel:model.device];
+                [strongSelf.apm_db jq_insertTable:@"apm_app" dicOrModel:model.app];
+            });
+            [strongSelf.apm_db jq_insertTable:@"apm_cpu" dicOrModel:model.cpu];
+            [strongSelf.apm_db jq_insertTable:@"apm_disk" dicOrModel:model.disk];
+            [strongSelf.apm_db jq_insertTable:@"apm_memory" dicOrModel:model.memory];
+        }
+        
+        //插入apm_page
+        NSString *sql = [NSString stringWithFormat:@"where pageName = %@ and entryInterval = %@", model.page.pageName, @(model.page.entryInterval)];
+        NSArray *res = [strongSelf.apm_db jq_lookupTable:@"apm_page" dicOrModel:[PageModel_APM class] whereFormat:sql];
+        if (res.count < 1) {
+            [strongSelf.apm_db jq_insertTable:@"apm_page" dicOrModel:model.page];
+        }
+        
+        NSLog(@"webServer接收的APM数据:\n%@",apmDic);
+    }];
+    
 }
 
 - (NSBundle *)getDebuggerBundle {

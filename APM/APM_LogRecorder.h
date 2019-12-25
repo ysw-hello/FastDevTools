@@ -76,9 +76,18 @@ FOUNDATION_EXTERN  APM_SamplingRecordLog(NSString *name, NSDictionary *param); /
  @param name 点名称
  @param param 外部植入参数
  @param interval 采集时间间隔(s)
- @param dataHandler 单次采集APM数据
+ @param dataHandler 单次采集APM数据回调
  */
-- (void)logRecordWithName:(NSString *)name param:(NSDictionary * __nullable)param interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler;
+- (void)logRecordWithName:(NSString *)name busiParam:(NSDictionary * __nullable)busiParam interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler;
+
+/**
+ APM数据 无痕采集 <不间断采集>
+
+ @param pageModel 页面相关数据模型
+ @param interval 采集时间间隔(s)
+ @param dataHandler 单次采集APM数据回调
+ */
+- (void)tracelessRecordWithPageModel:(PageModel_APM *)pageModel interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler;
 
 /**
  获取设备APM数据 <数据采样>

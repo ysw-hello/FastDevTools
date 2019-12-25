@@ -10,24 +10,35 @@
 
 static UIDevice *_device = nil;
 
+static inline int64_t getCurInterval() {
+    return (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
+}
+
 @implementation APMDataModel
 + (APMDataModel *)createAPMDataWithName:(NSString *)name param:(NSDictionary *)param fps:(NSUInteger)fps {
-    if (!name) {
+    if (!name || ![param isKindOfClass:[NSDictionary class]]) {
         return nil;
     }
     _device = [UIDevice currentDevice];
     APMDataModel *model = [[APMDataModel alloc] init];
-    model.name = name;
-    model.param = param;
-    model.fps = fps;
+    model.name = name; //业务采集调用
+    model.busiParam = param; //业务采集调用
     model.device = [DeviceModel_APM customCreate];
     model.disk = [DiskModel_APM customCreate];
     model.memory = [MemoryModel_APM customCreate];
     model.cpu = [CPUModel_APM customCreate];
-    model.timeInterval = (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
     model.app = [APPModel_APM customCreate];
+    
+    PageModel_APM *pageModel = [PageModel_APM yy_modelWithJSON:param];
+    pageModel.fps = fps;
+    model.page = pageModel; //无痕埋点调用
+
     return model;
 }
+
+@end
+
+@implementation PageModel_APM
 
 @end
 
@@ -40,6 +51,7 @@ static UIDevice *_device = nil;
     appInfo.appName = [infoDictionary objectForKey:@"CFBundleDisplayName"] ? : @"--";
     appInfo.appBuildNum = [infoDictionary objectForKey:@"CFBundleVersion"] ? : @"--";
     appInfo.appBundleID = [infoDictionary objectForKey:@"CFBundleIdentifier"] ? : @"--";
+    appInfo.curInterval = getCurInterval();
     return appInfo;
 }
 
@@ -52,6 +64,7 @@ static UIDevice *_device = nil;
     model.machineModel_ = _device.machineModel_;
     model.machineName_ = _device.machineName_;
     model.systemVersion_ = _device.systemVersion_;
+    model.curInterval = getCurInterval();
     return model;
 }
 
@@ -64,6 +77,7 @@ static UIDevice *_device = nil;
     model.diskSpace = _device.diskSpace;
     model.diskSpaceFree = _device.diskSpaceFree;
     model.diskSpaceUsed = _device.diskSpaceUsed;
+    model.curInterval = getCurInterval();
     return model;
 }
 
@@ -80,6 +94,7 @@ static UIDevice *_device = nil;
     model.memoryInactive = _device.memoryInactive;
     model.memoryWired = _device.memoryWired;
     model.memoryPurgable = _device.memoryPurgable;
+    model.curInterval = getCurInterval();
     return model;
 }
 
@@ -92,6 +107,7 @@ static UIDevice *_device = nil;
     model.cpuCount = _device.cpuCount;
     model.cpuUsage = _device.cpuUsage;
     model.cpuUsagePerProcessor = _device.cpuUsagePerProcessor;
+    model.curInterval = getCurInterval();
     return model;
 }
 

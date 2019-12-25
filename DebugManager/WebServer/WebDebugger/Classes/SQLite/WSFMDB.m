@@ -141,12 +141,23 @@ static WSFMDB *jqdb = nil;
         if ((nameArr && [nameArr containsObject:key]) || [key isEqualToString:@"pkid"]) {
             continue;
         }
+        
+        NSString *type = SQL_TEXT;
+        id value = dic[key];
+        if ([value isKindOfClass:[NSString class]]) {
+            type = SQL_TEXT;
+        } else if ([value isKindOfClass:[NSNumber class]]) {
+            type = SQL_REAL;
+        } else if ([value isKindOfClass:[NSData class]]) {
+            type = SQL_BLOB;
+        }
+        
         if (keyCount == dic.count) {
-            [fieldStr appendFormat:@" %@ %@)", key, dic[key]];
+            [fieldStr appendFormat:@" %@ %@)", key, type];
             break;
         }
         
-        [fieldStr appendFormat:@" %@ %@,", key, dic[key]];
+        [fieldStr appendFormat:@" %@ %@,", key, type];
     }
     
     BOOL creatFlag;
