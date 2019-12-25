@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (__kindof UIViewController *)getCurrentVC;
 + (__kindof UIViewController *)viewControllerForVeryView:(__kindof UIView *)veryView;
 + (__kindof WKWebView *)topVCIncludeVeryWebViewClass:(Class)webviewClass;
++ (NSDictionary *)ws_dictionaryWithJSON:(id)json;
 
 @end
 

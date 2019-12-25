@@ -260,8 +260,8 @@ static NSString *bonjourName = @"me.local";
 
 #pragma mark - pravite SEL
 - (void)proceeAPMData:(NSData *)bodyData {
-    APMDataModel *apmModel = [APMDataModel yy_modelWithJSON:bodyData];
-    NSLog(@"webServer接收的APM数据:%@", [apmModel yy_modelToJSONObject]);
+    NSDictionary *apmDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
+    NSLog(@"webServer接收的APM数据:%@", apmDic);
     //TODO: 数据存储及web轮询请求
 }
 
