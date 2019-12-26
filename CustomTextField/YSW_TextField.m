@@ -2,8 +2,8 @@
 //  YSW_TextField.m
 //  homework
 //
-//  Created by 闫士伟 on 2018/6/13.
-//  Copyright © 2018年 zyb. All rights reserved.
+//  Created by TimmyYan on 2018/6/13.
+//  Copyright © 2018年 Timmy. All rights reserved.
 //
 
 #import "YSW_TextField.h"

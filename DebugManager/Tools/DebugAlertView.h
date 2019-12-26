@@ -30,7 +30,7 @@ typedef void(^MidBottomBtnTouchedBlock)(NSInteger index);
  @param content 描述文字
  @param textFieldPlaceorder 输入框占位文字
  @param hostPrefixBtnStrArr 环境类型,如qatest，test，线上 <最多传入三种类型>
- @param hostNameBtnStrArr   域名后缀类型,如.suanshubang.com，.zybang.com，线上 <最多传入两种种类型>
+ @param hostNameBtnStrArr   域名后缀类型,如.baidu.com，线上 <最多传入两种种类型>
  @param bottomBtnStrArr 底部按钮，如取消，确定<最多传入四种类型>
  @param bottomBtnTouchedHandler 传出所点击按钮在bottomBtnStrArr的索引（左->右）以及输入框的内容<底部所有按钮的点击都会移除弹窗>
  @return 带透明背景的全屏view <单击黑色蒙层，弹窗移除>

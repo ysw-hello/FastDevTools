@@ -188,10 +188,10 @@
 }
 
 - (void)monitorNetService {
-    self.currentDormain = @"www.zybang.com";//默认域名
+    self.currentDormain = @"www.baidu.com";//默认域名
     //UI处理
     _startBtn = [self customButtonWithFrame:CGRectMake(10.0f, 150.0f, 100.0f, 50.0f) selector:@selector(startNetDiagnosis) title:@"开始诊断" superView:self];
-    _dormainBtn = [self customButtonWithFrame:CGRectMake(130.0f, 150.0f, self.width - 130.f - 10.f, 50.0f) selector:@selector(domainInputAction:) title:@"www.zybang.com" superView:self];
+    _dormainBtn = [self customButtonWithFrame:CGRectMake(130.0f, 150.0f, self.width - 130.f - 10.f, 50.0f) selector:@selector(domainInputAction:) title:@"www.baidu.com" superView:self];
     
     _txtView_log = [[UITextView alloc] initWithFrame:CGRectZero];
     _txtView_log.layer.borderWidth = 1.f;
@@ -209,7 +209,7 @@
 
 - (void)domainInputAction:(UIButton *)button {
     __weak typeof(self) weakSelf = self;
-    [DebugAlertView createAlertWithTitle:@"域名输入" content:@"可以配置也可以手动输入域名" textFieldPlaceorder:@"例如：www.zybang.com" hostPrefixBtnStrArr:@[@"test", @"qatest"] hostNameBtnStrArr:@[@".suanshubang.com", @".zybang.com"] bottomBtnStrArr:@[@"取消", @"确定"] bottomBtnTouchedHandler:^(NSInteger index, NSString *inputStr) {
+    [DebugAlertView createAlertWithTitle:@"域名输入" content:@"可以配置也可以手动输入域名" textFieldPlaceorder:@"例如：www.baidu.com" hostPrefixBtnStrArr:@[@"test", @"qatest"] hostNameBtnStrArr:@[@".com"] bottomBtnStrArr:@[@"取消", @"确定"] bottomBtnTouchedHandler:^(NSInteger index, NSString *inputStr) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
         if (index == 1) {
             NSString *https = @"https://";
@@ -219,7 +219,7 @@
             } else if ([inputStr hasPrefix:http]) {
                 inputStr = [inputStr substringFromIndex:http.length];
             } else if (inputStr.length < 1) {
-                inputStr = @"www.zybang.com";
+                inputStr = @"www.baidu.com";
             }
             [button setTitle:inputStr forState:UIControlStateNormal];
             strongSelf.currentDormain = inputStr;

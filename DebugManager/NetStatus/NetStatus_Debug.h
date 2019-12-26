@@ -3,7 +3,7 @@
 //  NetStatus_Demo
 //
 //  Created by TimmyYan on 2018/12/3.
-//  Copyright © 2018年 com.zuoyebang. All rights reserved.
+//  Copyright © 2018年 com.ysw. All rights reserved.
 //  基于RealReachability<实时监测实际网络状态> & LDNetDiagnoService<进行网络诊断分析> & ifaddrs.h <读取网卡I/O数据，进行实时网速监测>
 
 #import <Foundation/Foundation.h>

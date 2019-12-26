@@ -3,7 +3,7 @@
 //  NetStatus_Demo
 //
 //  Created by TimmyYan on 2018/12/7.
-//  Copyright © 2018年 com.zuoyebang. All rights reserved.
+//  Copyright © 2018年 com.ysw. All rights reserved.
 //
 
 #import <CoreTelephony/CTCarrier.h>
@@ -19,7 +19,7 @@
 #import "NetStatus_TraceRoute.h"
 #import "NetStatus_WiFiInfo.h"
 
-static NSString *const kPingOpenServerIP = @"www.zybang.com";
+static NSString *const kPingOpenServerIP = @"www.baidu.com";
 static NSString *const kCheckOutIPURL = @"";
 
 @interface NetStatus_Service () <NetStatus_PingDelegate, NetStatus_ConnectDelegate, NetStatus_TraceRouteDelegate>

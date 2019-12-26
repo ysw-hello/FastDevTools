@@ -73,8 +73,8 @@
 
 - (void)debugCommand:(NSString *)action param:(NSDictionary *)param {
     if (action.length > 0) {
-        // 检查当前是否有 ZYBBaseWKWebView 正在展示，如果有则使用此界面，如果没有新开一个页面
-        WKWebView *veryWebView = [[self class] topVCIncludeVeryWebViewClass:NSClassFromString(@"ZYBBaseWKWebView")];
+        // 检查当前是否有 WKWebView 正在展示，如果有则使用此界面，如果没有新开一个页面
+        WKWebView *veryWebView = [[self class] topVCIncludeVeryWebViewClass:[WKWebView class]];
         if (!veryWebView && self.block) {
             veryWebView = self.block(action, param);
         }

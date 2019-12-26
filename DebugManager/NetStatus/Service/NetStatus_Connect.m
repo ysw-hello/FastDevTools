@@ -3,7 +3,7 @@
 //  NetStatus_Demo
 //
 //  Created by TimmyYan on 2018/12/10.
-//  Copyright © 2018年 com.zuoyebang. All rights reserved.
+//  Copyright © 2018年 com.ysw. All rights reserved.
 //
 
 #import <netinet/in.h>
