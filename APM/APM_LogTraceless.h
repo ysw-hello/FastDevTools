@@ -7,52 +7,56 @@
 /** <APM无痕埋点采集数据结构>
 {
     app =     {
-        appBuildNum = "1.0.1";
+        appBuildNum = "1.0.0";
         appBundleID = "com.timmy.apm";
-        appName = "\U4f5c\U4e1a\U5e2e\U76f4\U64ad\U8bfe";
-        appVersion = "1.0.0";
+        appName = "APMTest";
+        appVersion = "1.0.2";
+        curInterval = 1577336961404;
     };
     cpu =     {
         cpuCount = 6;
-        cpuUsage = "0.721028208732605";
+        cpuUsage = "0.7080432772636414";
         cpuUsagePerProcessor =         (
-                                        "0.1908515244722366",
-                                        "0.1539614349603653",
-                                        "0.033342491835355759",
-                                        "0.029603132978081703",
-                                        "0.1752402782440186",
-                                        "0.1380293667316437"
+                                        "0.1878475695848465",
+                                        "0.1516067683696747",
+                                        "0.031938750296831131",
+                                        "0.02829425036907196",
+                                        "0.1725597530603409",
+                                        "0.1357961744070053"
                                         );
+        allProcessorUsageStr = "0.1878475695848465,0.1516067683696747,0.031938750296831131,0.02829425036907196,0.1725597530603409,0.1357961744070053";
+        curInterval = 1577336961404;
     };
     device =     {
+        curInterval = 1577336961404;
         "machineModel_" = "iPhone10,2";
         "machineName_" = "iPhone 8 Plus";
         "systemVersion_" = "12.1.4";
     };
     disk =     {
+        curInterval = 1577336961404;
         diskSpace = 255989469184;
-        diskSpaceFree = 179183546368;
-        diskSpaceUsed = 76805922816;
+        diskSpaceFree = 178838278144;
+        diskSpaceUsed = 77151191040;
     };
-    fps = 60;
     memory =     {
-        memoryActive = 1102987264;
-        memoryFree = 148324352;
-        memoryInactive = 985432064;
-        memoryPurgable = 152109056;
+        curInterval = 1577336961404;
+        memoryActive = 1041809408;
+        memoryFree = 52871168;
+        memoryInactive = 1029193728;
+        memoryPurgable = 146423808;
         memoryTotal = 3134406656;
-        memoryUsed = 2563244032;
-        memoryWired = 474824704;
+        memoryUsed = 2466660352;
+        memoryWired = 395657216;
     };
-    name = APMTestWKWebViewController;
-    param =     {
-        func = viewWillAppear;
-        viewClass = APMTestWKWebView;
-        webCoreTyepe = WKWebView;
-        webUrl = "https://github.com/ysw-hello/FastDevTools";
+    page =     {
+        entryInterval = 1577336961404;
+        fps = 60;
+        naFunc = viewWillAppear;
+        pageName = APMTestViewController;
     };
-    timeInterval = 1577254483125;
 }
+
 */
 
 #import <Foundation/Foundation.h>

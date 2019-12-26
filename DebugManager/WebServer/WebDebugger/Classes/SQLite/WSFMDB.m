@@ -8,6 +8,7 @@
 #import "WSFMDB.h"
 #import "FMDB.h"
 #import <objc/runtime.h>
+#import <YYModel/YYModel.h>
 
 // 数据库中常见的几种类型
 #define SQL_TEXT     @"TEXT" //文本
@@ -25,8 +26,7 @@
 
 @implementation WSFMDB
 
-- (FMDatabaseQueue *)dbQueue
-{
+- (FMDatabaseQueue *)dbQueue {
     if (!_dbQueue) {
         FMDatabaseQueue *fmdb = [FMDatabaseQueue databaseQueueWithPath:_dbPath];
         self.dbQueue = fmdb;
@@ -37,18 +37,15 @@
 }
 
 static WSFMDB *jqdb = nil;
-+ (instancetype)shareDatabase
-{
++ (instancetype)shareDatabase {
     return [WSFMDB shareDatabase:nil];
 }
 
-+ (instancetype)shareDatabase:(NSString *)dbName
-{
++ (instancetype)shareDatabase:(NSString *)dbName {
     return [WSFMDB shareDatabase:dbName path:nil];
 }
 
-+ (instancetype)shareDatabase:(NSString *)dbName path:(NSString *)dbPath
-{
++ (instancetype)shareDatabase:(NSString *)dbName path:(NSString *)dbPath {
     if (!jqdb) {
         
         NSString *path;
@@ -75,13 +72,11 @@ static WSFMDB *jqdb = nil;
     return jqdb;
 }
 
-- (instancetype)initWithDBName:(NSString *)dbName
-{
+- (instancetype)initWithDBName:(NSString *)dbName {
     return [self initWithDBName:dbName path:nil];
 }
 
-- (instancetype)initWithDBName:(NSString *)dbName path:(NSString *)dbPath
-{
+- (instancetype)initWithDBName:(NSString *)dbName path:(NSString *)dbPath {
     if (!dbName) {
         dbName = @"WSFMDB.sqlite";
     }
@@ -105,13 +100,11 @@ static WSFMDB *jqdb = nil;
     return nil;
 }
 
-- (BOOL)jq_createTable:(NSString *)tableName dicOrModel:(id)parameters
-{
+- (BOOL)jq_createTable:(NSString *)tableName dicOrModel:(id)parameters {
     return [self jq_createTable:tableName dicOrModel:parameters excludeName:nil];
 }
 
-- (BOOL)jq_createTable:(NSString *)tableName dicOrModel:(id)parameters excludeName:(NSArray *)nameArr
-{
+- (BOOL)jq_createTable:(NSString *)tableName dicOrModel:(id)parameters excludeName:(NSArray *)nameArr {
     
     NSDictionary *dic;
     if ([parameters isKindOfClass:[NSDictionary class]]) {
@@ -136,12 +129,10 @@ static WSFMDB *jqdb = nil;
     
     int keyCount = 0;
     for (NSString *key in dic) {
-        
         keyCount++;
         if ((nameArr && [nameArr containsObject:key]) || [key isEqualToString:@"pkid"]) {
             continue;
         }
-        
         NSString *type = SQL_TEXT;
         id value = dic[key];
         if ([value isKindOfClass:[NSString class]]) {
@@ -164,52 +155,6 @@ static WSFMDB *jqdb = nil;
     creatFlag = [_db executeUpdate:fieldStr];
     
     return creatFlag;
-}
-
-- (NSString *)createTable:(NSString *)tableName dictionary:(NSDictionary *)dic excludeName:(NSArray *)nameArr
-{
-    NSMutableString *fieldStr = [[NSMutableString alloc] initWithFormat:@"CREATE TABLE %@ (pkid  INTEGER PRIMARY KEY,", tableName];
-    
-    int keyCount = 0;
-    for (NSString *key in dic) {
-        
-        keyCount++;
-        if ((nameArr && [nameArr containsObject:key]) || [key isEqualToString:@"pkid"]) {
-            continue;
-        }
-        if (keyCount == dic.count) {
-            [fieldStr appendFormat:@" %@ %@)", key, dic[key]];
-            break;
-        }
-        
-        [fieldStr appendFormat:@" %@ %@,", key, dic[key]];
-    }
-    
-    return fieldStr;
-}
-
-- (NSString *)createTable:(NSString *)tableName model:(Class)cls excludeName:(NSArray *)nameArr
-{
-    NSMutableString *fieldStr = [[NSMutableString alloc] initWithFormat:@"CREATE TABLE %@ (pkid INTEGER PRIMARY KEY,", tableName];
-    
-    NSDictionary *dic = [self modelToDictionary:cls excludePropertyName:nameArr];
-    int keyCount = 0;
-    for (NSString *key in dic) {
-        
-        keyCount++;
-        
-        if ([key isEqualToString:@"pkid"]) {
-            continue;
-        }
-        if (keyCount == dic.count) {
-            [fieldStr appendFormat:@" %@ %@)", key, dic[key]];
-            break;
-        }
-        
-        [fieldStr appendFormat:@" %@ %@,", key, dic[key]];
-    }
-    
-    return fieldStr;
 }
 
 #pragma mark - *************** runtime
@@ -242,14 +187,12 @@ static WSFMDB *jqdb = nil;
 }
 
 // 获取model的key和value
-- (NSDictionary *)getModelPropertyKeyValue:(id)model tableName:(NSString *)tableName clomnArr:(NSArray *)clomnArr
-{
+- (NSDictionary *)getModelPropertyKeyValue:(id)model tableName:(NSString *)tableName clomnArr:(NSArray *)clomnArr {
     NSMutableDictionary *mDic = [NSMutableDictionary dictionaryWithCapacity:0];
     unsigned int outCount;
     objc_property_t *properties = class_copyPropertyList([model class], &outCount);
     
     for (int i = 0; i < outCount; i++) {
-        
         NSString *name = [NSString stringWithCString:property_getName(properties[i]) encoding:NSUTF8StringEncoding];
         if (![clomnArr containsObject:name]) {
             continue;
@@ -265,10 +208,9 @@ static WSFMDB *jqdb = nil;
     return mDic;
 }
 
-- (NSString *)propertTypeConvert:(NSString *)typeStr
-{
+- (NSString *)propertTypeConvert:(NSString *)typeStr {
     NSString *resultStr = nil;
-    if ([typeStr hasPrefix:@"T@\"NSString\""]) {
+    if ([typeStr hasPrefix:@"T@\"NSString\""] || [typeStr hasPrefix:@"T@\"NSArray\""]) {
         resultStr = SQL_TEXT;
     } else if ([typeStr hasPrefix:@"T@\"NSData\""]) {
         resultStr = SQL_BLOB;
@@ -282,12 +224,9 @@ static WSFMDB *jqdb = nil;
 }
 
 // 得到表里的字段名称
-- (NSArray *)getColumnArr:(NSString *)tableName db:(FMDatabase *)db
-{    
+- (NSArray *)getColumnArr:(NSString *)tableName db:(FMDatabase *)db {
     NSMutableArray *mArr = [NSMutableArray arrayWithCapacity:0];
-    
     FMResultSet *resultSet = [db getTableSchema:tableName];
-    
     while ([resultSet next]) {
         [mArr addObject:[resultSet stringForColumn:@"name"]];
     }
@@ -296,14 +235,12 @@ static WSFMDB *jqdb = nil;
 }
 
 #pragma mark - *************** 增删改查
-- (BOOL)jq_insertTable:(NSString *)tableName dicOrModel:(id)parameters
-{
+- (BOOL)jq_insertTable:(NSString *)tableName dicOrModel:(id)parameters {
     NSArray *columnArr = [self getColumnArr:tableName db:_db];
     return [self insertTable:tableName dicOrModel:parameters columnArr:columnArr];
 }
 
-- (BOOL)insertTable:(NSString *)tableName dicOrModel:(id)parameters columnArr:(NSArray *)columnArr
-{
+- (BOOL)insertTable:(NSString *)tableName dicOrModel:(id)parameters columnArr:(NSArray *)columnArr {
     BOOL flag;
     NSDictionary *dic;
     if ([parameters isKindOfClass:[NSDictionary class]]) {
@@ -324,6 +261,15 @@ static WSFMDB *jqdb = nil;
         [finalStr appendFormat:@"%@,", key];
         [tempStr appendString:@"?,"];
         
+        //兼容 NSArray/NSDictionary/NSNumber 类型
+        id valueObj = dic[key];
+        if ([valueObj isKindOfClass:[NSArray class]]) {
+            valueObj = [valueObj componentsJoinedByString:@","];
+        } else if ([valueObj isKindOfClass:[NSDictionary class]]) {
+            valueObj = [valueObj yy_modelToJSONString];
+        } else if ([valueObj isKindOfClass:[NSNumber class]]) {
+            valueObj = [valueObj stringValue];
+        }
         [argumentsArr addObject:dic[key]];
     }
     
@@ -337,8 +283,7 @@ static WSFMDB *jqdb = nil;
     return flag;
 }
 
-- (BOOL)jq_deleteTable:(NSString *)tableName whereFormat:(NSString *)format, ...
-{
+- (BOOL)jq_deleteTable:(NSString *)tableName whereFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
     NSString *where = format?[[NSString alloc] initWithFormat:format locale:[NSLocale currentLocale] arguments:args]:format;
@@ -350,8 +295,7 @@ static WSFMDB *jqdb = nil;
     return flag;
 }
 
-- (BOOL)jq_updateTable:(NSString *)tableName dicOrModel:(id)parameters whereFormat:(NSString *)format, ...
-{
+- (BOOL)jq_updateTable:(NSString *)tableName dicOrModel:(id)parameters whereFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
     NSString *where = format?[[NSString alloc] initWithFormat:format locale:[NSLocale currentLocale] arguments:args]:format;
@@ -386,8 +330,7 @@ static WSFMDB *jqdb = nil;
     return flag;
 }
 
-- (NSArray *)jq_lookupTable:(NSString *)tableName dicOrModel:(id)parameters whereFormat:(NSString *)format, ...
-{
+- (NSArray *)jq_lookupTable:(NSString *)tableName dicOrModel:(id)parameters whereFormat:(NSString *)format, ... {
     va_list args;
     va_start(args, format);
     NSString *where = format?[[NSString alloc] initWithFormat:format locale:[NSLocale currentLocale] arguments:args]:format;
@@ -426,7 +369,7 @@ static WSFMDB *jqdb = nil;
             if (resultDic) [resultMArr addObject:resultDic];
         }
         
-    }else {
+    } else {
         
         Class CLS;
         if ([parameters isKindOfClass:[NSString class]]) {
@@ -473,9 +416,7 @@ static WSFMDB *jqdb = nil;
 }
 
 // 直接传一个array插入
-- (NSArray *)jq_insertTable:(NSString *)tableName dicOrModelArray:(NSArray *)dicOrModelArray
-{
-    
+- (NSArray *)jq_insertTable:(NSString *)tableName dicOrModelArray:(NSArray *)dicOrModelArray {
     int errorIndex = 0;
     NSMutableArray *resultMArr = [NSMutableArray arrayWithCapacity:0];
     NSArray *columnArr = [self getColumnArr:tableName db:_db];
@@ -491,9 +432,7 @@ static WSFMDB *jqdb = nil;
     return resultMArr;
 }
 
-- (BOOL)jq_deleteTable:(NSString *)tableName
-{
-    
+- (BOOL)jq_deleteTable:(NSString *)tableName {
     NSString *sqlstr = [NSString stringWithFormat:@"DROP TABLE %@", tableName];
     if (![_db executeUpdate:sqlstr])
     {
@@ -502,9 +441,7 @@ static WSFMDB *jqdb = nil;
     return YES;
 }
 
-- (BOOL)jq_deleteAllDataFromTable:(NSString *)tableName
-{
-    
+- (BOOL)jq_deleteAllDataFromTable:(NSString *)tableName {
     NSString *sqlstr = [NSString stringWithFormat:@"DELETE FROM %@", tableName];
     if (![_db executeUpdate:sqlstr])
     {
@@ -514,9 +451,7 @@ static WSFMDB *jqdb = nil;
     return YES;
 }
 
-- (BOOL)jq_isExistTable:(NSString *)tableName
-{
-    
+- (BOOL)jq_isExistTable:(NSString *)tableName {
     FMResultSet *set = [_db executeQuery:@"SELECT count(*) as 'count' FROM sqlite_master WHERE type ='table' and name = ?", tableName];
     while ([set next])
     {
@@ -530,14 +465,11 @@ static WSFMDB *jqdb = nil;
     return NO;
 }
 
-- (NSArray *)jq_columnNameArray:(NSString *)tableName
-{
+- (NSArray *)jq_columnNameArray:(NSString *)tableName {
     return [self getColumnArr:tableName db:_db];
 }
 
-- (int)jq_tableItemCount:(NSString *)tableName
-{
-    
+- (int)jq_tableItemCount:(NSString *)tableName {
     NSString *sqlstr = [NSString stringWithFormat:@"SELECT count(*) as 'count' FROM %@", tableName];
     FMResultSet *set = [_db executeQuery:sqlstr];
     while ([set next])
@@ -547,34 +479,28 @@ static WSFMDB *jqdb = nil;
     return 0;
 }
 
-- (void)close
-{
+- (void)close {
     [_db close];
 }
 
-- (void)open
-{
+- (void)open {
     [_db open];
 }
 
-- (NSInteger)lastInsertPrimaryKeyId:(NSString *)tableName
-{
+- (NSInteger)lastInsertPrimaryKeyId:(NSString *)tableName {
     NSString *sqlstr = [NSString stringWithFormat:@"SELECT * FROM %@ where pkid = (SELECT max(pkid) FROM %@)", tableName, tableName];
     FMResultSet *set = [_db executeQuery:sqlstr];
-    while ([set next])
-    {
+    while ([set next]) {
         return [set longLongIntForColumn:@"pkid"];
     }
     return 0;
 }
 
-- (BOOL)jq_alterTable:(NSString *)tableName dicOrModel:(id)parameters
-{
+- (BOOL)jq_alterTable:(NSString *)tableName dicOrModel:(id)parameters {
     return [self jq_alterTable:tableName dicOrModel:parameters excludeName:nil];
 }
 
-- (BOOL)jq_alterTable:(NSString *)tableName dicOrModel:(id)parameters excludeName:(NSArray *)nameArr
-{
+- (BOOL)jq_alterTable:(NSString *)tableName dicOrModel:(id)parameters excludeName:(NSArray *)nameArr {
     __block BOOL flag;
     __weak typeof(self) weakSelf = self;
     [self jq_inTransaction:^(BOOL *rollback) {
@@ -623,23 +549,17 @@ static WSFMDB *jqdb = nil;
 
 // =============================   线程安全操作    ===============================
 
-- (void)jq_inDatabase:(void(^)(void))block
-{
-    
+- (void)jq_inDatabase:(void(^)(void))block {
     [[self dbQueue] inDatabase:^(FMDatabase *db) {
         block();
     }];
 }
 
-- (void)jq_inTransaction:(void(^)(BOOL *rollback))block
-{
-    
+- (void)jq_inTransaction:(void(^)(BOOL *rollback))block {
     [[self dbQueue] inTransaction:^(FMDatabase *db, BOOL *rollback) {
         block(rollback);
     }];
-    
 }
-
 
 @end
 
