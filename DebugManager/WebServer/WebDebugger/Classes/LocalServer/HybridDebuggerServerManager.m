@@ -278,7 +278,6 @@ static NSString *bonjourName = @"me.local";
     __weak typeof(self) weakSelf = self;
     [_apm_db jq_inDatabase:^{
         __strong typeof(weakSelf) strongSelf = weakSelf;
-        
         NSDictionary *apmDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
         APMDataModel *model = [APMDataModel yy_modelWithJSON:bodyData];
         if (model.page.fps > 0) {
@@ -290,12 +289,6 @@ static NSString *bonjourName = @"me.local";
             [strongSelf.apm_db jq_insertTable:@"apm_cpu" dicOrModel:model.cpu];
             [strongSelf.apm_db jq_insertTable:@"apm_disk" dicOrModel:model.disk];
             [strongSelf.apm_db jq_insertTable:@"apm_memory" dicOrModel:model.memory];
-        }
-        
-        //插入apm_page
-        NSString *sql = [NSString stringWithFormat:@"where pageName = %@ and entryInterval = %@", model.page.pageName, @(model.page.entryInterval)];
-        NSArray *res = [strongSelf.apm_db jq_lookupTable:@"apm_page" dicOrModel:[PageModel_APM class] whereFormat:sql];
-        if (res.count < 1) {
             [strongSelf.apm_db jq_insertTable:@"apm_page" dicOrModel:model.page];
         }
         

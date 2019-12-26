@@ -15,6 +15,16 @@ NS_ASSUME_NONNULL_BEGIN
 @interface APMDataModel : NSObject
 
 /**
+ 外部植入参数
+ */
+@property (nonatomic, strong) NSDictionary *busiParam;
+
+/**
+ 点位名称
+ */
+@property (nonatomic, strong) NSString *name;
+
+/**
  机器信息 <APP生命周期内，只传一次>
  */
 @property (nonatomic, strong) DeviceModel_APM *device;
@@ -38,16 +48,6 @@ NS_ASSUME_NONNULL_BEGIN
  cpu信息
  */
 @property (nonatomic, strong) CPUModel_APM *cpu;
-
-/**
- 外部植入参数
- */
-@property (nonatomic, strong) NSDictionary *busiParam;
-
-/**
- 点位名称
- */
-@property (nonatomic, strong) NSString *name;
 
 /**
  页面信息
@@ -123,6 +123,5 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) int64_t curInterval;
 
 @end
-
 
 NS_ASSUME_NONNULL_END

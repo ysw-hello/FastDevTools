@@ -85,7 +85,6 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
                 
                 apmTraceless.pageModel.naFunc = @"viewWillAppear";
                 apmTraceless.pageModel.pageName = NSStringFromClass([self class]);
-                apmTraceless.pageModel.entryInterval = (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
                 
                 [[APM_LogRecorder sharedInstance] tracelessRecordWithPageModel:apmTraceless.pageModel interval:RecordInterval_APM dataHandler:^(APMDataModel *apmData) { //Native回调
 //                    NSLog(@"Native回调APM数据:\n%@", [apmData yy_modelToJSONString]);

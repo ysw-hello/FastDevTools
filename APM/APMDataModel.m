@@ -20,17 +20,43 @@ static inline int64_t getCurInterval() {
         return nil;
     }
     _device = [UIDevice currentDevice];
-    APMDataModel *model = [[APMDataModel alloc] init];
-    model.name = name; //业务采集调用
-    model.busiParam = param; //业务采集调用
-    model.device = [DeviceModel_APM customCreate];
-    model.disk = [DiskModel_APM customCreate];
-    model.memory = [MemoryModel_APM customCreate];
-    model.cpu = [CPUModel_APM customCreate];
-    model.app = [APPModel_APM customCreate];
+    int64_t curInterval = getCurInterval();
     
+    APMDataModel *model = [[APMDataModel alloc] init];
+    
+    //业务植入
+    model.name = name;
+    model.busiParam = param;
+    
+    //device
+    DeviceModel_APM *deviceModel = [DeviceModel_APM customCreate];
+    deviceModel.curInterval = curInterval;
+    model.device = deviceModel;
+    
+    //disk
+    DiskModel_APM *diskModel = [DiskModel_APM customCreate];
+    diskModel.curInterval = curInterval;
+    model.disk = diskModel;
+    
+    //memory
+    MemoryModel_APM *memoryModel = [MemoryModel_APM customCreate];
+    memoryModel.curInterval = curInterval;
+    model.memory = memoryModel;
+    
+    //cpu
+    CPUModel_APM *cpuModel = [CPUModel_APM customCreate];
+    cpuModel.curInterval = curInterval;
+    model.cpu = cpuModel;
+    
+    //app
+    APPModel_APM *appModel = [APPModel_APM customCreate];
+    appModel.curInterval = curInterval;
+    model.app = appModel;
+    
+    //page
     PageModel_APM *pageModel = [PageModel_APM yy_modelWithJSON:param];
     pageModel.fps = fps;
+    pageModel.entryInterval = curInterval;
     model.page = pageModel; //无痕埋点调用
 
     return model;
@@ -51,7 +77,6 @@ static inline int64_t getCurInterval() {
     appInfo.appName = [infoDictionary objectForKey:@"CFBundleDisplayName"] ? : @"--";
     appInfo.appBuildNum = [infoDictionary objectForKey:@"CFBundleVersion"] ? : @"--";
     appInfo.appBundleID = [infoDictionary objectForKey:@"CFBundleIdentifier"] ? : @"--";
-    appInfo.curInterval = getCurInterval();
     return appInfo;
 }
 
@@ -64,7 +89,6 @@ static inline int64_t getCurInterval() {
     model.machineModel_ = _device.machineModel_;
     model.machineName_ = _device.machineName_;
     model.systemVersion_ = _device.systemVersion_;
-    model.curInterval = getCurInterval();
     return model;
 }
 
@@ -77,7 +101,6 @@ static inline int64_t getCurInterval() {
     model.diskSpace = _device.diskSpace;
     model.diskSpaceFree = _device.diskSpaceFree;
     model.diskSpaceUsed = _device.diskSpaceUsed;
-    model.curInterval = getCurInterval();
     return model;
 }
 
@@ -94,7 +117,6 @@ static inline int64_t getCurInterval() {
     model.memoryInactive = _device.memoryInactive;
     model.memoryWired = _device.memoryWired;
     model.memoryPurgable = _device.memoryPurgable;
-    model.curInterval = getCurInterval();
     return model;
 }
 
@@ -107,7 +129,6 @@ static inline int64_t getCurInterval() {
     model.cpuCount = _device.cpuCount;
     model.cpuUsage = _device.cpuUsage;
     model.cpuUsagePerProcessor = _device.cpuUsagePerProcessor;
-    model.curInterval = getCurInterval();
     return model;
 }
 
