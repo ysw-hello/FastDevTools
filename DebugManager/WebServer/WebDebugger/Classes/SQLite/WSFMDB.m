@@ -213,8 +213,13 @@ static WSFMDB *jqdb = nil;
 }
 
 #pragma mark - *************** runtime
-- (NSDictionary *)modelToDictionary:(Class)cls excludePropertyName:(NSArray *)nameArr
-{
+- (NSDictionary *)modelToDictionary:(Class)cls excludePropertyName:(NSArray *)nameArr {
+    NSArray *blackList = @[@"hash", @"debugDescription"];
+    if (!nameArr) {
+        nameArr = [NSArray arrayWithArray:blackList];
+    } else if (![nameArr containsObject:[blackList firstObject]] && ![nameArr containsObject:[blackList lastObject]]) {
+        nameArr = [nameArr arrayByAddingObjectsFromArray:blackList];
+    }
     NSMutableDictionary *mDic = [NSMutableDictionary dictionaryWithCapacity:0];
     unsigned int outCount;
     objc_property_t *properties = class_copyPropertyList(cls, &outCount);
