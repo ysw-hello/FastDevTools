@@ -58,10 +58,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface APM_LogRecorder : NSObject
 
-FOUNDATION_EXTERN  APM_RecorderSetURL(NSString *apmUrlStr);
-FOUNDATION_EXTERN  APM_RecordLog(NSString *name, NSDictionary *param); //默认5s间隔
-FOUNDATION_EXTERN  APM_RecordStop();
-FOUNDATION_EXTERN  APM_SamplingRecordLog(NSString *name, NSDictionary *param); //默认0.8s间隔,采样18个点位
+FOUNDATION_EXTERN  void APM_RecorderSetURL(NSString *apmUrlStr);
+FOUNDATION_EXTERN  void APM_RecordLog(NSString *name, NSDictionary *param); //默认5s间隔
+FOUNDATION_EXTERN  void APM_RecordStop();
+FOUNDATION_EXTERN  void APM_SamplingRecordLog(NSString *name, NSDictionary *param); //默认0.8s间隔,采样18个点位
 
 /**
  接收打点数据的服务器url
@@ -74,11 +74,11 @@ FOUNDATION_EXTERN  APM_SamplingRecordLog(NSString *name, NSDictionary *param); /
  APM数据采集 <不间断采集>
 
  @param name 点名称
- @param param 外部植入参数
+ @param busiParam 外部植入参数
  @param interval 采集时间间隔(s)
  @param dataHandler 单次采集APM数据回调
  */
-- (void)logRecordWithName:(NSString *)name busiParam:(NSDictionary * __nullable)busiParam interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler;
+- (void)logRecordWithName:(NSString *)name busiParam:(NSDictionary * __nullable)busiParam interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler __nullable)dataHandler;
 
 /**
  APM数据 无痕采集 <不间断采集>
@@ -87,7 +87,7 @@ FOUNDATION_EXTERN  APM_SamplingRecordLog(NSString *name, NSDictionary *param); /
  @param interval 采集时间间隔(s)
  @param dataHandler 单次采集APM数据回调
  */
-- (void)tracelessRecordWithPageModel:(PageModel_APM *)pageModel interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler;
+- (void)tracelessRecordWithPageModel:(PageModel_APM *)pageModel interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler __nullable)dataHandler;
 
 /**
  获取设备APM数据 <数据采样>
@@ -99,7 +99,7 @@ FOUNDATION_EXTERN  APM_SamplingRecordLog(NSString *name, NSDictionary *param); /
  @param dataHandler 单次采集APM数据
  
  */
-- (void)fetchDeviceAPMWithName:(NSString *)name param:(NSDictionary * __nullable)param SamplingCount:(NSUInteger)count interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler;
+- (void)fetchDeviceAPMWithName:(NSString *)name param:(NSDictionary * __nullable)param SamplingCount:(NSUInteger)count interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler __nullable)dataHandler;
 
 /**
  停止数据获取

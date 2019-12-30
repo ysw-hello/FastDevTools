@@ -7,6 +7,7 @@
 
 #import "APM_LogRecorder.h"
 #import "NSData+gzip.h"
+#import <Foundation/Foundation.h>
 
 @interface APM_LogRecorder ()
 
@@ -21,6 +22,7 @@
 @property (nonatomic, assign) NSTimeInterval lastTimeStamp;
 @property (nonatomic, assign) NSUInteger countPerFrame;
 @property (nonatomic, assign) NSUInteger currentFPS;
+@property (nonatomic, strong) NSLock *lock;
 
 @end
 
@@ -34,6 +36,7 @@
         alr = [[APM_LogRecorder alloc] init] ;
         alr.safeQueue = dispatch_queue_create("com.device.apm", DISPATCH_QUEUE_SERIAL);
         [[NSNotificationCenter defaultCenter] addObserver:alr selector:@selector(stopFetchData) name:UIApplicationDidEnterBackgroundNotification object:nil];
+        alr.lock = [[NSLock alloc] init];
     }) ;
     return alr ;
 }
@@ -47,31 +50,33 @@
 }
 
 #pragma mark - public SEL
-APM_RecorderSetURL (NSString *apmUrlStr) {
+void APM_RecorderSetURL (NSString *apmUrlStr) {
     [[APM_LogRecorder sharedInstance] setReceiveUrl:apmUrlStr];
 }
 
-APM_RecordLog(NSString *name, NSDictionary *param) {
-    [[APM_LogRecorder sharedInstance] logRecordWithName:name param:param interval:4 dataHandler:nil];
+void APM_RecordLog(NSString *name, NSDictionary *param) {
+    [[APM_LogRecorder sharedInstance] logRecordWithName:name busiParam:param interval:4 dataHandler:nil];
 }
 
-APM_RecordStop() {
+void APM_RecordStop() {
     [[APM_LogRecorder sharedInstance] stopFetchData];
 }
 
-APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
+void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     [[APM_LogRecorder sharedInstance] fetchDeviceAPMWithName:name param:param SamplingCount:18 interval:0.8 dataHandler:nil];
 }
 
-- (void)logRecordWithName:(NSString *)name param:(NSDictionary * __nullable)param interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler {
-    [self fetchDeviceAPMWithName:name param:param SamplingCount:ULONG_MAX interval:interval dataHandler:dataHandler];
+- (void)logRecordWithName:(NSString *)name busiParam:(NSDictionary * __nullable)busiParam interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler {
+    [self fetchDeviceAPMWithName:name param:busiParam SamplingCount:ULONG_MAX interval:interval dataHandler:dataHandler];
 }
 
 - (void)tracelessRecordWithPageModel:(PageModel_APM *)pageModel interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler {
-    [self logRecordWithName:pageModel.pageName param:[pageModel yy_modelToJSONObject] interval:interval dataHandler:dataHandler];;
+    [self logRecordWithName:pageModel.pageName busiParam:[pageModel yy_modelToJSONObject] interval:interval dataHandler:dataHandler];;
 }
 
 - (void)fetchDeviceAPMWithName:(NSString *)name param:(NSDictionary * __nullable)param SamplingCount:(NSUInteger)count interval:(CGFloat)interval dataHandler:(DeviceAPM_Handler)dataHandler {
+    [_lock lock];
+    
     if (self.receiveUrl.length < 3) {
         return;
     }
@@ -100,14 +105,18 @@ APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
             }
             
         });
-        dispatch_resume(_timer);
+        
+        if (@available(iOS 10.0, *)) {
+            dispatch_activate(_timer);
+        } else {
+            dispatch_resume(_timer);
+        }
         
     } @catch (NSException *exception) {
         NSLog(@"性能检测异常:%@",exception.description);
-    } @finally {
-        
     }
     
+    [_lock unlock];
 }
 
 - (void)stopFetchData {
@@ -175,7 +184,6 @@ APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
         return NO;
     }
     
-    BOOL successed = NO;
     NSString *url = [self.receiveUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
     NSMutableURLRequest *req = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
     
@@ -199,14 +207,22 @@ APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     unsigned long result = crc32(0, sourceStrData.bytes, (unsigned int)sourceStrData.length);
     [req addValue:[NSString stringWithFormat:@"%lu",result] forHTTPHeaderField:@"sign"];
     
-    NSURLResponse *response = nil;
-    [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:nil];
-    NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-    // 发送成功
-    if ([httpResponse statusCode] == 200){
-        successed = YES;
+    if (@available(iOS 9.0, *)) {
+        __block BOOL succeed = NO;
+        [[NSURLSession alloc] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+            NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+            succeed = [httpResponse statusCode] == 200;
+        }];
+        return succeed;
+    } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        NSURLResponse *response = nil;
+        [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:nil];
+        NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
+#pragma clang diagnostic pop
+        return [httpResponse statusCode] == 200;
     }
-    return successed;
 }
 
 
