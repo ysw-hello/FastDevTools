@@ -304,7 +304,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     } else if (curRow == [curArr indexOfObject:kDebugControl_APM]) {
         cell.debugSwitch.on = [[NSUserDefaults standardUserDefaults] boolForKey:KUserDefaults_APMRecordKey_DebugSwitch];
         cell.moduleType = kDebug_ModuleType_APMRecord;
-        cell.title = [APM_LogRecorder sharedInstance].receiveUrl.length > 3 ? [NSString stringWithFormat:@"APM-URL:%@", [APM_LogRecorder sharedInstance].receiveUrl] : [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+        cell.title = [APM_LogRecorder sharedInstance].receiveUrl.length > 3 ? [NSString stringWithFormat:@"APM-接收数据的URL为:\n%@", [APM_LogRecorder sharedInstance].receiveUrl] : [[_titleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     }
 
     //action 响应 (需要依赖于当前控制器)
@@ -465,6 +465,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     [super layoutSubviews];
     _titleLabel.left = 10;
     _titleLabel.centerY = _moduleType == kDebug_ModuleType_WebServer ? 50/2 : self.height/2;
+    _titleLabel.width =  [UIScreen mainScreen].bounds.size.width - 20;
     
     _debugSwitch.left = self.width - _debugSwitch.width - 10;
     _debugSwitch.centerY = _titleLabel.centerY;
@@ -502,7 +503,8 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 - (void)customSubviews {
-    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 60, 30)];
+    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 60, [UIScreen mainScreen].bounds.size.width - 20)];
+    _titleLabel.numberOfLines = 2;
     [self addSubview:_titleLabel];
     
     self.debugSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(100, 10, 50, 34)];
