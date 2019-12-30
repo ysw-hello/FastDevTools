@@ -79,6 +79,8 @@ static NSUInteger const RecordInterval_APM = 2;
  */
 - (void)stopAPMLogTraceless;
 
++ (NSDictionary *)getDemoDataStructure;
+
 @end
 
 NS_ASSUME_NONNULL_END

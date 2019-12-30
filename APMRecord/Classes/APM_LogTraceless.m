@@ -69,6 +69,64 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
     self.isRunning = NO;
 }
 
++ (NSDictionary *)getDemoDataStructure {
+    return @{
+             @"描述" : @"主要分为app、cpu、device、disk、memory、page六大块数据。\n其中app与device数据，在应用生命周期内只会上传第一次采集。时间戳单位为毫秒(ms),大小单位均为字节(byte)。\n可根据时间戳进行表关联。",
+             @"app" : @{
+                     @"appBuildNum" : @"1.0.0",
+                     @"appBundleID" : @"com.timmy.apm",
+                     @"appName" : @"APMTest",
+                     @"appVersion" : @"1.0.2",
+                     @"curInterval" : @(1577336961404)
+                     },
+             @"cpu" : @{
+                     @"cpuCount" : @(6),
+                     @"cpuUsage" : @"0.7080432772636414",
+                     @"cpuUsagePerProcessor" : @[
+                                            @(0.1878475695848465),
+                                            @(0.1516067683696747),
+                                            @(0.031938750296831131),
+                                            @(0.02829425036907196),
+                                            @(0.1725597530603409),
+                                            @(0.1357961744070053)
+                                            ],
+                     @"curInterval" : @(1577336961404),
+                     },
+             @"device" : @{
+                     @"curInterval" : @(1577336961404),
+                     @"machineModel_" : @"iPhone10,2",
+                     @"machineName_" : @"iPhone 8 Plus",
+                     @"systemVersion_" : @"12.1.4"
+                     },
+             @"disk" : @{
+                     @"curInterval" : @(1577336961404),
+                     @"diskSpace" : @(255989469184),
+                     @"diskSpaceFree" : @(178838278144),
+                     @"diskSpaceUsed" : @(77151191040)
+                     },
+             @"memory" : @{
+                     @"curInterval" : @(1577336961404),
+                     @"memoryActive" : @(1041809408),
+                     @"memoryFree" : @(52871168),
+                     @"memoryInactive" : @(1029193728),
+                     @"memoryPurgable" : @(146423808),
+                     @"memoryTotal" : @(3134406656),
+                     @"memoryUsed" : @(2466660352),
+                     @"memoryWired" : @(395657216)
+                     },
+             @"page" : @{
+                     @"entryInterval" : @(1577336961404),
+                     @"fps" : @(60),
+                     @"naFunc" : @"viewWillAppear",
+                     @"pageName" : @"APMTestViewController",
+                     @"webUrl" : @"https://www.baidu.com",
+                     @"viewClass" : @"APMWKWebView",
+                     @"webCoreType" : @"WKWebView"
+            }
+        };
+
+}
+
 #pragma mark - private SEL
 - (void)apm_viewWillAppear:(BOOL)animated {
     APM_LogTraceless *apmTraceless = [APM_LogTraceless sharedInstance];

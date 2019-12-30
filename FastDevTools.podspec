@@ -37,8 +37,8 @@ Pod::Spec.new do |s|
 
   #APM界面级无痕埋点
   s.subspec 'APMRecord' do |apm|
-    apm.source_files = 'APM/*.{h,m}'
-    apm.resources = 'APM/APM_VCBlackList.bundle' #黑名单界面<不采集apm数据>
+    apm.source_files = 'APMRecord/Classes/*.{h,m}'
+    apm.resources = 'APMRecord/Resources/APM_VCBlackList.bundle' #黑名单界面<不采集apm数据>
     apm.dependency 'YYModel'
   end
     

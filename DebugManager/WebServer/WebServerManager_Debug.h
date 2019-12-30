@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface WebServerManager_Debug : NSObject
 
-@property (nonatomic, strong) UIView *webServerView;
+@property (nonatomic, strong, nullable) UIView *webServerView;
 @property (nonatomic, strong, nullable) NSMutableArray *webServerURL_Array;
 
 + (instancetype)sharedInstance;
