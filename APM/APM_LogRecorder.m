@@ -209,11 +209,19 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     
     if (@available(iOS 9.0, *)) {
         __block BOOL succeed = NO;
-        [[NSURLSession alloc] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0); //利用信号量阻塞当前线程，模拟同步请求
+        
+        NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
             succeed = [httpResponse statusCode] == 200;
+            
+            dispatch_semaphore_signal(semaphore);
         }];
+        [task resume];
+        
+        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
         return succeed;
+        
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -223,6 +231,7 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
 #pragma clang diagnostic pop
         return [httpResponse statusCode] == 200;
     }
+    
 }
 
 

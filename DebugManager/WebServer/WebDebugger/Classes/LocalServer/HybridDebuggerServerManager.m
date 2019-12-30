@@ -150,7 +150,7 @@ static NSString *bonjourName = @"me.local";
                         [[HybridDebuggerMessageDispatch sharedInstance] debugCommand:action param:contentJSON];
                     });
                 }
-                [_webServer logInfo:@"action:%@, param:%@", action, param];
+                [strongSelf.webServer logInfo:@"action:%@, param:%@", action, param];
             } else {
                 // 异常记录
                 if (action.length < 1) {
@@ -291,8 +291,7 @@ static NSString *bonjourName = @"me.local";
             [strongSelf.apm_db jq_insertTable:@"apm_memory" dicOrModel:model.memory];
             [strongSelf.apm_db jq_insertTable:@"apm_page" dicOrModel:model.page];
         }
-        
-        NSLog(@"webServer接收的APM数据:\n%@",apmDic);
+        WSLog(@"webServer接收的APM数据:\n%@",apmDic);
     }];
     
 }

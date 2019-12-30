@@ -12,9 +12,7 @@
 #define Hybrid_Debug __has_include(<FastDevTools/HybridDebuggerServerManager.h>) ? Hybrid_DebuggerSwitch : 0
 
 #ifndef WSLog
-    #define WSLog(format, ...)  do {\
-                (NSLog)((@"[WebServer] " format), ##__VA_ARGS__); \
-            } while (0)
+#define WSLog(FORMAT, ...) fprintf(stderr, "[WebServer] %s:%d\t%s\n", [[[NSString stringWithUTF8String: __FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat: FORMAT, ## __VA_ARGS__] UTF8String]);
 #endif
 
 static BOOL kGCDWebServer_logging_enabled = YES; // 调试日志开关

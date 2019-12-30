@@ -60,7 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 FOUNDATION_EXTERN  void APM_RecorderSetURL(NSString *apmUrlStr);
 FOUNDATION_EXTERN  void APM_RecordLog(NSString *name, NSDictionary *param); //默认5s间隔
-FOUNDATION_EXTERN  void APM_RecordStop();
+FOUNDATION_EXTERN  void APM_RecordStop(void);
 FOUNDATION_EXTERN  void APM_SamplingRecordLog(NSString *name, NSDictionary *param); //默认0.8s间隔,采样18个点位
 
 /**
