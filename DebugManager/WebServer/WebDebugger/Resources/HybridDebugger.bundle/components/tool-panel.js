@@ -42,7 +42,7 @@ Vue.component("tool-panel", {
                     clsName: "w-tool-item w-tool-apm",
                     title: "APM数据图表",
                     text: "APM"
-                }
+                 }
             ]
         };
     },

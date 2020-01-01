@@ -37,7 +37,7 @@
         alr.safeQueue = dispatch_queue_create("com.device.apm", DISPATCH_QUEUE_SERIAL);
         [[NSNotificationCenter defaultCenter] addObserver:alr selector:@selector(stopFetchData) name:UIApplicationDidEnterBackgroundNotification object:nil];
         alr.lock = [[NSLock alloc] init];
-    }) ;
+    });
     return alr ;
 }
 

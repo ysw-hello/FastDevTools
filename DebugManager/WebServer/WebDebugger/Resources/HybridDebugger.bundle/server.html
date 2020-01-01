@@ -13,8 +13,6 @@
     <link href="./server.css" rel="stylesheet" type="text/css" />
     <link href="./renderjson.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.6.14/beautify.js"></script>
-<!--    <script        src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js?autoload=true&amp;skin=sunburst&amp;lang=js"></script>-->
-
 </head>
 
 <body>
@@ -59,20 +57,16 @@
                     <div class="w-help-code">:clear</div>
                     <div class='w-example-title'>8. 查看命令输入历史</div>
                     <div class="w-help-code">:history</div>
-
-                    <!--                    <div class='w-example-title'>5. 注入 weinre 脚本，需要重新打开页面。注入一次，后面打开的页面都会支持，即使是外部页面。如果需要调试 https，你可能需要安装 ngrok</div>-->
-                    <!--                    <div class="w-help-code">:weinre http://10.12.0.0:8888/target/target-script-min.js#anonymous</div>-->
-                    <!--                    <div class='w-example-title'>5.1. 取消注入 weinre 脚本</div>-->
-                    <!--                    <div class="w-help-code">:weinre disable</div>-->
-
                 </div>
+                
                 <div v-else-if="item.type === 'history'" class="m-output-result">
                     <ol v-if="item.data.length > 0" class="c-command-history">
                     <template v-for="(command, index) in item.data">
                         <li v-on:click="useHistoryCommand" v-bind:data-command="command" class="w-history-item">&#9656; {{command}}</li>
                     </template>
-                </ol>
+                    </ol>
                 </div>
+                
                 <div v-else-if="item.type === 'list'" class="m-output-result">
                     <p class="f-warning-text">下面列出可以调用的接口的签名。</p>
                     <template v-for="api in item.apis">
@@ -81,6 +75,7 @@
                     </template>
                     <p class="w-api_list-other">注意：<br/>1. 可以输入 `:about method`,如 `:about core_openWindow` 查看详细接口说明、示例、描述；<br/>2.内置的命令如`about` 调用时需要前导":"冒号，以和业务命令区分</p>
                 </div>
+                
                 <div v-else-if="item.type === 'about_item'" class="m-output-doc">
                         <p v-if="item.doc.discuss" class="w-doc-discuss">{{item.doc.discuss}}</p>
                         <div v-if="item.doc.param" class="w-doc-type_title">参数说明：</div>
@@ -98,6 +93,7 @@
                         <div v-if="item.doc.error"class="w-err-code">{{item.doc.error}}</div>
                         <div v-if="item.doc.codeResult" class="w-doc-codeResult"><span  class="w-doc-type_title">代码执行后期望：</span>{{item.doc.expect}}</div>
                 </div>
+                
                 <p v-else> 未知参数</p>
             </template>
         </div>

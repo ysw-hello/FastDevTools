@@ -136,7 +136,7 @@ function loop() {
     xhr.onload = function () {
         // console.log(xhr.response);
         var json = xhr.response;
-        if (json.code == "OK") {
+        if (json.code == 200) {
             var data = json.data;
             var logs = data ? data.logs : [];
             _renderLogs(logs);

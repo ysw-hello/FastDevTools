@@ -11,7 +11,7 @@
 static UIDevice *_device = nil;
 
 static inline int64_t getCurInterval() {
-    return (int64_t)([[NSDate date] timeIntervalSince1970] * 1000);
+    return (int64_t)([[NSDate date] timeIntervalSince1970]); //精确到秒
 }
 
 @implementation APMDataModel

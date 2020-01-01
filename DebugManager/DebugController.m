@@ -314,9 +314,9 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         if (moduleType == kDebug_ModuleType_WebServer) {//web调试
             if ([APM_LogRecorder sharedInstance].receiveUrl.length < 3) {
                 GCDWebServer *webServer = [[HybridDebuggerServerManager sharedInstance] getLocalServer];
-                NSString *apmUrlStr = webServer.isRunning ? [webServer.serverURL.absoluteString stringByAppendingString:APMDataPath] : @"";
+                NSString *apmUrlStr = webServer.isRunning ? [webServer.serverURL.absoluteString stringByAppendingString:APM_WritePath] : @"";
                 APM_RecorderSetURL(apmUrlStr);
-            } else if (!isOn && [[APM_LogRecorder sharedInstance].receiveUrl containsString:[@":8181/" stringByAppendingString:APMDataPath]]) {
+            } else if (!isOn && [[APM_LogRecorder sharedInstance].receiveUrl containsString:[@":8181/" stringByAppendingString:APM_WritePath]]) {
                 APM_RecorderSetURL(@"");
             }
             
@@ -342,13 +342,15 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
             if (flexManagerClass && [flexManagerClass respondsToSelector:NSSelectorFromString(SEL_SharedManager_FLEXManager)]) {
                 
                 [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_FlexToolsKey_DebugSwitch];
-                
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 id flexManager = [flexManagerClass performSelector:NSSelectorFromString(SEL_SharedManager_FLEXManager)];
                 if (isOn && [flexManager respondsToSelector:NSSelectorFromString(SEL_ShowExplorer_FLEXManager)]) {
                     [flexManager performSelector:NSSelectorFromString(SEL_ShowExplorer_FLEXManager)];
                 } else if ([flexManager respondsToSelector:NSSelectorFromString(SEL_HideExplorer_FLEXManager)]) {
                     [flexManager performSelector:NSSelectorFromString(SEL_HideExplorer_FLEXManager)];
                 }
+#pragma clang diagnostic pop
                 
             }
             

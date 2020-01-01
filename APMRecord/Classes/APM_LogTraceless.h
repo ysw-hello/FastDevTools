@@ -11,7 +11,7 @@
         appBundleID = "com.timmy.apm";
         appName = "APMTest";
         appVersion = "1.0.2";
-        curInterval = 1577336961404;
+        curInterval = 1577336961;
     };
     cpu =     {
         cpuCount = 6;
@@ -24,22 +24,22 @@
                                         "0.1725597530603409",
                                         "0.1357961744070053"
                                         );
-        curInterval = 1577336961404;
+        curInterval = 1577336961;
     };
     device =     {
-        curInterval = 1577336961404;
+        curInterval = 1577336961;
         "machineModel_" = "iPhone10,2";
         "machineName_" = "iPhone 8 Plus";
         "systemVersion_" = "12.1.4";
     };
     disk =     {
-        curInterval = 1577336961404;
+        curInterval = 1577336961;
         diskSpace = 255989469184;
         diskSpaceFree = 178838278144;
         diskSpaceUsed = 77151191040;
     };
     memory =     {
-        curInterval = 1577336961404;
+        curInterval = 1577336961;
         memoryActive = 1041809408;
         memoryFree = 52871168;
         memoryInactive = 1029193728;
@@ -49,7 +49,7 @@
         memoryWired = 395657216;
     };
     page =     {
-        entryInterval = 1577336961404;
+        entryInterval = 1577336961;
         fps = 60;
         naFunc = viewWillAppear;
         pageName = APMTestViewController;

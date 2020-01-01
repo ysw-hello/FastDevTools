@@ -1,27 +1,60 @@
 <html>
     <head>
         <meta charset="UTF-8" />
+        <title>WebServer Debugger</title>
         <meta name="viewport" content="width = device-width, initial-scale = 1.0, minimum-scale = 1.0, maximum-scale = 3.0,user-scalable = no,viewport-fit = cover">
-        <script src="AAHighchartsLib.js"></script>
-        <script src="AAHighchartsMore.js"></script>
-        <script src="AAFunnel.js"></script>
-        <script src="AAEasing.js"></script>
-        
-        <!-- 若介意本地js代码体积(250KB左右,工程打包压缩后实际体积远小于此)过大，可换用加载网络js代码 -->
-        <!-- <script src="https://img.hcharts.cn/highcharts/highcharts.js">-->
-        <!-- </script>-->
-        <!-- <script src="https://img.hcharts.cn/highcharts/highcharts-more.js">-->
-        <!-- </script>-->
-        <!-- <script src="https://img.hcharts.cn/highcharts/modules/funnel.js">-->
-        <!-- </script>-->
+        <link href="./WSChartView.css" rel="stylesheet" type="text/css" />
+
+<!--        <script src="./WAHighchartsLib.js"></script>-->
+<!--        <script src="./WSHighchartsMore.js"></script>-->
+<!--        <script src="./WSFunnel.js"></script>-->
+<!--        <script src="./WSEasing.js"></script>-->
+<!--         若介意本地js代码体积(250KB左右,工程打包压缩后实际体积远小于此)过大，可换用加载网络js代码-->
+         <script src="https://img.hcharts.cn/highcharts/highcharts.js">
+         </script>
+         <script src="https://img.hcharts.cn/highcharts/highcharts-more.js">
+         </script>
+         <script src="https://img.hcharts.cn/highcharts/modules/funnel.js">
+         </script>
+         
+         <script>
+             function loop () {
+                 var xhr = new XMLHttpRequest();
+                 xhr.open("POST", "/chart/apm_read?a=test", true);
+                 xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded", "Access-Control-Allow-Origin", "*");
+                 xhr.responseType = "json";
+                 xhr.onload = function () {
+                     console.log(xhr.response);
+                     var json = xhr.response;
+                     if (json.code == 200 && json.data.sender) {
+                         console.log("APM:200");
+                         var data = json.data;
+                         var sender = data.sender?data.sender:{};
+                         var receivedWidth = data.receivedWidth?data.receivedWidth:'0';
+                         var receivedHeight = data.receivedHeight?data.receivedHeight:'0';
+                         var isWKWebView = data.isWKWebView?data.isWKWebView:'1';
+                         loadTheHighChartView(sender,receivedWidth,receivedHeight,isWKWebView);
+                     }
+                 };
+                 var timestamp = Math.round(new Date() / 1000); //精确到秒
+                 var param = JSON.stringify({type:"cpu", interval:timestamp});
+                 xhr.send(param);
+             }
+         </script>
+         
         <style>
             *{ -webkit-user-select: none; 
                 user-select: none; }
         </style>
     </head>
-    <body>
+    <body onload="window.setInterval(loop, 2000);">
+        <div id="app">
+            <p class="w-welcome-slogan">APM 图表</p>
+        </div>
+
         <div id="container" style="width: min-450px; height: 200px; margin: -8px">
         </div>
+
         <script>
         var aaGlobalChart;
         function loadTheHighChartView(sender, receivedWidth, receivedHeight,isWKWebView) {
@@ -29,7 +62,9 @@
                 if (receivedWidth != 0) {
                     container.style.width = receivedWidth; //设置宽度
                 }
-                container.style.height = receivedHeight; //设置高度
+                if (receivedHeight != 0) {
+                    container.style.height = receivedHeight; //设置高度
+                }
                 var aaOptions = JSON.parse(sender);
 
                 if (aaOptions.gradientColorEnabled == true) { //开启图表渐变色功能
@@ -198,6 +233,7 @@
         }
         
         </script>
+        
     </body>
 
 </html>
