@@ -135,32 +135,26 @@ static NSString *kLastWeinreScript = nil;
 
     } else if ([action isEqualToString:@"clearCookie"]) {
         // 清理 WKWebview 的 Cookie，和 NSHTTPCookieStorage 是独立的
-        WKHTTPCookieStore * _Nonnull cookieStorage = [WKWebsiteDataStore defaultDataStore].httpCookieStore;
-        [cookieStorage getAllCookies:^(NSArray<NSHTTPCookie *> * _Nonnull cookies) {
-            [cookies enumerateObjectsUsingBlock:^(NSHTTPCookie * _Nonnull cookie, NSUInteger idx, BOOL * _Nonnull stop) {
-                [cookieStorage deleteCookie:cookie completionHandler:nil];
+        if (@available(iOS 11.0, *)) {
+            WKHTTPCookieStore * _Nonnull cookieStorage = [WKWebsiteDataStore defaultDataStore].httpCookieStore;
+            [cookieStorage getAllCookies:^(NSArray<NSHTTPCookie *> * _Nonnull cookies) {
+                [cookies enumerateObjectsUsingBlock:^(NSHTTPCookie * _Nonnull cookie, NSUInteger idx, BOOL * _Nonnull stop) {
+                    [cookieStorage deleteCookie:cookie completionHandler:nil];
+                }];
+                [veryWebView fire:@"clearCookieDone" param:@{@"count":@(cookies.count)}];
             }];
-            [veryWebView fire:@"clearCookieDone" param:@{@"count":@(cookies.count)}];
-        }];
+        } else {
+            NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+            [cookieStorage.cookies enumerateObjectsUsingBlock:^(NSHTTPCookie * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+                [cookieStorage deleteCookie:obj];
+            }];
+            [veryWebView fire:@"clearCookieDone" param:@{@"count":@(cookieStorage.cookies.count)}];
+        }
 
     } else if ([action isEqualToString:@"console.log"]) {
         // 正常的日志输出时，不需要做特殊处理。
         // 因为在 invoke 的时候，已经向 debugger Server 发送过日志数据，已经打印过了
         WSLog(@"Browser Command is console.log");
-    } else if ([action isEqualToString:@"weinre"]) {
-        // $ weinre --boundHost 10.242.24.59 --httpPort 9090
-        BOOL disabled = [[param objectForKey:@"disabled"] boolValue];
-        if (disabled) {
-            kLastWeinreScript = nil;
-            [WKWebView removeJavaScriptForKey:@"weinre.js"];
-        } else {
-            kLastWeinreScript = [param objectForKey:@"url"];
-            if (kLastWeinreScript.length > 0) {
-                [WKWebView prepareJavaScript:[NSURL URLWithString:kLastWeinreScript] when:WKUserScriptInjectionTimeAtDocumentEnd key:@"weinre.js"];
-                [veryWebView fire:@"weinre.enable" param:@{@"jsURL": kLastWeinreScript}];
-            }
-        }
-
     } else if ([action isEqualToString:@"testcase"]) {
         // 检查是否有文件生成，如果没有则遍历
 //        NSString *docsdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
