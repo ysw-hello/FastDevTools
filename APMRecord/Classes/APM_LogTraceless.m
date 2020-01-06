@@ -161,6 +161,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
 // 递归获取子视图
 - (void)fetchURLStrWithView:(UIView *)view{
     NSArray *subviews = [view subviews];
+
     PageModel_APM *page = [APM_LogTraceless sharedInstance].pageModel;
     page.webUrl = @"";
     page.webCoreType = @"";
@@ -192,9 +193,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
             page.webUrl = [(NSURL *)[subview performSelector:@selector(URL)] absoluteString];
             page.viewClass = NSStringFromClass([subview class]);
             page.webCoreType = @"WKWebView";
-            [(WKWebView *)subview evaluateJavaScript:@"document.title" completionHandler:^(id _Nullable title, NSError * _Nullable error) {
-                page.webTitle = title;
-            }];
+            page.webTitle = [(WKWebView *)subview title];
             return;
         }
         
