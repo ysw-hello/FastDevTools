@@ -55,14 +55,14 @@ static NSString *bonjourName = @"me.local";
         //初始化db
         NSString *dbName = @"APM_DB.sqlite";
         NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-        [[NSFileManager defaultManager] removeItemAtPath:[path stringByAppendingPathComponent:dbName] error:nil];
+        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
         self.apm_db = [WSFMDB shareDatabase:dbName path:path];
-        [_apm_db jq_createTable:@"apm_page" dicOrModel:[PageModel_APM class]];
-        [_apm_db jq_createTable:@"apm_device" dicOrModel:[DeviceModel_APM class]];
-        [_apm_db jq_createTable:@"apm_cpu" dicOrModel:[CPUModel_APM class]];
-        [_apm_db jq_createTable:@"apm_memory" dicOrModel:[MemoryModel_APM class]];
-        [_apm_db jq_createTable:@"apm_disk" dicOrModel:[DiskModel_APM class]];
-        [_apm_db jq_createTable:@"apm_app" dicOrModel:[APPModel_APM class]];        
+        if(![_apm_db jq_isExistTable:@"apm_page"]) [_apm_db jq_createTable:@"apm_page" dicOrModel:[PageModel_APM class]];
+        if(![_apm_db jq_isExistTable:@"apm_device"]) [_apm_db jq_createTable:@"apm_device" dicOrModel:[DeviceModel_APM class]];
+        if(![_apm_db jq_isExistTable:@"apm_cpu"]) [_apm_db jq_createTable:@"apm_cpu" dicOrModel:[CPUModel_APM class]];
+        if(![_apm_db jq_isExistTable:@"apm_memory"]) [_apm_db jq_createTable:@"apm_memory" dicOrModel:[MemoryModel_APM class]];
+        if(![_apm_db jq_isExistTable:@"apm_disk"]) [_apm_db jq_createTable:@"apm_disk" dicOrModel:[DiskModel_APM class]];
+        if(![_apm_db jq_isExistTable:@"apm_app"]) [_apm_db jq_createTable:@"apm_app" dicOrModel:[APPModel_APM class]];
 
     }
     return self;
@@ -167,7 +167,7 @@ static NSString *bonjourName = @"me.local";
             [strongSelf proceeWriteAPMData:request.data];
         } else if ([url.path containsString:[@"/" stringByAppendingString:APM_ReadPath]]) { //APM读取数据接口
             if (request.data.length > 0) {
-                result = [strongSelf proceeReadAPMData:request.data];
+//                result = [strongSelf proceeReadAPMData:request.data];
             }
         }
         
@@ -279,16 +279,189 @@ static NSString *bonjourName = @"me.local";
 
 #pragma mark - pravite SEL
 - (NSDictionary *)proceeReadAPMData:(NSData *)bodyData { //TODO：从数据库取数据，实时绘制
-    NSDictionary *bodyDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
-    WSLog(@"webServer接收的APM数据Body:\n%@",bodyDic);
-    NSString *base64Str = @"ewogICJzdWJ0aXRsZSIgOiB7CiAgICAiYWxpZ24iIDogImxlZnQiLAogICAgInRleHQiIDogIiIsCiAgICAic3R5bGUiIDogewogICAgICAiY29sb3IiIDogIiMwMDAwMDAiLAogICAgICAiZm9udFNpemUiIDogIjlweCIsCiAgICAgICJmb250V2VpZ2h0IiA6ICJyZWd1bGFyIgogICAgfQogIH0sCiAgImdyYWRpZW50Q29sb3JFbmFibGVkIiA6IGZhbHNlLAogICJ0b3VjaEV2ZW50RW5hYmxlZCIgOiBmYWxzZSwKICAic2VyaWVzIiA6IFsKICAgIHsKICAgICAgInZpc2libGUiIDogdHJ1ZSwKICAgICAgImRhdGEiIDogWwogICAgICAgIDAsCiAgICAgICAgMC4xOTM2NDgxNzc2NjY5MzAzMiwKICAgICAgICAwLjM4MjAyMDE0MzMyNTY2ODY5LAogICAgICAgIDAuNTU5OTk5OTk5OTk5OTk5OTQsCiAgICAgICAgMC43MjI3ODc2MDk2ODY1MzkyMSwKICAgICAgICAwLjg2NjA0NDQ0MzExODk3Nzk5LAogICAgICAgIDAuOTg2MDI1NDAzNzg0NDM4NTksCiAgICAgICAgMS4wNzk2OTI2MjA3ODU5MDgzLAogICAgICAgIDEuMTQ0ODA3NzUzMDEyMjA4MSwKICAgICAgICAxLjE3OTk5OTk5OTk5OTk5OTksCiAgICAgICAgMS4xODQ4MDc3NTMwMTIyMDgxLAogICAgICAgIDEuMTU5NjkyNjIwNzg1OTA4NCwKICAgICAgICAxLjEwNjAyNTQwMzc4NDQzODYsCiAgICAgICAgMS4wMjYwNDQ0NDMxMTg5NzgxLAogICAgICAgIDAuOTIyNzg3NjA5Njg2NTM5NSwKICAgICAgICAwLjgwMDAwMDAwMDAwMDAwMDI3LAogICAgICAgIDAuNjYyMDIwMTQzMzI1NjY4OTQsCiAgICAgICAgMC41MTM2NDgxNzc2NjY5MzAyNywKICAgICAgICAwLjM2MDAwMDAwMDAwMDAwMDEsCiAgICAgICAgMC4yMDYzNTE4MjIzMzMwNjk5OCwKICAgICAgICAwLjA1Nzk3OTg1NjY3NDMzMTM2NSwKICAgICAgICAtMC4wODAwMDAwMDAwMDAwMDAxMjcsCiAgICAgICAgLTAuMjAyNzg3NjA5Njg2NTM5MjUsCiAgICAgICAgLTAuMzA2MDQ0NDQzMTE4OTc3ODgsCiAgICAgICAgLTAuMzg2MDI1NDAzNzg0NDM4MzksCiAgICAgICAgLTAuNDM5NjkyNjIwNzg1OTA4NDMsCiAgICAgICAgLTAuNDY0ODA3NzUzMDEyMjA4LAogICAgICAgIC0wLjQ1OTk5OTk5OTk5OTk5OTk2LAogICAgICAgIC0wLjQyNDgwNzc1MzAxMjIwODA4LAogICAgICAgIC0wLjM1OTY5MjYyMDc4NTkwODM2LAogICAgICAgIC0wLjI2NjAyNTQwMzc4NDQzOTA2LAogICAgICAgIC0wLjE0NjA0NDQ0MzExODk3ODEzLAogICAgICAgIC0wLjAwMjc4NzYwOTY4NjUzOTU3MTYsCiAgICAgICAgMC4xNjAwMDAwMDAwMDAwMDAzNiwKICAgICAgICAwLjMzNzk3OTg1NjY3NDMzMTQ1LAogICAgICAgIDAuNTI2MzUxODIyMzMzMDY5NjUsCiAgICAgICAgMC43MTk5OTk5OTk5OTk5OTk3NSwKICAgICAgICAwLjkxMzY0ODE3NzY2NjkyOTg1LAogICAgICAgIDEuMTAyMDIwMTQzMzI1NjY4MiwKICAgICAgICAxLjI3OTk5OTk5OTk5OTk5OTQsCiAgICAgICAgMS40NDI3ODc2MDk2ODY1MzkzLAogICAgICAgIDEuNTg2MDQ0NDQzMTE4OTc3MywKICAgICAgICAxLjcwNjAyNTQwMzc4NDQzODcsCiAgICAgICAgMS43OTk2OTI2MjA3ODU5MDgxLAogICAgICAgIDEuODY0ODA3NzUzMDEyMjA4LAogICAgICAgIDEuODk5OTk5OTk5OTk5OTk5OSwKICAgICAgICAxLjkwNDgwNzc1MzAxMjIwODEsCiAgICAgICAgMS44Nzk2OTI2MjA3ODU5MDc5LAogICAgICAgIDEuODI2MDI1NDAzNzg0NDM5MiwKICAgICAgICAxLjc0NjA0NDQ0MzExODk3ODgsCiAgICAgICAgMS42NDI3ODc2MDk2ODY1MzkKICAgICAgXSwKICAgICAgInNob3dJbkxlZ2VuZCIgOiB0cnVlLAogICAgICAibmFtZSIgOiAiMjAxNyIsCiAgICAgICJhbGxvd1BvaW50U2VsZWN0IiA6IGZhbHNlLAogICAgICAiY29sb3IiIDogewogICAgICAgICJzdG9wcyIgOiBbCiAgICAgICAgICBbCiAgICAgICAgICAgIDAsCiAgICAgICAgICAgICIjMDBBOEM1IgogICAgICAgICAgXSwKICAgICAgICAgIFsKICAgICAgICAgICAgMSwKICAgICAgICAgICAgIiNGRkZGN0UiCiAgICAgICAgICBdCiAgICAgICAgXSwKICAgICAgICAibGluZWFyR3JhZGllbnQiIDogewogICAgICAgICAgIngyIiA6IDAsCiAgICAgICAgICAieDEiIDogMCwKICAgICAgICAgICJ5MiIgOiAwLAogICAgICAgICAgInkxIiA6IDEKICAgICAgICB9CiAgICAgIH0KICAgIH0sCiAgICB7CiAgICAgICJ2aXNpYmxlIiA6IHRydWUsCiAgICAgICJkYXRhIiA6IFsKICAgICAgICAxLAogICAgICAgIDEuMDE0ODA3NzUzMDEyMjA3OSwKICAgICAgICAwLjk5OTY5MjYyMDc4NTkwODQ4LAogICAgICAgIDAuOTU2MDI1NDAzNzg0NDM4NjgsCiAgICAgICAgMC44ODYwNDQ0NDMxMTg5NzgwMSwKICAgICAgICAwLjc5Mjc4NzYwOTY4NjUzOTM5LAogICAgICAgIDAuNjgwMDAwMDAwMDAwMDAwMTYsCiAgICAgICAgMC41NTIwMjAxNDMzMjU2Njg4NCwKICAgICAgICAwLjQxMzY0ODE3NzY2NjkzMDQxLAogICAgICAgIDAuMjcwMDAwMDAwMDAwMDAwMDcsCiAgICAgICAgMC4xMjYzNTE4MjIzMzMwNjk2OSwKICAgICAgICAtMC4wMTIwMjAxNDMzMjU2Njg2OTcsCiAgICAgICAgLTAuMTM5OTk5OTk5OTk5OTk5ODUsCiAgICAgICAgLTAuMjUyNzg3NjA5Njg2NTM5MzUsCiAgICAgICAgLTAuMzQ2MDQ0NDQzMTE4OTc3OTIsCiAgICAgICAgLTAuNDE2MDI1NDAzNzg0NDM4NDcsCiAgICAgICAgLTAuNDU5NjkyNjIwNzg1OTA4MzMsCiAgICAgICAgLTAuNDc0ODA3NzUzMDEyMjA4MDEsCiAgICAgICAgLTAuNDU5OTk5OTk5OTk5OTk5OTYsCiAgICAgICAgLTAuNDE0ODA3NzUzMDEyMjA4MDcsCiAgICAgICAgLTAuMzM5NjkyNjIwNzg1OTA4NDUsCiAgICAgICAgLTAuMjM2MDI1NDAzNzg0NDM4NTksCiAgICAgICAgLTAuMTA2MDQ0NDQzMTE4OTc3OTgsCiAgICAgICAgMC4wNDcyMTIzOTAzMTM0NjA1ODQsCiAgICAgICAgMC4yMTk5OTk5OTk5OTk5OTk1MywKICAgICAgICAwLjQwNzk3OTg1NjY3NDMzMTQ1LAogICAgICAgIDAuNjA2MzUxODIyMzMzMDY5NzIsCiAgICAgICAgMC44MDk5OTk5OTk5OTk5OTk4MywKICAgICAgICAxLjAxMzY0ODE3NzY2NjkyOTksCiAgICAgICAgMS4yMTIwMjAxNDMzMjU2NjksCiAgICAgICAgMS4zOTk5OTk5OTk5OTk5OTk1LAogICAgICAgIDEuNTcyNzg3NjA5Njg2NTM5NCwKICAgICAgICAxLjcyNjA0NDQ0MzExODk3NzksCiAgICAgICAgMS44NTYwMjU0MDM3ODQ0Mzg4LAogICAgICAgIDEuOTU5NjkyNjIwNzg1OTA4NCwKICAgICAgICAyLjAzNDgwNzc1MzAxMjIwOCwKICAgICAgICAyLjA4MDAwMDAwMDAwMDAwMDEsCiAgICAgICAgMi4wOTQ4MDc3NTMwMTIyMDg1LAogICAgICAgIDIuMDc5NjkyNjIwNzg1OTA4NiwKICAgICAgICAyLjAzNjAyNTQwMzc4NDQzOTIsCiAgICAgICAgMS45NjYwNDQ0NDMxMTg5NzgxLAogICAgICAgIDEuODcyNzg3NjA5Njg2NTQwMSwKICAgICAgICAxLjc1OTk5OTk5OTk5OTk5OTgsCiAgICAgICAgMS42MzIwMjAxNDMzMjU2Njk2LAogICAgICAgIDEuNDkzNjQ4MTc3NjY2OTMwNiwKICAgICAgICAxLjM1MDAwMDAwMDAwMDAwMDMsCiAgICAgICAgMS4yMDYzNTE4MjIzMzMwNzAzLAogICAgICAgIDEuMDY3OTc5ODU2Njc0MzMwMiwKICAgICAgICAwLjk0MDAwMDAwMDAwMDAwMDcyLAogICAgICAgIDAuODI3MjEyMzkwMzEzNDYxNSwKICAgICAgICAwLjczMzk1NTU1Njg4MTAyMTY1CiAgICAgIF0sCiAgICAgICJzaG93SW5MZWdlbmQiIDogdHJ1ZSwKICAgICAgIm5hbWUiIDogIjIwMTgiLAogICAgICAiYWxsb3dQb2ludFNlbGVjdCIgOiBmYWxzZSwKICAgICAgImNvbG9yIiA6IHsKICAgICAgICAic3RvcHMiIDogWwogICAgICAgICAgWwogICAgICAgICAgICAwLAogICAgICAgICAgICAiI0Q0MTQ1QSIKICAgICAgICAgIF0sCiAgICAgICAgICBbCiAgICAgICAgICAgIDEsCiAgICAgICAgICAgICIjRkJCMDNCIgogICAgICAgICAgXQogICAgICAgIF0sCiAgICAgICAgImxpbmVhckdyYWRpZW50IiA6IHsKICAgICAgICAgICJ4MiIgOiAwLAogICAgICAgICAgIngxIiA6IDAsCiAgICAgICAgICAieTIiIDogMCwKICAgICAgICAgICJ5MSIgOiAxCiAgICAgICAgfQogICAgICB9CiAgICB9CiAgXSwKICAidG9vbHRpcCIgOiB7CiAgICAiY3Jvc3NoYWlycyIgOiB0cnVlLAogICAgImVuYWJsZWQiIDogdHJ1ZSwKICAgICJ1c2VIVE1MIiA6IGZhbHNlLAogICAgInNoYXJlZCIgOiB0cnVlLAogICAgImFuaW1hdGlvbiIgOiB0cnVlCiAgfSwKICAieEF4aXMiIDogewogICAgImxhYmVscyIgOiB7CiAgICAgICJlbmFibGVkIiA6IHRydWUsCiAgICAgICJzdHlsZSIgOiB7CiAgICAgICAgImNvbG9yIiA6ICIjNzc4ODk5IiwKICAgICAgICAiZm9udFNpemUiIDogIjExcHgiLAogICAgICAgICJmb250V2VpZ2h0IiA6ICJ0aGluIgogICAgICB9LAogICAgICAidXNlSFRNTCIgOiBmYWxzZQogICAgfSwKICAgICJncmlkTGluZVdpZHRoIiA6IDAsCiAgICAidmlzaWJsZSIgOiB0cnVlLAogICAgInRpY2ttYXJrUGxhY2VtZW50IiA6ICJvbiIsCiAgICAidGlja0ludGVydmFsIiA6IDEsCiAgICAicmV2ZXJzZWQiIDogZmFsc2UsCiAgICAic3RhcnRPblRpY2siIDogZmFsc2UKICB9LAogICJjaGFydCIgOiB7CiAgICAicGluY2hUeXBlIiA6ICJub25lIiwKICAgICJwb2xhciIgOiBmYWxzZSwKICAgICJ0eXBlIiA6ICJhcmVhIiwKICAgICJwYW5uaW5nIiA6IHRydWUsCiAgICAiaW52ZXJ0ZWQiIDogZmFsc2UKICB9LAogICJwbG90T3B0aW9ucyIgOiB7CiAgICAic2VyaWVzIiA6IHsKICAgICAgIm1hcmtlciIgOiB7CiAgICAgICAgInJhZGl1cyIgOiA1CiAgICAgIH0sCiAgICAgICJzdGFja2luZyIgOiAiIiwKICAgICAgImNvbm5lY3ROdWxscyIgOiBmYWxzZQogICAgfSwKICAgICJhcmVhIiA6IHsKCiAgICB9CiAgfSwKICAiY29sb3JzIiA6IFsKICAgICIjMWU5MGZmIiwKICAgICIjZGMxNDNjIgogIF0sCiAgInRpdGxlIiA6IHsKICAgICJzdHlsZSIgOiB7CiAgICAgICJjb2xvciIgOiAiIzAwMDAwMCIsCiAgICAgICJmb250U2l6ZSIgOiAiMTFweCIsCiAgICAgICJmb250V2VpZ2h0IiA6ICJyZWd1bGFyIgogICAgfSwKICAgICJ0ZXh0IiA6ICIiLAogICAgInVzZUhUTUwiIDogZmFsc2UKICB9LAogICJ5QXhpcyIgOiB7CiAgICAiYWxsb3dEZWNpbWFscyIgOiB0cnVlLAogICAgImdyaWRMaW5lV2lkdGgiIDogMSwKICAgICJsYWJlbHMiIDogewogICAgICAiZW5hYmxlZCIgOiB0cnVlLAogICAgICAic3R5bGUiIDogewogICAgICAgICJjb2xvciIgOiAiIzc3ODg5OSIsCiAgICAgICAgImZvbnRTaXplIiA6ICIxMXB4IiwKICAgICAgICAiZm9udFdlaWdodCIgOiAidGhpbiIKICAgICAgfSwKICAgICAgInVzZUhUTUwiIDogZmFsc2UsCiAgICAgICJmb3JtYXQiIDogInt2YWx1ZTouLDBmfSIKICAgIH0sCiAgICAidmlzaWJsZSIgOiBmYWxzZSwKICAgICJvcHBvc2l0ZSIgOiBmYWxzZSwKICAgICJ0aXRsZSIgOiB7CiAgICAgICJ0ZXh0IiA6ICLmkYTmsI/luqYiCiAgICB9LAogICAgInJldmVyc2VkIiA6IGZhbHNlLAogICAgImxpbmVXaWR0aCIgOiAwLjUKICB9LAogICJsZWdlbmQiIDogewogICAgImVuYWJsZWQiIDogdHJ1ZQogIH0sCiAgInpvb21SZXNldEJ1dHRvblRleHQiIDogIuaBouWkjee8qeaUviIKfQ==";
-    NSData *data = [[NSData alloc] initWithBase64EncodedString:base64Str options:NSDataBase64DecodingIgnoreUnknownCharacters];
-    NSString *sender = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    NSString *receivedWidth = @"0";
-    NSString *receivedHeight = @"1000";
-    NSString *isWKWebView = @"1";
-    NSDictionary *param = @{@"sender" : sender, @"receivedWidth":receivedWidth, @"receivedHeight" : receivedHeight, @"isWKWebView" : isWKWebView};
+    NSDictionary *param = @{};
+    @autoreleasepool {
+//        NSDictionary *bodyDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
+//        WSLog(@"webServer接收的APM数据Body:\n%@",bodyDic);
+        
+        NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+        NSDictionary *title = @{
+                                @"style": @{
+                                        @"color": @"#abc123",
+                                        @"fontSize": @"16px",
+                                        @"fontWeight": @"regular"
+                                        },
+                                @"text": @"内存图表",
+                                @"useHTML": @(false)
+                                };
+        NSDictionary *subtitle = @{
+                                   @"align": @"left",
+                                   @"text": @"已使用内存",
+                                   @"style": @{
+                                           @"color": @"#123abc",
+                                           @"fontSize": @"12px",
+                                           @"fontWeight": @"regular"
+                                           }
+                                   };
+        NSDictionary *xAxis = @{
+                                @"labels": @{
+                                        @"enabled": @(true),
+                                        @"style": @{
+                                                @"color": @"#778899",
+                                                @"fontSize": @"11px",
+                                                @"fontWeight": @"thin"
+                                                },
+                                        @"useHTML": @(false)
+                                        },
+                                @"gridLineWidth": @(0),
+                                @"visible": @(true),
+                                @"tickmarkPlacement": @"on",
+                                @"tickInterval": @(1),
+                                @"reversed": @(false),
+                                @"startOnTick": @(false)
+                                };
+        NSDictionary *yAxis = @{
+                                @"allowDecimals": @(true),
+                                @"gridLineWidth": @(1),
+                                @"labels": @{
+                                        @"enabled": @(true),
+                                        @"style": @{
+                                                @"color": @"#778899",
+                                                @"fontSize": @"11px",
+                                                @"fontWeight": @"thin"
+                                                },
+                                        @"useHTML": @(false),
+                                        @"format": @"{value:.,0f}"
+                                        },
+                                @"visible": @(true),
+                                @"opposite": @(false),
+                                @"title": @{
+                                        @"text": @"Byte"
+                                        },
+                                @"reversed": @(false),
+                                @"lineWidth": @(0.5)
+                                };
+        NSDictionary *tooltip = @{
+                                  @"crosshairs": @(true),
+                                  @"enabled": @(true),
+                                  @"useHTML": @(false),
+                                  @"shared": @(true),
+                                  @"animation": @(true)
+                                  };
+        NSDictionary *chart = @{
+                                @"pinchType": @"none",
+                                @"polar": @(false),
+                                @"type": @"line",
+                                @"panning": @(true),
+                                @"inverted": @(false)
+                                };
+        NSDictionary *plotOptions = @{
+                                      @"line": @{},
+                                      @"series": @{
+                                              @"marker": @{
+                                                      @"radius": @(5)
+                                                      },
+                                              @"stacking": @"",
+                                              @"connectNulls": @(false)
+                                              }
+                                      };
+        //    if ([self.apm_db jq_tableItemCount:@"apm_cpu"]) {
+        //        long long time = [[bodyDic objectForKey:@"interval"] longLongValue];
+        [self.apm_db jq_inDatabase:^{
+            NSArray *resArr = [self.apm_db jq_lookupTable:@"apm_memory" dicOrModel:[MemoryModel_APM class] whereFormat:nil];
+            NSMutableArray *usedArr = [NSMutableArray arrayWithCapacity:resArr.count];
+            NSMutableArray *freeArr = [NSMutableArray arrayWithCapacity:resArr.count];
+            NSMutableArray *activeArr = [NSMutableArray arrayWithCapacity:resArr.count];
+            for (MemoryModel_APM *model in resArr) {
+                [usedArr addObject:@(model.memoryUsed)];
+                [freeArr addObject:@(model.memoryFree)];
+                [activeArr addObject:@(model.memoryActive)];
+            }
+            NSDictionary *perUnit_Used = @{
+                                           @"visible": @(true),
+                                           @"data": usedArr,
+                                           @"showInLegend": @(true),
+                                           @"name": @"Used",
+                                           @"allowPointSelect": @(false),
+                                           @"color": @{
+                                                   @"stops": @[
+                                                           @[@"0", @"#00A8C5"],
+                                                           @[@"1", @"#FFFF7E"]
+                                                           ],
+                                                   @"linearGradient": @{
+                                                           @"x2": @(0),
+                                                           @"x1": @(0),
+                                                           @"y2": @(0),
+                                                           @"y1": @(1)
+                                                           }
+                                                   }
+                                           };
+            
+            NSDictionary *perUnit_Free = @{
+                                           @"visible": @(true),
+                                           @"data": freeArr,
+                                           @"showInLegend": @(true),
+                                           @"name": @"Free",
+                                           @"allowPointSelect": @(false),
+                                           @"color": @{
+                                                   @"stops": @[
+                                                           @[@"0", @"#D4145A"],
+                                                           @[@"1", @"#FBB03B"]
+                                                           ],
+                                                   @"linearGradient": @{
+                                                           @"x2": @(0),
+                                                           @"x1": @(0),
+                                                           @"y2": @(0),
+                                                           @"y1": @(1)
+                                                           }
+                                                   }
+                                           };
+            NSDictionary *perUnit_Active = @{
+                                             @"visible": @(true),
+                                             @"data": activeArr,
+                                             @"showInLegend": @(true),
+                                             @"name": @"Active",
+                                             @"allowPointSelect": @(false),
+                                             @"color": @{
+                                                     @"stops": @[
+                                                             @[@"0", @"#87CEFA"],
+                                                             @[@"1", @"#00BFFF"]
+                                                             ],
+                                                     @"linearGradient": @{
+                                                             @"x2": @(0),
+                                                             @"x1": @(0),
+                                                             @"y2": @(0),
+                                                             @"y1": @(1)
+                                                             }
+                                                     }
+                                             };
+            [dic setObject:@[perUnit_Used, perUnit_Active, perUnit_Free] forKey:@"series"];
+        }];
+        //    }
+        
+        [dic setObject:title forKey:@"title"];
+        [dic setObject:subtitle forKey:@"subtitle"];
+        [dic setObject:xAxis forKey:@"xAxis"];
+        [dic setObject:yAxis forKey:@"yAxis"];
+        [dic setObject:tooltip forKey:@"tooltip"];
+        [dic setObject:chart forKey:@"chart"];
+        [dic setObject:plotOptions forKey:@"plotOptions"];
+        
+        [dic setObject:@"恢复缩放" forKey:@"zoomResetButtonText"];
+        [dic setObject:@{@"enabled": @(true)} forKey:@"legend"];
+        [dic setObject:@[@"#1e90ff", @"#dc143c"] forKey:@"colors"];
+        [dic setObject:@(false) forKey:@"gradientColorEnabled"];
+        [dic setObject:@(false) forKey:@"touchEventEnabled"];
+        
+        NSString *sender = [dic yy_modelToJSONString];
+        NSString *receivedWidth = @"0";
+        NSString *receivedHeight = @"500";
+        NSString *isWKWebView = @"1";
+        
+        param = @{@"sender" : sender, @"receivedWidth":receivedWidth, @"receivedHeight" : receivedHeight, @"isWKWebView" : isWKWebView};
+    }
     return param;
+
 }
 - (void)proceeWriteAPMData:(NSData *)bodyData { //TODO:设置数据库存储大小
     __weak typeof(self) weakSelf = self;

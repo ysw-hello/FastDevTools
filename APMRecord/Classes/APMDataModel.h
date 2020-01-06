@@ -62,11 +62,13 @@ NS_ASSUME_NONNULL_BEGIN
 @interface PageModel_APM : NSObject
 
 @property (nonatomic, strong) NSString *pageName;
+@property (nonatomic, strong, nullable) NSString *pageTitle;
 @property (nonatomic, assign) NSUInteger fps;
 @property (nonatomic, assign) int64_t entryInterval;
-@property (nonatomic, strong) NSString *webUrl;
-@property (nonatomic, strong) NSString *viewClass;
-@property (nonatomic, strong) NSString *webCoreType;
+@property (nonatomic, strong, nullable) NSString *webUrl;
+@property (nonatomic, strong, nullable) NSString *webTitle;
+@property (nonatomic, strong, nullable) NSString *viewClass;
+@property (nonatomic, strong, nullable) NSString *webCoreType;
 @property (nonatomic, strong) NSString *naFunc;
 
 @end

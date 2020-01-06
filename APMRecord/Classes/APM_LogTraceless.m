@@ -39,14 +39,14 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
 + (void)initialize {
     [super initialize];
     
-    Method apm_viewWillAppearMethod = class_getInstanceMethod([self class], @selector(apm_viewWillAppear:));
-    if (apm_addMethod(UIViewController.class, @selector(apm_viewWillAppear:), apm_viewWillAppearMethod)) {
-        apm_swizzleSelector(UIViewController.class, @selector(viewWillAppear:), @selector(apm_viewWillAppear:));
+    Method apm_viewDidAppearMethod = class_getInstanceMethod([self class], @selector(apm_viewDidAppear:));
+    if (apm_addMethod(UIViewController.class, @selector(apm_viewDidAppear:), apm_viewDidAppearMethod)) {
+        apm_swizzleSelector(UIViewController.class, @selector(viewDidAppear:), @selector(apm_viewDidAppear:));
     }
     
-    Method apm_viewWillDisappearMethod = class_getInstanceMethod([self class], @selector(apm_viewWillDisappear:));
-    if (apm_addMethod(UIViewController.class, @selector(apm_viewWillDisappear:), apm_viewWillDisappearMethod)) {
-        apm_swizzleSelector(UIViewController.class, @selector(viewWillDisappear:), @selector(apm_viewWillDisappear:));
+    Method apm_viewDidDisappearMethod = class_getInstanceMethod([self class], @selector(apm_viewDidDisappear:));
+    if (apm_addMethod(UIViewController.class, @selector(apm_viewDidDisappear:), apm_viewDidDisappearMethod)) {
+        apm_swizzleSelector(UIViewController.class, @selector(viewDidDisappear:), @selector(apm_viewDidDisappear:));
     }
 }
 
@@ -57,6 +57,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
     dispatch_once(&onceToken, ^{
         apmLogger_ = [[APM_LogTraceless alloc] init];
         apmLogger_.safeQueue = dispatch_queue_create("com.apm.traceless", DISPATCH_QUEUE_SERIAL);
+        apmLogger_.pageModel = [PageModel_APM new];
     });
     return apmLogger_;
 }
@@ -117,7 +118,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
              @"page" : @{
                      @"entryInterval" : @(1577336961404),
                      @"fps" : @(60),
-                     @"naFunc" : @"viewWillAppear",
+                     @"naFunc" : @"viewDidAppear",
                      @"pageName" : @"APMTestViewController",
                      @"webUrl" : @"https://www.baidu.com",
                      @"viewClass" : @"APMWKWebView",
@@ -128,7 +129,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
 }
 
 #pragma mark - private SEL
-- (void)apm_viewWillAppear:(BOOL)animated {
+- (void)apm_viewDidAppear:(BOOL)animated {
     APM_LogTraceless *apmTraceless = [APM_LogTraceless sharedInstance];
     if (apmTraceless.isRunning) {
         NSString *className = NSStringFromClass([self class]);
@@ -141,8 +142,9 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
                 //递归subviews获取webview的url
                 [apmTraceless fetchURLStrWithView:vc.view];
                 
-                apmTraceless.pageModel.naFunc = @"viewWillAppear";
+                apmTraceless.pageModel.naFunc = @"viewDidAppear";
                 apmTraceless.pageModel.pageName = NSStringFromClass([self class]);
+                apmTraceless.pageModel.pageTitle = [vc title]?:@"";
                 
                 [[APM_LogRecorder sharedInstance] tracelessRecordWithPageModel:apmTraceless.pageModel interval:RecordInterval_APM dataHandler:^(APMDataModel *apmData) { //Native回调
 //                    NSLog(@"Native回调APM数据:\n%@", [apmData yy_modelToJSONString]);
@@ -153,20 +155,24 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
         
     }
     
-    [self apm_viewWillAppear:animated];
+    [self apm_viewDidAppear:animated];
 }
 
 // 递归获取子视图
 - (void)fetchURLStrWithView:(UIView *)view{
     NSArray *subviews = [view subviews];
-    PageModel_APM *page = [[PageModel_APM alloc] init];
-
+    PageModel_APM *page = [APM_LogTraceless sharedInstance].pageModel;
+    page.webUrl = @"";
+    page.webCoreType = @"";
+    page.viewClass = @"";
+    page.webTitle = @"";
+    
     if (subviews.count == 0) {
         if ([view isKindOfClass:[WKWebView class]] && [view respondsToSelector:@selector(URL)]) {
             page.webUrl = [(NSURL *)[view performSelector:@selector(URL)] absoluteString];
             page.viewClass = NSStringFromClass([view class]);
             page.webCoreType = @"WKWebView";
-            self.pageModel = page;
+            page.webTitle = [(WKWebView *)view title];
             return;
         }
         
@@ -174,11 +180,10 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
             page.webUrl = [(NSURL *)[(NSURLRequest *)[view performSelector:@selector(request)] URL] absoluteString];
             page.viewClass = NSStringFromClass([view class]);
             page.webCoreType = @"UIWebView";
-            self.pageModel = page;
+            page.webTitle = [(UIWebView *)view stringByEvaluatingJavaScriptFromString:@"document.title"];
             return;
         }
         
-        self.pageModel = page;
         return;
     }
 
@@ -187,7 +192,9 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
             page.webUrl = [(NSURL *)[subview performSelector:@selector(URL)] absoluteString];
             page.viewClass = NSStringFromClass([subview class]);
             page.webCoreType = @"WKWebView";
-            self.pageModel = page;
+            [(WKWebView *)subview evaluateJavaScript:@"document.title" completionHandler:^(id _Nullable title, NSError * _Nullable error) {
+                page.webTitle = title;
+            }];
             return;
         }
         
@@ -195,7 +202,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
             page.webUrl = [(NSURL *)[(NSURLRequest *)[subview performSelector:@selector(request)] URL] absoluteString];
             page.viewClass = NSStringFromClass([subview class]);
             page.webCoreType = @"UIWebView";
-            self.pageModel = page;
+            page.webTitle = [(UIWebView *)subview stringByEvaluatingJavaScriptFromString:@"document.title"];
             return;
         }
         
@@ -221,7 +228,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
     return dic;
 }
 
-- (void)apm_viewWillDisappear:(BOOL)animated {
+- (void)apm_viewDidDisappear:(BOOL)animated {
     if ([APM_LogTraceless sharedInstance].isRunning) {
         NSString *className = NSStringFromClass([self class]);
         if ([[APM_LogTraceless sharedInstance] shouldTrackWithController:(UIViewController *)self]) {
@@ -234,7 +241,7 @@ static inline BOOL apm_addMethod(Class theClass, SEL selector, Method method) {
 
     }
     
-    [self apm_viewWillDisappear:animated];
+    [self apm_viewDidDisappear:animated];
 }
 
 - (BOOL)shouldTrackWithController:(UIViewController *)controller {
