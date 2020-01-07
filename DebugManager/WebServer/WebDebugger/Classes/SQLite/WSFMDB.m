@@ -6,7 +6,6 @@
 //
 
 #import "WSFMDB.h"
-#import "FMDB.h"
 #import <objc/runtime.h>
 #import <YYModel/YYModel.h>
 
@@ -20,7 +19,6 @@
 
 @property (nonatomic, strong)NSString *dbPath;
 @property (nonatomic, strong)FMDatabaseQueue *dbQueue;
-@property (nonatomic, strong)FMDatabase *db;
 
 @end
 

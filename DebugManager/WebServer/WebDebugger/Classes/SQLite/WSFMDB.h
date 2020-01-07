@@ -5,9 +5,11 @@
 //  Created by TimmyYan on 2019/12/25.
 //
 #import <Foundation/Foundation.h>
+#import "FMDB.h"
 
 @interface WSFMDB : NSObject
 
+@property (nonatomic, strong)FMDatabase *db;
 
 /**
  (主键id,自动创建) 返回最后插入的primary key id
