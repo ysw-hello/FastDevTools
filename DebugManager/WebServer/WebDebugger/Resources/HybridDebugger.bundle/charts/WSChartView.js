@@ -1,5 +1,5 @@
 
-window.setInterval(loop, 20000); //20s轮询间隔
+window.setInterval(loop, 10000); //10s轮询间隔
 
 function loop () {
     var xhr = new XMLHttpRequest();
