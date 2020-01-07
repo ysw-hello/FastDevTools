@@ -55,7 +55,6 @@ static NSString *bonjourName = @"me.local";
         //初始化db
         NSString *dbName = @"APM_DB.sqlite";
         NSString *path = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-        [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
         self.apm_db = [WSFMDB shareDatabase:dbName path:path];
         if(![_apm_db jq_isExistTable:@"apm_page"]) [_apm_db jq_createTable:@"apm_page" dicOrModel:[PageModel_APM class]];
         if(![_apm_db jq_isExistTable:@"apm_device"]) [_apm_db jq_createTable:@"apm_device" dicOrModel:[DeviceModel_APM class]];
@@ -167,7 +166,7 @@ static NSString *bonjourName = @"me.local";
             [strongSelf proceeWriteAPMData:request.data];
         } else if ([url.path containsString:[@"/" stringByAppendingString:APM_ReadPath]]) { //APM读取数据接口
             if (request.data.length > 0) {
-//                result = [strongSelf proceeReadAPMData:request.data];
+                result = [strongSelf proceeReadAPMData:request.data];
             }
         }
         
@@ -279,187 +278,186 @@ static NSString *bonjourName = @"me.local";
 
 #pragma mark - pravite SEL
 - (NSDictionary *)proceeReadAPMData:(NSData *)bodyData { //TODO：从数据库取数据，实时绘制
-    NSDictionary *param = @{};
-    @autoreleasepool {
-//        NSDictionary *bodyDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
-//        WSLog(@"webServer接收的APM数据Body:\n%@",bodyDic);
-        
-        NSMutableDictionary *dic = [NSMutableDictionary dictionary];
-        NSDictionary *title = @{
-                                @"style": @{
-                                        @"color": @"#abc123",
-                                        @"fontSize": @"16px",
-                                        @"fontWeight": @"regular"
-                                        },
-                                @"text": @"内存图表",
-                                @"useHTML": @(false)
-                                };
-        NSDictionary *subtitle = @{
-                                   @"align": @"left",
-                                   @"text": @"已使用内存",
-                                   @"style": @{
-                                           @"color": @"#123abc",
-                                           @"fontSize": @"12px",
-                                           @"fontWeight": @"regular"
+    NSDictionary *bodyDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
+    WSLog(@"webServer接收的APM数据Body:\n%@",bodyDic);
+    
+    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
+    NSDictionary *title = @{
+                            @"style": @{
+                                    @"color": @"#abc123",
+                                    @"fontSize": @"16px",
+                                    @"fontWeight": @"regular"
+                                    },
+                            @"text": @"内存图表",
+                            @"useHTML": @(false)
+                            };
+    NSDictionary *subtitle = @{
+                               @"align": @"left",
+                               @"text": @"已使用内存",
+                               @"style": @{
+                                       @"color": @"#123abc",
+                                       @"fontSize": @"12px",
+                                       @"fontWeight": @"regular"
+                                       }
+                               };
+    NSDictionary *xAxis = @{
+                            @"labels": @{
+                                    @"enabled": @(true),
+                                    @"style": @{
+                                            @"color": @"#778899",
+                                            @"fontSize": @"11px",
+                                            @"fontWeight": @"thin"
+                                            },
+                                    @"useHTML": @(false)
+                                    },
+                            @"gridLineWidth": @(0),
+                            @"visible": @(true),
+                            @"tickmarkPlacement": @"on",
+                            @"tickInterval": @(1),
+                            @"reversed": @(false),
+                            @"startOnTick": @(false)
+                            };
+    NSDictionary *yAxis = @{
+                            @"allowDecimals": @(true),
+                            @"gridLineWidth": @(1),
+                            @"labels": @{
+                                    @"enabled": @(true),
+                                    @"style": @{
+                                            @"color": @"#778899",
+                                            @"fontSize": @"11px",
+                                            @"fontWeight": @"thin"
+                                            },
+                                    @"useHTML": @(false),
+                                    @"format": @"{value:.,0f}"
+                                    },
+                            @"visible": @(true),
+                            @"opposite": @(false),
+                            @"title": @{
+                                    @"text": @"Byte"
+                                    },
+                            @"reversed": @(false),
+                            @"lineWidth": @(0.5)
+                            };
+    NSDictionary *tooltip = @{
+                              @"crosshairs": @(true),
+                              @"enabled": @(true),
+                              @"useHTML": @(false),
+                              @"shared": @(true),
+                              @"animation": @(true)
+                              };
+    NSDictionary *chart = @{
+                            @"pinchType": @"none",
+                            @"polar": @(false),
+                            @"type": @"line",
+                            @"panning": @(true),
+                            @"inverted": @(false)
+                            };
+    NSDictionary *plotOptions = @{
+                                  @"line": @{},
+                                  @"series": @{
+                                          @"marker": @{
+                                                  @"radius": @(5)
+                                                  },
+                                          @"stacking": @"",
+                                          @"connectNulls": @(false)
+                                          }
+                                  };
+    
+    long long time = [[bodyDic objectForKey:@"interval"] longLongValue];
+    NSString *sqlStr = [NSString stringWithFormat:@"select memoryUsed,memoryFree,memoryActive from apm_memory where curInterval > %lld - 60 ", time];
+    FMResultSet *res = [self.apm_db.db executeQuery:sqlStr];
+    NSMutableArray *usedArr = @[].mutableCopy;
+    NSMutableArray *freeArr = @[].mutableCopy;
+    NSMutableArray *activeArr = @[].mutableCopy;
+    while ([res next]) {
+        NSDictionary *dic = [res resultDictionary];
+        [usedArr addObject:[dic objectForKey:@"memoryUsed"]];
+        [freeArr addObject:[dic objectForKey:@"memoryFree"]];
+        [activeArr addObject:[dic objectForKey:@"memoryActive"]];
+    }
+    
+    WSLog(@"wsUsed:%@\n wsFree:%@\n wsActive:%@\n", usedArr, freeArr, activeArr);
+    
+    NSDictionary *perUnit_Used = @{
+                                   @"visible": @(true),
+                                   @"data": usedArr,
+                                   @"showInLegend": @(true),
+                                   @"name": @"Used",
+                                   @"allowPointSelect": @(false),
+                                   @"color": @{
+                                           @"stops": @[
+                                                   @[@"0", @"#00A8C5"],
+                                                   @[@"1", @"#FFFF7E"]
+                                                   ],
+                                           @"linearGradient": @{
+                                                   @"x2": @(0),
+                                                   @"x1": @(0),
+                                                   @"y2": @(0),
+                                                   @"y1": @(1)
+                                                   }
                                            }
                                    };
-        NSDictionary *xAxis = @{
-                                @"labels": @{
-                                        @"enabled": @(true),
-                                        @"style": @{
-                                                @"color": @"#778899",
-                                                @"fontSize": @"11px",
-                                                @"fontWeight": @"thin"
-                                                },
-                                        @"useHTML": @(false)
-                                        },
-                                @"gridLineWidth": @(0),
-                                @"visible": @(true),
-                                @"tickmarkPlacement": @"on",
-                                @"tickInterval": @(1),
-                                @"reversed": @(false),
-                                @"startOnTick": @(false)
-                                };
-        NSDictionary *yAxis = @{
-                                @"allowDecimals": @(true),
-                                @"gridLineWidth": @(1),
-                                @"labels": @{
-                                        @"enabled": @(true),
-                                        @"style": @{
-                                                @"color": @"#778899",
-                                                @"fontSize": @"11px",
-                                                @"fontWeight": @"thin"
-                                                },
-                                        @"useHTML": @(false),
-                                        @"format": @"{value:.,0f}"
-                                        },
-                                @"visible": @(true),
-                                @"opposite": @(false),
-                                @"title": @{
-                                        @"text": @"Byte"
-                                        },
-                                @"reversed": @(false),
-                                @"lineWidth": @(0.5)
-                                };
-        NSDictionary *tooltip = @{
-                                  @"crosshairs": @(true),
-                                  @"enabled": @(true),
-                                  @"useHTML": @(false),
-                                  @"shared": @(true),
-                                  @"animation": @(true)
-                                  };
-        NSDictionary *chart = @{
-                                @"pinchType": @"none",
-                                @"polar": @(false),
-                                @"type": @"line",
-                                @"panning": @(true),
-                                @"inverted": @(false)
-                                };
-        NSDictionary *plotOptions = @{
-                                      @"line": @{},
-                                      @"series": @{
-                                              @"marker": @{
-                                                      @"radius": @(5)
-                                                      },
-                                              @"stacking": @"",
-                                              @"connectNulls": @(false)
-                                              }
-                                      };
-        //    if ([self.apm_db jq_tableItemCount:@"apm_cpu"]) {
-        //        long long time = [[bodyDic objectForKey:@"interval"] longLongValue];
-        [self.apm_db jq_inDatabase:^{
-            NSArray *resArr = [self.apm_db jq_lookupTable:@"apm_memory" dicOrModel:[MemoryModel_APM class] whereFormat:nil];
-            NSMutableArray *usedArr = [NSMutableArray arrayWithCapacity:resArr.count];
-            NSMutableArray *freeArr = [NSMutableArray arrayWithCapacity:resArr.count];
-            NSMutableArray *activeArr = [NSMutableArray arrayWithCapacity:resArr.count];
-            for (MemoryModel_APM *model in resArr) {
-                [usedArr addObject:@(model.memoryUsed)];
-                [freeArr addObject:@(model.memoryFree)];
-                [activeArr addObject:@(model.memoryActive)];
-            }
-            NSDictionary *perUnit_Used = @{
-                                           @"visible": @(true),
-                                           @"data": usedArr,
-                                           @"showInLegend": @(true),
-                                           @"name": @"Used",
-                                           @"allowPointSelect": @(false),
-                                           @"color": @{
-                                                   @"stops": @[
-                                                           @[@"0", @"#00A8C5"],
-                                                           @[@"1", @"#FFFF7E"]
-                                                           ],
-                                                   @"linearGradient": @{
-                                                           @"x2": @(0),
-                                                           @"x1": @(0),
-                                                           @"y2": @(0),
-                                                           @"y1": @(1)
-                                                           }
+    
+    NSDictionary *perUnit_Free = @{
+                                   @"visible": @(true),
+                                   @"data": freeArr,
+                                   @"showInLegend": @(true),
+                                   @"name": @"Free",
+                                   @"allowPointSelect": @(false),
+                                   @"color": @{
+                                           @"stops": @[
+                                                   @[@"0", @"#D4145A"],
+                                                   @[@"1", @"#FBB03B"]
+                                                   ],
+                                           @"linearGradient": @{
+                                                   @"x2": @(0),
+                                                   @"x1": @(0),
+                                                   @"y2": @(0),
+                                                   @"y1": @(1)
                                                    }
-                                           };
-            
-            NSDictionary *perUnit_Free = @{
-                                           @"visible": @(true),
-                                           @"data": freeArr,
-                                           @"showInLegend": @(true),
-                                           @"name": @"Free",
-                                           @"allowPointSelect": @(false),
-                                           @"color": @{
-                                                   @"stops": @[
-                                                           @[@"0", @"#D4145A"],
-                                                           @[@"1", @"#FBB03B"]
-                                                           ],
-                                                   @"linearGradient": @{
-                                                           @"x2": @(0),
-                                                           @"x1": @(0),
-                                                           @"y2": @(0),
-                                                           @"y1": @(1)
-                                                           }
-                                                   }
-                                           };
-            NSDictionary *perUnit_Active = @{
-                                             @"visible": @(true),
-                                             @"data": activeArr,
-                                             @"showInLegend": @(true),
-                                             @"name": @"Active",
-                                             @"allowPointSelect": @(false),
-                                             @"color": @{
-                                                     @"stops": @[
-                                                             @[@"0", @"#87CEFA"],
-                                                             @[@"1", @"#00BFFF"]
-                                                             ],
-                                                     @"linearGradient": @{
-                                                             @"x2": @(0),
-                                                             @"x1": @(0),
-                                                             @"y2": @(0),
-                                                             @"y1": @(1)
-                                                             }
+                                           }
+                                   };
+    NSDictionary *perUnit_Active = @{
+                                     @"visible": @(true),
+                                     @"data": activeArr,
+                                     @"showInLegend": @(true),
+                                     @"name": @"Active",
+                                     @"allowPointSelect": @(false),
+                                     @"color": @{
+                                             @"stops": @[
+                                                     @[@"0", @"#87CEFA"],
+                                                     @[@"1", @"#00BFFF"]
+                                                     ],
+                                             @"linearGradient": @{
+                                                     @"x2": @(0),
+                                                     @"x1": @(0),
+                                                     @"y2": @(0),
+                                                     @"y1": @(1)
                                                      }
-                                             };
-            [dic setObject:@[perUnit_Used, perUnit_Active, perUnit_Free] forKey:@"series"];
-        }];
-        //    }
-        
-        [dic setObject:title forKey:@"title"];
-        [dic setObject:subtitle forKey:@"subtitle"];
-        [dic setObject:xAxis forKey:@"xAxis"];
-        [dic setObject:yAxis forKey:@"yAxis"];
-        [dic setObject:tooltip forKey:@"tooltip"];
-        [dic setObject:chart forKey:@"chart"];
-        [dic setObject:plotOptions forKey:@"plotOptions"];
-        
-        [dic setObject:@"恢复缩放" forKey:@"zoomResetButtonText"];
-        [dic setObject:@{@"enabled": @(true)} forKey:@"legend"];
-        [dic setObject:@[@"#1e90ff", @"#dc143c"] forKey:@"colors"];
-        [dic setObject:@(false) forKey:@"gradientColorEnabled"];
-        [dic setObject:@(false) forKey:@"touchEventEnabled"];
-        
-        NSString *sender = [dic yy_modelToJSONString];
-        NSString *receivedWidth = @"0";
-        NSString *receivedHeight = @"500";
-        NSString *isWKWebView = @"1";
-        
-        param = @{@"sender" : sender, @"receivedWidth":receivedWidth, @"receivedHeight" : receivedHeight, @"isWKWebView" : isWKWebView};
-    }
+                                             }
+                                     };
+    [dic setObject:@[perUnit_Used, perUnit_Active, perUnit_Free] forKey:@"series"];
+    
+    [dic setObject:title forKey:@"title"];
+    [dic setObject:subtitle forKey:@"subtitle"];
+    [dic setObject:xAxis forKey:@"xAxis"];
+    [dic setObject:yAxis forKey:@"yAxis"];
+    [dic setObject:tooltip forKey:@"tooltip"];
+    [dic setObject:chart forKey:@"chart"];
+    [dic setObject:plotOptions forKey:@"plotOptions"];
+
+    [dic setObject:@"恢复缩放" forKey:@"zoomResetButtonText"];
+    [dic setObject:@{@"enabled": @(true)} forKey:@"legend"];
+    [dic setObject:@[@"#1e90ff", @"#dc143c"] forKey:@"colors"];
+    [dic setObject:@(false) forKey:@"gradientColorEnabled"];
+    [dic setObject:@(false) forKey:@"touchEventEnabled"];
+
+    NSString *sender = [dic yy_modelToJSONString];
+    NSString *receivedWidth = @"0";
+    NSString *receivedHeight = @"500";
+    NSString *isWKWebView = @"1";
+
+    NSDictionary *param = @{@"sender" : sender, @"receivedWidth" : receivedWidth, @"receivedHeight" : receivedHeight, @"isWKWebView" : isWKWebView};
     return param;
 
 }
