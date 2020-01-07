@@ -482,7 +482,9 @@ static NSString *bonjourName = @"me.local";
         
 #if DEBUG
         NSDictionary *apmDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
-        WSLog(@"webServer接收的APM数据:\n%@",apmDic);
+        NSData *jsonData = [NSJSONSerialization dataWithJSONObject:apmDic options:NSJSONWritingPrettyPrinted  error:nil];
+        NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+        WSLog(@"webServer接收的APM数据:\n%@",jsonString);
 #endif
         
     }];

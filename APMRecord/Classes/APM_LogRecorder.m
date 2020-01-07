@@ -209,7 +209,7 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     
     if (@available(iOS 9.0, *)) {
         __block BOOL succeed = NO;
-        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0); //利用信号量阻塞当前线程，模拟同步请求
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(1); //利用信号量阻塞当前线程，模拟同步请求
         
         NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;

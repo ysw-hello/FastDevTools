@@ -72,7 +72,7 @@ static inline int64_t getCurInterval() {
 
 + (instancetype)customCreate {
     APPModel_APM *appInfo = [[APPModel_APM alloc] init];
-    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     appInfo.appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"] ? : @"--";
     appInfo.appName = [infoDictionary objectForKey:@"CFBundleDisplayName"] ? : @"--";
     appInfo.appBuildNum = [infoDictionary objectForKey:@"CFBundleVersion"] ? : @"--";
