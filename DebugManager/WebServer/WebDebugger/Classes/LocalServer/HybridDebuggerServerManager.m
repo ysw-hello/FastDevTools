@@ -286,20 +286,27 @@ static NSString *bonjourName = @"me.local";
     
     [_lock lock];
     long long time = [[bodyDic objectForKey:@"interval"] longLongValue] - 60*5;
-    NSString *sqlStr = [NSString stringWithFormat:@"select memoryUsed,memoryFree,memoryActive,memoryWired from apm_memory where cast(curInterval as long) > %lld ", time];
+    NSString *sqlStr = [NSString stringWithFormat:@"select memoryFree,memoryActive,memoryWired,memoryPurgable,curInterval from apm_memory where cast(curInterval as long) > %lld ", time];
     FMResultSet *res = [self.apm_db.db executeQuery:sqlStr];
-//    NSMutableArray *usedArr = @[].mutableCopy;
     NSMutableArray *freeArr = @[].mutableCopy;
-//    NSMutableArray *activeArr = @[].mutableCopy;
     NSMutableArray *appActiveArr = @[].mutableCopy;
+    
+    long long interval = time * 1000 + 8*3600*1000;
+    BOOL flag = NO;
     while ([res next]) {
         NSDictionary *dic = [res resultDictionary];
-//        [usedArr addObject:[NSNumber numberWithLongLong:[[dic objectForKey:@"memoryUsed"] longLongValue]]];
         [freeArr addObject:[NSNumber numberWithLongLong:[[dic objectForKey:@"memoryFree"] longLongValue]]];
-        long long act = [[dic objectForKey:@"memoryActive"] longLongValue];
-//        [activeArr addObject:[NSNumber numberWithLongLong:act]];
-        long long appAct = act - [[dic objectForKey:@"memoryWired"] longLongValue];
+        long long act = [[dic objectForKey:@"memoryActive"] longLongValue]; //系统活跃内存
+        long long wired = [[dic objectForKey:@"memoryWired"] longLongValue]; //系统内核占用内存
+        long long purgable = [[dic objectForKey:@"memoryPurgable"] longLongValue]; //系统管控可擦除内存
+        long long appAct = act - wired - purgable;
         [appActiveArr addObject:[NSNumber numberWithLongLong:appAct]];
+        
+        if (!flag) {
+            interval = [[dic objectForKey:@"curInterval"] longLongValue] * 1000 + 8*3600*1000;
+            flag = YES;
+        }
+        
     }
     
     [_lock unlock];
@@ -308,23 +315,22 @@ static NSString *bonjourName = @"me.local";
     NSDictionary *perUnit_AppUsed = @{
                                    @"data": appActiveArr,
                                    @"name": @"AppUsed",
+                                   @"pointStart" : @(interval),
+                                   @"pointInterval" : @(2000)
                                    };
     
     NSDictionary *perUnit_Free = @{
                                    @"data": freeArr,
                                    @"name": @"Free",
+                                   @"pointStart" : @(interval),
+                                   @"pointInterval" : @(2000)
                                    };
-    
-//    NSDictionary *perUnit_Active = @{
-//                                     @"data": activeArr,
-//                                     @"name": @"Active",
-//                                     @"visible": @(true)
-//                                     };
     
     NSDictionary *param = @{
                             @"series": @[perUnit_AppUsed, perUnit_Free],
                             @"titleName": @"内存图表",
-                            @"subtitleName": @""
+                            @"subtitleName": @"",
+                            @"xAxis_maxZoom": @(300000)
                             };
     return param;
 }

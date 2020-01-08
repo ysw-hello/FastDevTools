@@ -56,7 +56,7 @@ var xAxis = {
         },
     },
     "tickmarkPlacement": "on",
-    "tickInterval": 1,
+    "type":"datetime",
 };
 
 //y轴
@@ -86,9 +86,10 @@ var yAxis = {
 //              }
 //              ];
 
-function createSender (series, titleName, subtitleName) {
+function createSender (series, titleName, subtitleName, xAxis_maxZoom) {
     title["text"] = titleName;
     subtitle["text"] = subtitleName;
+    xAxis["maxZoom"] = xAxis_maxZoom;
     
     var sender = {
         title : title,
@@ -118,7 +119,7 @@ function loop (isFirst) {
         var json = xhr.response;
         if (json.code == 200 && json.data) {
             var data = json.data;
-            var sender = createSender(data.series, data.titleName, data.subtitleName);
+            var sender = createSender(data.series, data.titleName, data.subtitleName, data.xAxis_maxZoom);
            
 //            if (isFirst) {
                 loadTheHighChartView(sender,receivedWidth,receivedHeight,isWKWebView);
