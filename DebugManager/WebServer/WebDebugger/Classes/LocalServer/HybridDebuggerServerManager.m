@@ -33,6 +33,8 @@
 
 @property (nonatomic, strong) WSFMDB *apm_db;
 
+@property (nonatomic, strong) NSLock *lock;
+
 #pragma mark - SEL
 
 @end
@@ -51,6 +53,7 @@ static NSString *bonjourName = @"me.local";
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(responseEventOccur:) name:kHybridDebuggerInvokeResponseEvent object:nil];
         [[HybridDebuggerMessageDispatch sharedInstance] setupDebugger];
         
+        self.lock = [[NSLock alloc] init];
         self.logQueue = dispatch_queue_create("com.wslogger.syncQueue", DISPATCH_QUEUE_SERIAL);
         //初始化db
         NSString *dbName = @"APM_DB.sqlite";
@@ -281,185 +284,49 @@ static NSString *bonjourName = @"me.local";
     NSDictionary *bodyDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
     WSLog(@"webServer接收的APM数据Body:\n%@",bodyDic);
     
-    NSMutableDictionary *dic = [NSMutableDictionary dictionary];
-    NSDictionary *title = @{
-                            @"style": @{
-                                    @"color": @"#abc123",
-                                    @"fontSize": @"16px",
-                                    @"fontWeight": @"regular"
-                                    },
-                            @"text": @"内存图表",
-                            @"useHTML": @(false)
-                            };
-    NSDictionary *subtitle = @{
-                               @"align": @"left",
-                               @"text": @"已使用内存",
-                               @"style": @{
-                                       @"color": @"#123abc",
-                                       @"fontSize": @"12px",
-                                       @"fontWeight": @"regular"
-                                       }
-                               };
-    NSDictionary *xAxis = @{
-                            @"labels": @{
-                                    @"enabled": @(true),
-                                    @"style": @{
-                                            @"color": @"#778899",
-                                            @"fontSize": @"11px",
-                                            @"fontWeight": @"thin"
-                                            },
-                                    @"useHTML": @(false)
-                                    },
-                            @"gridLineWidth": @(0),
-                            @"visible": @(true),
-                            @"tickmarkPlacement": @"on",
-                            @"tickInterval": @(1),
-                            @"reversed": @(false),
-                            @"startOnTick": @(false)
-                            };
-    NSDictionary *yAxis = @{
-                            @"allowDecimals": @(true),
-                            @"gridLineWidth": @(1),
-                            @"labels": @{
-                                    @"enabled": @(true),
-                                    @"style": @{
-                                            @"color": @"#778899",
-                                            @"fontSize": @"11px",
-                                            @"fontWeight": @"thin"
-                                            },
-                                    @"useHTML": @(false),
-                                    @"format": @"{value:.,0f}"
-                                    },
-                            @"visible": @(true),
-                            @"opposite": @(false),
-                            @"title": @{
-                                    @"text": @"Byte"
-                                    },
-                            @"reversed": @(false),
-                            @"lineWidth": @(0.5)
-                            };
-    NSDictionary *tooltip = @{
-                              @"crosshairs": @(true),
-                              @"enabled": @(true),
-                              @"useHTML": @(false),
-                              @"shared": @(true),
-                              @"animation": @(true)
-                              };
-    NSDictionary *chart = @{
-                            @"pinchType": @"none",
-                            @"polar": @(false),
-                            @"type": @"line",
-                            @"panning": @(true),
-                            @"inverted": @(false)
-                            };
-    NSDictionary *plotOptions = @{
-                                  @"line": @{},
-                                  @"series": @{
-                                          @"marker": @{
-                                                  @"radius": @(5)
-                                                  },
-                                          @"stacking": @"",
-                                          @"connectNulls": @(false)
-                                          }
-                                  };
-    
-    long long time = [[bodyDic objectForKey:@"interval"] longLongValue];
-    NSString *sqlStr = [NSString stringWithFormat:@"select memoryUsed,memoryFree,memoryActive from apm_memory where curInterval > %lld - 60 ", time];
+    [_lock lock];
+    long long time = [[bodyDic objectForKey:@"interval"] longLongValue] - 60*5;
+    NSString *sqlStr = [NSString stringWithFormat:@"select memoryUsed,memoryFree,memoryActive,memoryWired from apm_memory where cast(curInterval as long) > %lld ", time];
     FMResultSet *res = [self.apm_db.db executeQuery:sqlStr];
-    NSMutableArray *usedArr = @[].mutableCopy;
+//    NSMutableArray *usedArr = @[].mutableCopy;
     NSMutableArray *freeArr = @[].mutableCopy;
-    NSMutableArray *activeArr = @[].mutableCopy;
+//    NSMutableArray *activeArr = @[].mutableCopy;
+    NSMutableArray *appActiveArr = @[].mutableCopy;
     while ([res next]) {
         NSDictionary *dic = [res resultDictionary];
-        [usedArr addObject:[dic objectForKey:@"memoryUsed"]];
-        [freeArr addObject:[dic objectForKey:@"memoryFree"]];
-        [activeArr addObject:[dic objectForKey:@"memoryActive"]];
+//        [usedArr addObject:[NSNumber numberWithLongLong:[[dic objectForKey:@"memoryUsed"] longLongValue]]];
+        [freeArr addObject:[NSNumber numberWithLongLong:[[dic objectForKey:@"memoryFree"] longLongValue]]];
+        long long act = [[dic objectForKey:@"memoryActive"] longLongValue];
+//        [activeArr addObject:[NSNumber numberWithLongLong:act]];
+        long long appAct = act - [[dic objectForKey:@"memoryWired"] longLongValue];
+        [appActiveArr addObject:[NSNumber numberWithLongLong:appAct]];
     }
     
-    WSLog(@"wsUsed:%@\n wsFree:%@\n wsActive:%@\n", usedArr, freeArr, activeArr);
+    [_lock unlock];
+
     
-    NSDictionary *perUnit_Used = @{
-                                   @"visible": @(true),
-                                   @"data": usedArr,
-                                   @"showInLegend": @(true),
-                                   @"name": @"Used",
-                                   @"allowPointSelect": @(false),
-                                   @"color": @{
-                                           @"stops": @[
-                                                   @[@"0", @"#00A8C5"],
-                                                   @[@"1", @"#FFFF7E"]
-                                                   ],
-                                           @"linearGradient": @{
-                                                   @"x2": @(0),
-                                                   @"x1": @(0),
-                                                   @"y2": @(0),
-                                                   @"y1": @(1)
-                                                   }
-                                           }
+    NSDictionary *perUnit_AppUsed = @{
+                                   @"data": appActiveArr,
+                                   @"name": @"AppUsed",
                                    };
     
     NSDictionary *perUnit_Free = @{
-                                   @"visible": @(true),
                                    @"data": freeArr,
-                                   @"showInLegend": @(true),
                                    @"name": @"Free",
-                                   @"allowPointSelect": @(false),
-                                   @"color": @{
-                                           @"stops": @[
-                                                   @[@"0", @"#D4145A"],
-                                                   @[@"1", @"#FBB03B"]
-                                                   ],
-                                           @"linearGradient": @{
-                                                   @"x2": @(0),
-                                                   @"x1": @(0),
-                                                   @"y2": @(0),
-                                                   @"y1": @(1)
-                                                   }
-                                           }
                                    };
-    NSDictionary *perUnit_Active = @{
-                                     @"visible": @(true),
-                                     @"data": activeArr,
-                                     @"showInLegend": @(true),
-                                     @"name": @"Active",
-                                     @"allowPointSelect": @(false),
-                                     @"color": @{
-                                             @"stops": @[
-                                                     @[@"0", @"#87CEFA"],
-                                                     @[@"1", @"#00BFFF"]
-                                                     ],
-                                             @"linearGradient": @{
-                                                     @"x2": @(0),
-                                                     @"x1": @(0),
-                                                     @"y2": @(0),
-                                                     @"y1": @(1)
-                                                     }
-                                             }
-                                     };
-    [dic setObject:@[perUnit_Used, perUnit_Active, perUnit_Free] forKey:@"series"];
     
-    [dic setObject:title forKey:@"title"];
-    [dic setObject:subtitle forKey:@"subtitle"];
-    [dic setObject:xAxis forKey:@"xAxis"];
-    [dic setObject:yAxis forKey:@"yAxis"];
-    [dic setObject:tooltip forKey:@"tooltip"];
-    [dic setObject:chart forKey:@"chart"];
-    [dic setObject:plotOptions forKey:@"plotOptions"];
-
-    [dic setObject:@"恢复缩放" forKey:@"zoomResetButtonText"];
-    [dic setObject:@{@"enabled": @(true)} forKey:@"legend"];
-    [dic setObject:@[@"#1e90ff", @"#dc143c"] forKey:@"colors"];
-    [dic setObject:@(false) forKey:@"gradientColorEnabled"];
-    [dic setObject:@(false) forKey:@"touchEventEnabled"];
-
-    NSString *sender = [dic yy_modelToJSONString];
-    NSString *receivedWidth = @"0";
-    NSString *receivedHeight = @"500";
-    NSString *isWKWebView = @"1";
-
-    NSDictionary *param = @{@"sender" : sender, @"receivedWidth" : receivedWidth, @"receivedHeight" : receivedHeight, @"isWKWebView" : isWKWebView};
+//    NSDictionary *perUnit_Active = @{
+//                                     @"data": activeArr,
+//                                     @"name": @"Active",
+//                                     @"visible": @(true)
+//                                     };
+    
+    NSDictionary *param = @{
+                            @"series": @[perUnit_AppUsed, perUnit_Free],
+                            @"titleName": @"内存图表",
+                            @"subtitleName": @""
+                            };
     return param;
-
 }
 - (void)proceeWriteAPMData:(NSData *)bodyData { //TODO:设置数据库存储大小
     __weak typeof(self) weakSelf = self;

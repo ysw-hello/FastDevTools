@@ -79,6 +79,7 @@ Vue.component("tool-panel", {
                 break;
               case 'help':
               case 'list':
+              case 'clear':
               case 'timing':
                     {
                         window.debugger_env.isMobile = false;
