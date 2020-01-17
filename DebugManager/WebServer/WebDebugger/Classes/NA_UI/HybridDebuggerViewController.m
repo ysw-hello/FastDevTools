@@ -6,8 +6,10 @@
 //
 
 #import "HybridDebuggerViewController.h"
-#import <GCDWebServer/GCDWebServerPrivate.h>
 #import "HybridDebuggerDefine.h"
+
+#import <GCDWebServer/GCDWebServerPrivate.h>
+#import <YYCategories/NSTimer+YYAdd.h>
 
 @interface HybridDebuggerViewController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -28,7 +30,6 @@ CGFloat kDebugHeadeHeight = 46.f;
 @implementation HybridDebuggerViewController
 
 #pragma mark - Life Cycle
-
 - (instancetype)init {
     if (self = [super init]) {
         self.dataSource = [NSMutableArray array];
@@ -70,17 +71,11 @@ CGFloat kDebugHeadeHeight = 46.f;
     self.navigationItem.rightBarButtonItems = @[exportBar, refreshBar];
 
     // 执行定时任务 刷新数据
-    [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(refresh:) userInfo:nil repeats:YES];
-}
-
-- (void)viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    
-}
-
-- (void)viewWillDisappear:(BOOL)animated {
-    [super viewWillDisappear:animated];
-    
+    __weak typeof(self) weakSelf = self;
+    [NSTimer scheduledTimerWithTimeInterval:1 block:^(NSTimer * _Nonnull timer) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        [strongSelf refresh:nil];
+    } repeats:YES];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -90,10 +85,6 @@ CGFloat kDebugHeadeHeight = 46.f;
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    
-}
-
-- (void)dealloc {
     
 }
 
@@ -109,7 +100,6 @@ CGFloat kDebugHeadeHeight = 46.f;
         _tableView.estimatedRowHeight = 50.f;
         _tableView.tableHeaderView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, 0.01)];
         _tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
-        //
     }
     return _tableView;
 }
@@ -129,8 +119,11 @@ CGFloat kDebugHeadeHeight = 46.f;
 
 - (void)showNewLine:(NSArray<NSString *> *)line {
     self.dataSource = [self.dataSource arrayByAddingObjectsFromArray:line];
+    __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.tableView reloadData];
+        __strong typeof(weakSelf) strongSelf = weakSelf;
+        
+        [strongSelf.tableView reloadData];
     });
 }
 
@@ -176,7 +169,7 @@ CGFloat kDebugHeadeHeight = 46.f;
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     NSString *kIdentiferOfReuseable = @"kHybridDebuggerCellID";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:kIdentiferOfReuseable];
-    if (cell == nil) {
+    if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:kIdentiferOfReuseable];
         cell.textLabel.numberOfLines = -1;
         cell.backgroundColor = [UIColor clearColor];
