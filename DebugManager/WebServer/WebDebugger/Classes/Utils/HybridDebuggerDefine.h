@@ -8,8 +8,12 @@
 #ifndef HybridDebuggerDefine_h
 #define HybridDebuggerDefine_h
 
-#define Hybrid_DebuggerSwitch 1 // 调试模式开关
-#define Hybrid_Debug __has_include(<FastDevTools/HybridDebuggerServerManager.h>) ? Hybrid_DebuggerSwitch : 0
+#if __has_include(<FastDevTools/HybridDebuggerServerManager.h>)
+// 调试模式开关
+#ifndef Hybrid_Debug
+#define Hybrid_Debug 1
+#endif
+#endif
 
 #ifndef WSLog
 #define WSLog(FORMAT, ...) fprintf(stderr, "[WebServer] %s:%d\t%s\n", [[[NSString stringWithUTF8String: __FILE__] lastPathComponent] UTF8String], __LINE__, [[NSString stringWithFormat: FORMAT, ## __VA_ARGS__] UTF8String]);

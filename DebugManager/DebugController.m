@@ -309,8 +309,11 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
     //action 响应 (需要依赖于当前控制器)
     __weak typeof(self) weakSelf = self;
+    __weak typeof(tableView) weakTableView = tableView;
     cell.debugSwithAction = ^(BOOL isOn, Debug_ModuleType moduleType) {
         __strong typeof(weakSelf) strongSelf = weakSelf;
+        __strong typeof(weakTableView) strongTableView = weakTableView;
+
         if (moduleType == kDebug_ModuleType_WebServer) {//web调试
             if ([APM_LogRecorder sharedInstance].receiveUrl.length < 3) {
                 GCDWebServer *webServer = [[HybridDebuggerServerManager sharedInstance] getLocalServer];
@@ -320,7 +323,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
                 APM_RecorderSetURL(@"");
             }
             
-            [tableView reloadData];
+            [strongTableView reloadData];
             
         } else if (moduleType == kDebug_ModuleType_TipsOnline) {//Tips服务器
             [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:kUserDefaults_OnlineTipsKey_DebugSwitch];
@@ -332,7 +335,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
         } else if (moduleType == kDebug_ModuleType_NetStatus) {//网络状态分析
             [[NSUserDefaults standardUserDefaults] setBool:isOn forKey:KUserDefaults_NetMonitorKey_DebugSwitch];
             if (isOn) {
-                [[NetStatus_Debug sharedInstance] showNetMonitorViewWithRootViewController:self.rootViewController uid:strongSelf.UIDStr ? : @""];
+                [[NetStatus_Debug sharedInstance] showNetMonitorViewWithRootViewController:strongSelf.rootViewController uid:strongSelf.UIDStr ? : @""];
             } else {
                 [[NetStatus_Debug sharedInstance] hideNetMonitorView];
             }
