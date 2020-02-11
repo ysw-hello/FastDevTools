@@ -48,6 +48,7 @@ Pod::Spec.new do |s|
     
     dm.dependency 'FMDB'
     dm.dependency 'AFNetworking'
+    dm.dependency 'YYCategories'
     
     dm.dependency 'GCDWebServer'
     dm.dependency 'GCDWebServer/WebUploader'
