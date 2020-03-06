@@ -35,10 +35,20 @@
     dispatch_once(&onceToken, ^{
         alr = [[APM_LogRecorder alloc] init] ;
         alr.safeQueue = dispatch_queue_create("com.device.apm", DISPATCH_QUEUE_SERIAL);
+        
+        //fps定时器初始化
+        alr.displayLink = [CADisplayLink displayLinkWithTarget:alr selector:@selector(envokeDisplayLink:)];
+        alr.displayLink.paused = YES;
+        [alr.displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+
         [[NSNotificationCenter defaultCenter] addObserver:alr selector:@selector(stopFetchData) name:UIApplicationDidEnterBackgroundNotification object:nil];
         alr.lock = [[NSLock alloc] init];
     });
     return alr ;
+}
+
+- (void)dealloc {
+    [self.displayLink invalidate];
 }
 
 #pragma mark - settter
@@ -128,7 +138,7 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
             self.timer = nil;
         }
     }
-    [self destoryFPSMonitor];
+    [self stopFPSMonitor];
 }
 
 
@@ -150,9 +160,7 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
 #pragma mark - FPS
 - (void)startMonitorFPS {
     _lastTimeStamp = -1;
-    _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(envokeDisplayLink:)];
     _displayLink.paused = NO;
-    [_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
 }
 
 - (void)envokeDisplayLink:(CADisplayLink *)displaylink {
@@ -171,10 +179,9 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     _countPerFrame = 0;
 }
 
-- (void)destoryFPSMonitor {
+- (void)stopFPSMonitor {
     if (_displayLink) {
         _displayLink.paused = YES;
-        [_displayLink invalidate];
     }
 }
 
@@ -209,19 +216,19 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     
     if (@available(iOS 9.0, *)) {
         __block BOOL succeed = NO;
-        dispatch_semaphore_t semaphore = dispatch_semaphore_create(1); //利用信号量阻塞当前线程，模拟同步请求
-        
+        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0); //利用信号量阻塞当前线程，模拟同步请求
+
         NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
             succeed = [httpResponse statusCode] == 200;
-            
+
             dispatch_semaphore_signal(semaphore);
         }];
         [task resume];
-        
+
         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
         return succeed;
-        
+
     } else {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
