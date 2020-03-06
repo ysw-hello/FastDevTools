@@ -235,7 +235,10 @@ static WSFMDB *jqdb = nil;
 #pragma mark - *************** 增删改查
 - (BOOL)jq_insertTable:(NSString *)tableName dicOrModel:(id)parameters {
     NSArray *columnArr = [self getColumnArr:tableName db:_db];
-    return [self insertTable:tableName dicOrModel:parameters columnArr:columnArr];
+    if (columnArr.count > 0) {
+        return [self insertTable:tableName dicOrModel:parameters columnArr:columnArr];
+    }
+    return NO;
 }
 
 - (BOOL)insertTable:(NSString *)tableName dicOrModel:(id)parameters columnArr:(NSArray *)columnArr {
