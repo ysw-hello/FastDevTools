@@ -7,6 +7,7 @@
 
 #import "APM_LogRecorder.h"
 #import "NSData+gzip.h"
+#import "UIDevice+APMLog.h"
 #import <Foundation/Foundation.h>
 
 @interface APM_LogRecorder ()
@@ -192,6 +193,12 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     }
     
     NSString *url = [self.receiveUrl stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+    //Fixed:iOS9,ATS会拦截局域网本地IP的http请求
+    if (@available(iOS 10.0, *)) {
+        //iOS 10以上，系统已修复
+    } else if ([url hasPrefix:[NSString stringWithFormat:@"http://%@", [UIDevice deviceIPAdress]]]){
+        url = [url stringByReplacingOccurrencesOfString:[UIDevice deviceIPAdress] withString:@"localhost"];
+    }
     NSMutableURLRequest *req = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
     
     NSString *logStr = [model yy_modelToJSONString];
@@ -217,15 +224,12 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
     if (@available(iOS 9.0, *)) {
         __block BOOL succeed = NO;
         dispatch_semaphore_t semaphore = dispatch_semaphore_create(0); //利用信号量阻塞当前线程，模拟同步请求
-
         NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
             NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
-            succeed = [httpResponse statusCode] == 200;
-
+            succeed = (!error) && ([httpResponse statusCode] == 200);
             dispatch_semaphore_signal(semaphore);
         }];
         [task resume];
-
         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
         return succeed;
 
@@ -233,10 +237,11 @@ void APM_SamplingRecordLog(NSString *name, NSDictionary *param) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
         NSURLResponse *response = nil;
-        [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:nil];
+        NSError *error = nil;
+        [NSURLConnection sendSynchronousRequest:req returningResponse:&response error:&error];
         NSHTTPURLResponse* httpResponse = (NSHTTPURLResponse*)response;
 #pragma clang diagnostic pop
-        return [httpResponse statusCode] == 200;
+        return (!error) && ([httpResponse statusCode] == 200);
     }
     
 }
