@@ -169,7 +169,9 @@ static NSString *bonjourName = @"me.local";
             [strongSelf proceeWriteAPMData:request.data];
         } else if ([url.path containsString:[@"/" stringByAppendingString:APM_ReadPath]]) { //APM读取数据接口
             if (request.data.length > 0) {
-                result = [strongSelf proceeReadAPMData:request.data];
+                [strongSelf.apm_db jq_inDatabase:^{
+                    result = [strongSelf proceeReadAPMData:request.data];
+                }];
             }
         }
         
@@ -280,27 +282,44 @@ static NSString *bonjourName = @"me.local";
 }
 
 #pragma mark - pravite SEL
+- (float)changeToMBWithByte:(long long)byte { //保留三位小数
+    float mb = byte / 1024.0 / 1024.0;
+    return roundf(mb * 1000) / 1000;
+}
+
 - (NSDictionary *)proceeReadAPMData:(NSData *)bodyData { //TODO：从数据库取数据，实时绘制
     NSDictionary *bodyDic = [NSDictionary ws_dictionaryWithJSON:bodyData];
     WSLog(@"webServer接收的APM数据Body:\n%@",bodyDic);
     
-    [_lock lock];
-    long long time = [[bodyDic objectForKey:@"interval"] longLongValue] - 60*5;
-    NSString *sqlStr = [NSString stringWithFormat:@"select memoryFree,memoryActive,memoryWired,memoryPurgable,curInterval from apm_memory where cast(curInterval as long) > %lld ", time];
+    long long time = [[bodyDic objectForKey:@"interval"] longLongValue] - 60*5; //查询时间戳参数前五分钟的数据
+    NSString *sqlStr = [NSString stringWithFormat:@"select memoryFree,memoryActive,memoryInactive,memoryWired,memoryPurgable,curInterval from apm_memory where cast(curInterval as long) > %lld ", time];
+    
     FMResultSet *res = [self.apm_db.db executeQuery:sqlStr];
     NSMutableArray *freeArr = @[].mutableCopy;
-    NSMutableArray *appActiveArr = @[].mutableCopy;
+    NSMutableArray *activeArr = @[].mutableCopy;
+    NSMutableArray *wiredArr = @[].mutableCopy;
+    NSMutableArray *inactiveArr = @[].mutableCopy;
+    NSMutableArray *purgableArr = @[].mutableCopy;
     
     long long interval = time * 1000 + 8*3600*1000;
     BOOL flag = NO;
     while ([res next]) {
         NSDictionary *dic = [res resultDictionary];
-        [freeArr addObject:[NSNumber numberWithLongLong:[[dic objectForKey:@"memoryFree"] longLongValue]]];
-        long long act = [[dic objectForKey:@"memoryActive"] longLongValue]; //系统活跃内存
-        long long wired = [[dic objectForKey:@"memoryWired"] longLongValue]; //系统内核占用内存
-        long long purgable = [[dic objectForKey:@"memoryPurgable"] longLongValue]; //系统管控可擦除内存
-        long long appAct = act - wired - purgable;
-        [appActiveArr addObject:[NSNumber numberWithLongLong:appAct]];
+        //空闲内存
+        float free = [self changeToMBWithByte:[[dic objectForKey:@"memoryFree"] longLongValue]];
+        [freeArr addObject:[NSNumber numberWithFloat:free]];
+        //活跃内存
+        float act = [self changeToMBWithByte:[[dic objectForKey:@"memoryActive"] longLongValue]]; //系统活跃内存
+        [activeArr addObject:[NSNumber numberWithFloat:act]];
+        //联动内存(系统内核)
+        float wired = [self changeToMBWithByte:[[dic objectForKey:@"memoryWired"] longLongValue]]; //系统内核占用内存
+        [wiredArr addObject:[NSNumber numberWithFloat:wired]];
+        //系统管控可擦除内存(可能是缓存相关占用)
+        float purgable = [self changeToMBWithByte:[[dic objectForKey:@"memoryPurgable"] longLongValue]];
+        [purgableArr addObject:[NSNumber numberWithFloat:purgable]];
+        //当前不活跃内存
+        float inactive = [self changeToMBWithByte:[[dic objectForKey:@"memoryInactive"] longLongValue]];
+        [inactiveArr addObject:[NSNumber numberWithFloat:inactive]];
         
         if (!flag) {
             interval = [[dic objectForKey:@"curInterval"] longLongValue] * 1000 + 8*3600*1000;
@@ -309,25 +328,47 @@ static NSString *bonjourName = @"me.local";
         
     }
     
-    [_lock unlock];
-
-    
-    NSDictionary *perUnit_AppUsed = @{
-                                   @"data": appActiveArr,
-                                   @"name": @"AppUsed",
+    NSDictionary *perUnit_Active = @{
+                                   @"data": activeArr,
+                                   @"name": @"活跃内存",
                                    @"pointStart" : @(interval),
                                    @"pointInterval" : @(2000)
                                    };
     
     NSDictionary *perUnit_Free = @{
                                    @"data": freeArr,
-                                   @"name": @"Free",
+                                   @"name": @"空闲内存",
                                    @"pointStart" : @(interval),
                                    @"pointInterval" : @(2000)
                                    };
+    NSDictionary *perUnit_Inactive = @{
+                                     @"data": inactiveArr,
+                                     @"name": @"不活跃内存",
+                                     @"pointStart" : @(interval),
+                                     @"pointInterval" : @(2000)
+                                     };
+    NSDictionary *perUnit_Wired = @{
+                                     @"data": wiredArr,
+                                     @"name": @"系统联动内存",
+                                     @"pointStart" : @(interval),
+                                     @"pointInterval" : @(2000)
+                                     };
+    NSDictionary *perUnit_Purgable = @{
+                                     @"data": purgableArr,
+                                     @"name": @"可擦除内存",
+                                     @"pointStart" : @(interval),
+                                     @"pointInterval" : @(2000)
+                                     };
+
     
     NSDictionary *param = @{
-                            @"series": @[perUnit_AppUsed, perUnit_Free],
+                            @"series": @[
+                                    perUnit_Free,
+                                    perUnit_Active,
+                                    perUnit_Wired,
+                                    perUnit_Inactive,
+                                    perUnit_Purgable
+                                    ],
                             @"titleName": @"内存图表",
                             @"subtitleName": @"",
                             @"xAxis_maxZoom": @(300000)

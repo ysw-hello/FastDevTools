@@ -228,7 +228,6 @@ static WSFMDB *jqdb = nil;
     while ([resultSet next]) {
         [mArr addObject:[resultSet stringForColumn:@"name"]];
     }
-    
     return mArr;
 }
 
