@@ -152,12 +152,21 @@
                         case 5:
                             netType = NetworkType_4G;
                             break;
+                            
                         case 4:
                             netType = NetworkType_3G;
                             break;
+                            
+                        case 3:
+                        case 2:
+                            netType = NetworkType_2G;
+                            break;
+                            
                         case 0:
                             // Return 0 when no sim card.
                             netType = NetworkType_None;
+                            break;
+                            
                         default:
                             netType = NetworkType_None;
                             break;
