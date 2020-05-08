@@ -214,6 +214,8 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 - (void)initTableView {
     CGFloat top = self.view.height == kDebug_ScreenHeight ? kDebug_NavBarBottom : 0;
     self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, top, kDebug_ScreenWidth, kDebug_ScreenHeight - kDebug_NavBarBottom) style:UITableViewStylePlain];
+    _tableView.backgroundColor = [UIColor whiteColor];
+    _tableView.showsVerticalScrollIndicator = NO;
     _tableView.delegate = self;
     _tableView.dataSource = self;
     _tableView.tableFooterView = [UIView new];
@@ -432,6 +434,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self) {
         self.selectionStyle = UITableViewCellSelectionStyleNone;
+        self.backgroundColor = [UIColor whiteColor];
         [self customSubviews];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(sandBoxListRemoved) name:kNotif_Name_SandBoxListRemoved object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(dataFetchContentRemoved) name:kNotif_Name_DataFetchContentRemoved object:nil];
@@ -510,6 +513,7 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 - (void)customSubviews {
     self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 60, [UIScreen mainScreen].bounds.size.width - 20)];
     _titleLabel.numberOfLines = 2;
+    _titleLabel.textColor = [UIColor blackColor];
     [self addSubview:_titleLabel];
     
     self.debugSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(100, 10, 50, 34)];
