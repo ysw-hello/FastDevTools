@@ -122,41 +122,87 @@
 
 //根据statusBar获取当前网络状态
 + (NetworkType)getNetworkTypeFromStatusBar {
-    UIApplication *app = [UIApplication sharedApplication];
     NetworkType netType = NetworkType_None;
-    //iOS 11
-    if ([[app valueForKeyPath:@"_statusBar"] isKindOfClass:NSClassFromString(@"UIStatusBar_Modern")]) {
-        NSArray *views = [[[[app valueForKeyPath:@"statusBar"] valueForKeyPath:@"statusBar"] valueForKeyPath:@"foregroundView"] subviews];
-        for (UIView *view in views) {
-            for (id child in view.subviews) {
-                //wifi
-                if ([child isKindOfClass:NSClassFromString(@"_UIStatusBarWifiSignalView")]) {
-                    netType = NetworkType_WiFi;
-                }
-                //2G 3G 4G
-                if ([child isKindOfClass:NSClassFromString(@"_UIStatusBarStringView")]) {
-                    if ([[child valueForKey:@"_originalText"] containsString:@"2G"]) {
-                        netType = NetworkType_2G;
-                    } else if ([[child valueForKey:@"_originalText"] containsString:@"3G"]) {
-                        netType = NetworkType_3G;
-                    } else if ([[child valueForKey:@"_originalText"] containsString:@"4G"]) {
-                        netType = NetworkType_4G;
+    
+    if (@available(iOS 13.0, *)) {
+        // iOS 13及以上系统，通过statusBar获取网络状态
+        id _statusBar = nil;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+        UIStatusBarManager *statusBarManager = [UIApplication sharedApplication].keyWindow.windowScene.statusBarManager;
+        if ([statusBarManager respondsToSelector:@selector(createLocalStatusBar)]) {
+            UIView *_localStatusBar = [statusBarManager performSelector:@selector(createLocalStatusBar)];
+            if ([_localStatusBar respondsToSelector:@selector(statusBar)]) {
+                _statusBar = [_localStatusBar performSelector:@selector(statusBar)];
+            }
+        }
+#pragma clang diagnostic pop
+        if (_statusBar) {
+            // _UIStatusBarDataCellularEntry
+            id currentData = [[_statusBar valueForKeyPath:@"_statusBar"] valueForKeyPath:@"currentData"];
+            id _wifiEntry = [currentData valueForKeyPath:@"wifiEntry"];
+            id _cellularEntry = [currentData valueForKeyPath:@"cellularEntry"];
+            if (_wifiEntry && [[_wifiEntry valueForKeyPath:@"isEnabled"] boolValue]) {
+                // If wifiEntry is enabled, is WiFi.
+                netType = NetworkType_WiFi;
+            } else if (_cellularEntry && [[_cellularEntry valueForKeyPath:@"isEnabled"] boolValue]) {
+                NSNumber *type = [_cellularEntry valueForKeyPath:@"type"];
+                if (type) {
+                    switch (type.integerValue) {
+                        case 5:
+                            netType = NetworkType_4G;
+                            break;
+                        case 4:
+                            netType = NetworkType_3G;
+                            break;
+                        case 0:
+                            // Return 0 when no sim card.
+                            netType = NetworkType_None;
+                        default:
+                            netType = NetworkType_None;
+                            break;
                     }
                 }
             }
         }
+        
     } else {
-        NSArray *subviews = [[[[UIApplication sharedApplication] valueForKey:@"statusBar"] valueForKey:@"foregroundView"] subviews];
-        NSNumber *dataNetworkItemView = nil;
-        for (id subView in subviews) {
-            if ([subView isKindOfClass:[NSClassFromString(@"UIStatusBarDataNetworkItemView") class]]) {
-                dataNetworkItemView = subView;
-                break;
-            }
-        }
-        NSNumber *num = [dataNetworkItemView valueForKey:@"dataNetworkType"];
-        netType = [num intValue];
-    }
+         // iOS 13以下，获取网络状态
+         UIApplication *app = [UIApplication sharedApplication];
+         //iOS 11
+         if ([[app valueForKeyPath:@"_statusBar"] isKindOfClass:NSClassFromString(@"UIStatusBar_Modern")]) {
+             NSArray *views = [[[[app valueForKeyPath:@"statusBar"] valueForKeyPath:@"statusBar"] valueForKeyPath:@"foregroundView"] subviews];
+             for (UIView *view in views) {
+                 for (id child in view.subviews) {
+                     //wifi
+                     if ([child isKindOfClass:NSClassFromString(@"_UIStatusBarWifiSignalView")]) {
+                         netType = NetworkType_WiFi;
+                     }
+                     //2G 3G 4G
+                     if ([child isKindOfClass:NSClassFromString(@"_UIStatusBarStringView")]) {
+                         if ([[child valueForKey:@"_originalText"] containsString:@"2G"]) {
+                             netType = NetworkType_2G;
+                         } else if ([[child valueForKey:@"_originalText"] containsString:@"3G"]) {
+                             netType = NetworkType_3G;
+                         } else if ([[child valueForKey:@"_originalText"] containsString:@"4G"]) {
+                             netType = NetworkType_4G;
+                         }
+                     }
+                 }
+             }
+         } else {
+             NSArray *subviews = [[[[UIApplication sharedApplication] valueForKey:@"statusBar"] valueForKey:@"foregroundView"] subviews];
+             NSNumber *dataNetworkItemView = nil;
+             for (id subView in subviews) {
+                 if ([subView isKindOfClass:[NSClassFromString(@"UIStatusBarDataNetworkItemView") class]]) {
+                     dataNetworkItemView = subView;
+                     break;
+                 }
+             }
+             NSNumber *num = [dataNetworkItemView valueForKey:@"dataNetworkType"];
+             netType = [num intValue];
+         }
+     }
     return netType;
 }
 
