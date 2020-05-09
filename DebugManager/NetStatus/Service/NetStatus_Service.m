@@ -52,7 +52,6 @@ static NSString *const kCheckOutIPURL = @"";
 @property (nonatomic, assign) BOOL isRunning;
 @property (nonatomic, assign) BOOL connectSuccess;
 
-
 @end
 
 @implementation NetStatus_Service
@@ -232,12 +231,21 @@ static NSString *const kCheckOutIPURL = @"";
     
     //WiFi路由器相关信息
     if (_curNetType == NetworkType_WiFi) {
-        
-        NSString *wifiSSID = [NetStatus_WiFiInfo getCurrentWiFiName];
-        [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi名称: %@", wifiSSID]];
-        
-        NSString *wifiAdress = [NetStatus_WiFiInfo getCurrentWiFiMACAdress];
-        [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi的路由地址: %@", wifiAdress]];
+       if (@available(iOS 13.0, *)) {
+           if ([[NSUserDefaults standardUserDefaults] boolForKey:@"__GetLocationAccess__Wifi"]) {
+               NSString *wifiSSID = [NetStatus_WiFiInfo getCurrentWiFiName];
+               [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi名称: %@", wifiSSID]];
+               
+               NSString *wifiAdress = [NetStatus_WiFiInfo getCurrentWiFiMACAdress];
+               [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi的路由地址: %@", wifiAdress]];
+           }
+       } else {
+           NSString *wifiSSID = [NetStatus_WiFiInfo getCurrentWiFiName];
+           [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi名称: %@", wifiSSID]];
+           
+           NSString *wifiAdress = [NetStatus_WiFiInfo getCurrentWiFiMACAdress];
+           [self recordStepInfo:[NSString stringWithFormat:@"当前连接WiFi的路由地址: %@", wifiAdress]];
+       }
         
         NetStatus_WiFiInfo *wifiInfo = [[NetStatus_WiFiInfo alloc] init];
         [self recordStepInfo:@"当前WiFi在线设备列表信息如下：<检测时长为50s左右>"];

@@ -23,6 +23,8 @@
 #import <FastDevTools/HybridDebuggerServerManager.h>
 #import <GCDWebServer/GCDWebServer.h>
 
+#import <CoreLocation/CLLocationManager.h> // ios13 获取WiFi信息需要定位
+
 ///主标题
 static NSString *const kDebugControl_MainTitle         =    @"PandoraBox";
 
@@ -51,7 +53,7 @@ static NSString *const SEL_SharedManager_FLEXManager   =    @"sharedManager";
 static NSString *const SEL_ShowExplorer_FLEXManager    =    @"showExplorer";
 static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
-@interface DebugController () <UITableViewDelegate, UITableViewDataSource>
+@interface DebugController () <UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate>
 
 @property (nonatomic, strong) UIView *headerView;
 @property (nonatomic, strong) UITableView *tableView;
@@ -59,6 +61,8 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 @property (nonatomic, strong) NSMutableArray *sectionTitleArray;
 @property (nonatomic, assign) BOOL preNavBarHidden;
 @property (nonatomic, strong) UIViewController *rootViewController;
+
+@property (nonatomic, strong) CLLocationManager *locManager;
 
 @end
 
@@ -79,6 +83,10 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    if (@available(iOS 13.0, *)) {
+        [self getcurrentLocation];
+    }
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -167,6 +175,21 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
 }
 
 #pragma mark - private SEL
+- (void)getcurrentLocation {
+    //用户明确拒绝，可以弹窗提示用户到设置中手动打开权限
+    if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied) {
+        //使用下面接口可以打开当前应用的设置页面
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }
+    
+    self.locManager = [[CLLocationManager alloc] init];
+    self.locManager.delegate = self;
+    if(![CLLocationManager locationServicesEnabled] || [CLLocationManager authorizationStatus] == kCLAuthorizationStatusNotDetermined){
+        //弹框提示用户是否开启位置权限
+        [self.locManager requestWhenInUseAuthorization];
+    }
+}
+
 -(void)appEnterBackground{
     [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:nil];
 }
@@ -228,6 +251,17 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     [super viewDidLayoutSubviews];
     CGFloat top = self.view.height == kDebug_ScreenHeight ? kDebug_NavBarBottom : 0;
     _tableView.top = top;
+}
+
+#pragma mark - CLLocationManagerDelegate
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    if (status == kCLAuthorizationStatusAuthorizedWhenInUse ||
+        status == kCLAuthorizationStatusAuthorizedAlways) {
+        // 可以获取WiFi info
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"__GetLocationAccess__Wifi"];
+    } else {
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:@"__GetLocationAccess__Wifi"];
+    }
 }
 
 #pragma mark - tableView Deleagate & DataSource
