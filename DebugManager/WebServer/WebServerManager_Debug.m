@@ -63,48 +63,49 @@
     }
     [self.webServerView removeFromSuperview];
     self.webServerView = [[UIView alloc] initWithFrame:CGRectZero];
+    _webServerView.width = [UIScreen mainScreen].bounds.size.width;
     _webServerView.backgroundColor = [UIColor blackColor];
     
-    UILabel *sb_title = [self createLabelWithFrame:CGRectMake(10, 10, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *sb_title = [self createLabelWithFrame:CGRectMake(10, 10, _webServerView.width, 20)];
     sb_title.text = [_webServerURL_Array firstObject];
     sb_title.textColor = [UIColor greenColor];
     sb_title.font = [UIFont systemFontOfSize:18];
     [sb_title sizeToFit];
     
-    UILabel *webServerURL = [self createLabelWithFrame:CGRectMake(10, sb_title.bottom + 10, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *webServerURL = [self createLabelWithFrame:CGRectMake(10, sb_title.bottom + 10,_webServerView.width, 20)];
     NSString *str = @"<本地沙盒web调试>浏览器访问地址为: \n";
     NSMutableAttributedString *att = [[NSMutableAttributedString alloc] initWithString:[str stringByAppendingString:_webServerURL_Array[1]]];
     [att addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str.length, [_webServerURL_Array[1] length])];
     webServerURL.attributedText = att;
     [webServerURL sizeToFit];
     
-    UILabel *webUploaderServerURL = [self createLabelWithFrame:CGRectMake(webServerURL.left, webServerURL.bottom + 5, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *webUploaderServerURL = [self createLabelWithFrame:CGRectMake(webServerURL.left, webServerURL.bottom + 5, _webServerView.width, 20)];
     NSString *str1 = @"<本地沙盒web调试>WebUploader访问地址为: \n";
     NSMutableAttributedString *att1 = [[NSMutableAttributedString alloc] initWithString:[str1 stringByAppendingString:_webServerURL_Array[2]]];
     [att1 addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str1.length, [_webServerURL_Array[2] length])];
     webUploaderServerURL.attributedText = att1;
     [webUploaderServerURL sizeToFit];
     
-    UILabel *webDavServerURL = [self createLabelWithFrame:CGRectMake(webServerURL.left, webUploaderServerURL.bottom + 5, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *webDavServerURL = [self createLabelWithFrame:CGRectMake(webServerURL.left, webUploaderServerURL.bottom + 5, _webServerView.width, 20)];
     NSString *str2 = @"<本地沙盒web调试>WebDav服务器地址为: \n";
     NSMutableAttributedString *att2 = [[NSMutableAttributedString alloc] initWithString:[str2 stringByAppendingString:_webServerURL_Array[3]]];
     [att2 addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(str2.length, [_webServerURL_Array[3] length])];
     webDavServerURL.attributedText = att2;
     [webDavServerURL sizeToFit];
     
-    UILabel *tipsLabel = [self createLabelWithFrame:CGRectMake(webServerURL.left, webDavServerURL.bottom + 5, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *tipsLabel = [self createLabelWithFrame:CGRectMake(webServerURL.left, webDavServerURL.bottom + 5, _webServerView.width, 20)];
     tipsLabel.text = @"温馨提示：WebDav Mac客户端建议使用'Transmit' \n<xclient.info有破解版下载> ";
     tipsLabel.textColor = [UIColor redColor];
     tipsLabel.numberOfLines = 2;
     [tipsLabel sizeToFit];
     
-    UILabel *ws_title = [self createLabelWithFrame:CGRectMake(webServerURL.left, tipsLabel.bottom + 10, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *ws_title = [self createLabelWithFrame:CGRectMake(webServerURL.left, tipsLabel.bottom + 10, _webServerView.width, 20)];
     ws_title.text = _webServerURL_Array[4];
     ws_title.textColor = [UIColor greenColor];
     ws_title.font = [UIFont systemFontOfSize:18];
     [ws_title sizeToFit];
     
-    UILabel *wsURL_Label = [self createLabelWithFrame:CGRectMake(webServerURL.left, ws_title.bottom + 10, [UIScreen mainScreen].bounds.size.width, 20)];
+    UILabel *wsURL_Label = [self createLabelWithFrame:CGRectMake(webServerURL.left, ws_title.bottom + 10, _webServerView.width, 20)];
     NSString *wsStr = @"<Web_Hybrid调试>浏览器访问地址为: \n";
     NSMutableAttributedString *wsAtt = [[NSMutableAttributedString alloc] initWithString:[wsStr stringByAppendingString:_webServerURL_Array[5]]];
     [wsAtt addAttribute:NSForegroundColorAttributeName value:[UIColor cyanColor] range:NSMakeRange(wsStr.length, [_webServerURL_Array[5] length])];

@@ -89,7 +89,7 @@ static NSString *kLastWeinreScript = nil;
 
 - (void)dispathMessageWithVeryWebView:(__kindof WKWebView *)veryWebView action:(NSString *)action param:(NSDictionary *)param {
     if ([action isEqualToString:@"eval"]) {
-        [veryWebView evalExpression:[param objectForKey:@"code"] completion:^(id  _Nonnull result, NSString * _Nonnull err) {
+        [veryWebView evalExpression:[param objectForKey:@"code"] completion:^(id _Nonnull result, NSString * _Nonnull err) {
             NSDictionary *res = nil;
             if (result) {
                 res = @{@"result" : [NSString stringWithFormat:@"%@", result]};

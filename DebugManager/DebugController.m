@@ -548,11 +548,11 @@ static NSString *const SEL_HideExplorer_FLEXManager    =    @"hideExplorer";
     self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 60, [UIScreen mainScreen].bounds.size.width - 20)];
     _titleLabel.numberOfLines = 2;
     _titleLabel.textColor = [UIColor blackColor];
-    [self addSubview:_titleLabel];
+    [self.contentView addSubview:_titleLabel];
     
     self.debugSwitch = [[UISwitch alloc] initWithFrame:CGRectMake(100, 10, 50, 34)];
     [_debugSwitch addTarget:self action:@selector(changeState) forControlEvents:UIControlEventValueChanged];
-    [self addSubview:_debugSwitch];
+    [self.contentView addSubview:_debugSwitch];
     
 }
 
